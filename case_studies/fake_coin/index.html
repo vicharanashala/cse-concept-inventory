@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Card · The Fake Coin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f6f1e4;
+  --paper-2:#efe7d2;
+  --ink:#20242b;
+  --ink-soft:#585c62;
+  --red:#c1443c;
+  --teal:#2f6f62;
+  --gold:#c9992f;
+  --gold-light:#eccf7f;
+  --rule:#c9bfa0;
+  --line:#d8cfb0;
+  --font-body:'Work Sans',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;}
+body{
+  margin:0;
+  min-height:100vh;
+  background:linear-gradient(var(--line) 1px, transparent 1px);
+  background-size:100% 2.1rem;
+  background-color:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-body);
+  padding:2.2rem 1rem 3rem;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--red);color:#fff;}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important;}}
+
+.card{
+  max-width:780px;
+  margin:0 auto;
+  background:var(--paper);
+  border:1.5px solid var(--ink);
+  border-radius:6px;
+  box-shadow:6px 6px 0 var(--rule);
+  padding:1.8rem clamp(1.1rem,4vw,2.4rem) 2.2rem;
+  position:relative;
+}
+.card::before{
+  content:'';
+  position:absolute; left:-1px; top:10%; bottom:10%; width:3px;
+  background-image:radial-gradient(var(--ink) 2px, transparent 2.4px);
+  background-size:3px 22px;
+  opacity:.5;
+}
+
+header.top{margin-bottom:.6rem;}
+.kicker{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);}
+h1{font-family:var(--font-body);font-weight:700;font-size:clamp(1.7rem,4.4vw,2.2rem);margin:.2rem 0 0;line-height:1.15;color:var(--ink);}
+.deck{color:var(--ink-soft);font-size:.95rem;margin:.4rem 0 0;}
+
+.rule{border:none;border-top:1.5px dashed var(--rule);margin:1.2rem 0;}
+
+.sec-title{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin:0 0 .3rem;}
+.sec-note{font-size:.9rem;color:var(--ink-soft);margin:0 0 .8rem;max-width:64ch;}
+.sec-note b{color:var(--ink);}
+h2{font-family:var(--font-body);font-weight:700;font-size:1.3rem;margin:0 0 .3rem;}
+h3{font-family:var(--font-body);font-weight:700;font-size:1.02rem;margin:0 0 .4rem;}
+
+/* ---------- page stepper ---------- */
+.stepper{display:flex;align-items:center;justify-content:center;gap:.4rem;margin-bottom:1.2rem;}
+.step{
+  display:flex;align-items:center;gap:.4rem;
+  font-family:var(--font-mono);font-size:.72rem;color:var(--ink-soft);
+}
+.step .dot{
+  width:22px;height:22px;border-radius:50%;border:1.5px solid var(--rule);
+  display:flex;align-items:center;justify-content:center;
+  background:var(--paper-2);font-weight:700;
+}
+.step.active .dot{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+.step.done .dot{background:var(--teal);border-color:var(--teal);color:#fff;}
+.step-connector{width:16px;height:1.5px;background:var(--rule);}
+
+/* ---------- pages ---------- */
+.page{display:none;}
+.page.active{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* ---------- scenario strip ---------- */
+.scenario{display:flex;gap:1.2rem;flex-wrap:wrap;align-items:center;font-size:.9rem;color:var(--ink-soft);margin-top:.9rem;}
+.scenario b{color:var(--ink);}
+
+/* ---------- generic panel ---------- */
+.panel{background:var(--paper-2);border:1px solid var(--rule);border-radius:8px;padding:1rem 1.1rem 1.2rem;}
+
+/* ---------- coin picker ---------- */
+.picker-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-bottom:.8rem;}
+.picker-row label{font-size:.82rem;color:var(--ink-soft);}
+.picker-row input[type=number]{
+  width:90px;padding:.4rem .5rem;border:1px solid var(--ink);border-radius:5px;
+  font-family:var(--font-mono);font-size:.95rem;background:var(--paper);color:var(--ink);
+}
+.picker-row input[type=range]{flex:1;min-width:140px;accent-color:var(--red);}
+.example-row{display:flex;gap:.6rem;justify-content:flex-start;margin-bottom:.9rem;flex-wrap:wrap;}
+.sim-btn{
+  font-family:var(--font-body);font-weight:600;font-size:.88rem;
+  background:var(--ink);color:var(--paper);border:none;border-radius:5px;
+  padding:.55rem .9rem;cursor:pointer;transition:transform .12s ease;
+}
+.sim-btn:hover:not(:disabled){transform:translateY(-1px);}
+.sim-btn:active:not(:disabled){transform:translateY(1px);}
+.sim-btn:disabled{opacity:.35;cursor:not-allowed;}
+.sim-btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--ink);}
+
+/* ---------- readout above scale ---------- */
+.sim-readout{display:flex;justify-content:center;gap:2.4rem;text-align:center;margin:.2rem 0 1rem;}
+.sim-readout .n{font-family:var(--font-mono);font-size:1.5rem;font-weight:700;transition:transform .2s ease;}
+.sim-readout .n.pulse{animation:pulse .4s ease;}
+@keyframes pulse{0%{transform:scale(1.4);color:var(--red);}100%{transform:scale(1);}}
+.sim-readout .l{font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);display:block;}
+
+/* ---------- scale + aside coin ---------- */
+.scale-stage{display:flex;align-items:center;justify-content:center;gap:1rem;margin-bottom:.4rem;flex-wrap:wrap;}
+.scale-svg{width:100%;max-width:340px;height:auto;overflow:visible;flex:1;min-width:240px;}
+#beamGroup2{transition:transform 1s cubic-bezier(.65,0,.35,1);transform-origin:160px 68px;}
+.pan-fill{opacity:1;transition:opacity .5s ease;}
+.pan-fill.fading{opacity:0;}
+.coin-c{fill:url(#coinGrad2);stroke:var(--gold);stroke-width:1.5;}
+.fake-label{font-family:var(--font-mono);font-size:12px;font-weight:700;fill:var(--red);letter-spacing:.04em;}
+.pan-label{font-family:'JetBrains Mono',monospace;font-size:11px;fill:var(--ink);font-weight:700;}
+.pan-tag{font-family:'JetBrains Mono',monospace;font-size:9px;fill:var(--ink-soft);letter-spacing:.03em;}
+
+.aside-panel{display:flex;flex-direction:column;align-items:center;gap:.15rem;min-width:70px;transition:opacity .3s ease;}
+.aside-panel.empty{opacity:.4;}
+.aside-emoji{font-size:2.1rem;line-height:1;}
+.aside-emoji-label{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);text-align:center;}
+
+.sim-msg{text-align:center;font-size:.85rem;color:var(--teal);font-weight:600;min-height:1.2rem;margin-bottom:.6rem;}
+.sim-msg.eliminated{color:var(--red);}
+
+.sim-actions{display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap;}
+.choice-row{display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap;margin-top:.3rem;}
+.choice-row .sim-btn{min-width:150px;}
+.hidden{display:none !important;}
+
+/* ---------- mini table ---------- */
+.mini-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:.8rem;margin-top:1rem;}
+.mini-table td{padding:.25rem .4rem;border-bottom:1px dotted var(--rule);}
+.mini-table td:first-child{text-align:right;width:36%;}
+.mini-table td:last-child{color:var(--teal);font-weight:700;}
+.mini-table tr{opacity:0;animation:rowIn .35s ease forwards;}
+@keyframes rowIn{to{opacity:1;}}
+
+/* ---------- two-up (learn page) ---------- */
+.two-up{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem;}
+@media(max-width:560px){.two-up{grid-template-columns:1fr;}}
+.flip{perspective:1000px;height:140px;cursor:pointer;}
+.flip-inner{position:relative;width:100%;height:100%;transition:transform .5s cubic-bezier(.65,0,.35,1);transform-style:preserve-3d;}
+.flip.on .flip-inner{transform:rotateY(180deg);}
+.flip-face{position:absolute;inset:0;backface-visibility:hidden;border:1px solid var(--rule);border-radius:8px;padding:.9rem 1rem;display:flex;flex-direction:column;justify-content:center;background:var(--paper-2);}
+.flip-face.back{transform:rotateY(180deg);background:var(--ink);color:var(--paper);}
+.flip-hint{font-size:.72rem;color:var(--ink-soft);margin-top:auto;}
+.flip-face.back .flip-hint{color:#c9c2ad;}
+.big-o{font-family:var(--font-mono);font-size:1.4rem;font-weight:700;}
+.flip-face.back .big-o{color:#e8896f;}
+
+.calc{border:1px solid var(--rule);border-radius:8px;padding:.9rem 1rem;background:var(--paper-2);display:flex;flex-direction:column;gap:.5rem;justify-content:center;}
+.calc label{font-size:.78rem;color:var(--ink-soft);}
+.calc-row{display:flex;align-items:center;gap:.6rem;}
+.calc input[type=number]{width:110px;padding:.45rem .5rem;border:1px solid var(--ink);border-radius:5px;font-family:var(--font-mono);font-size:.95rem;background:var(--paper);color:var(--ink);}
+.calc-result{font-family:var(--font-mono);font-size:1.3rem;font-weight:700;color:var(--teal);}
+.calc-result .lbl{font-size:.68rem;color:var(--ink-soft);font-weight:500;display:block;}
+.calc-limit-note{font-family:var(--font-mono);font-size:.74rem;color:var(--red);margin:.4rem 0 0;}
+
+/* ---------- chips ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;}
+.chip{font-family:var(--font-mono);font-size:.76rem;border:1px solid var(--ink);border-radius:20px;padding:.3rem .7rem;background:var(--paper);}
+.chip.coin{background:var(--ink);color:var(--paper);}
+
+/* ---------- quiz ---------- */
+.quiz-block{margin-bottom:1.4rem;}
+.quiz-q{font-size:.95rem;margin-bottom:.6rem;}
+.quiz-btns{display:flex;gap:.5rem;flex-wrap:wrap;}
+.quiz-btns.vertical{flex-direction:column;align-items:stretch;}
+.quiz-btns.vertical .quiz-btn{text-align:left;}
+.quiz-btn{font-family:var(--font-body);font-size:.85rem;font-weight:600;border:1px solid var(--ink);background:var(--paper);color:var(--ink);border-radius:5px;padding:.5rem .8rem;cursor:pointer;}
+.quiz-btn.correct{background:var(--teal);border-color:var(--teal);color:#fff;}
+.quiz-btn.wrong{background:var(--red);border-color:var(--red);color:#fff;}
+.quiz-fb{font-size:.85rem;margin-top:.6rem;color:var(--ink-soft);min-height:1.1rem;}
+.quiz-score{
+  margin-top:1.2rem;padding:1rem 1.1rem;border:1.5px solid var(--ink);border-radius:8px;
+  background:var(--paper-2);text-align:center;
+}
+.quiz-score p{font-family:var(--font-mono);font-size:1.05rem;font-weight:700;margin:0 0 .8rem;color:var(--ink);}
+
+/* ---------- reflection questions ---------- */
+.reflect-block{margin-bottom:1.3rem;}
+.reflect-list{margin:.3rem 0 .6rem;padding-left:1.2rem;font-size:.9rem;color:var(--ink-soft);}
+.reflect-list li{margin-bottom:.25rem;}
+.reflect-textarea{
+  width:100%;min-height:90px;padding:.6rem .7rem;
+  border:1px solid var(--ink);border-radius:6px;
+  background:var(--paper-2);color:var(--ink);
+  font-family:var(--font-body);font-size:.9rem;line-height:1.5;
+  resize:vertical;
+}
+.reflect-textarea:focus{outline:2px solid var(--red);outline-offset:1px;}
+
+/* ---------- page nav ---------- */
+.page-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.6rem;gap:.8rem;}
+.nav-warning{font-size:.84rem;color:var(--red);text-align:center;margin:1rem 0 0;font-weight:600;}
+
+footer.tag{text-align:center;margin-top:1.6rem;font-family:var(--font-body);font-style:italic;font-size:.9rem;color:var(--ink-soft);}
+
+/* ---------- warning modal ---------- */
+.warn-overlay{
+  position:fixed;inset:0;background:rgba(32,36,43,.55);
+  display:flex;align-items:center;justify-content:center;
+  z-index:50;padding:1rem;
+}
+.warn-overlay.hidden{display:none;}
+.warn-box{
+  background:var(--paper);border:1.5px solid var(--ink);border-radius:8px;
+  padding:1.3rem 1.4rem;max-width:340px;box-shadow:6px 6px 0 var(--rule);
+}
+.warn-box p{margin:0 0 1rem;font-size:.92rem;color:var(--ink);}
+.warn-actions{display:flex;justify-content:flex-end;gap:.6rem;}
+</style>
+</head>
+<body>
+<div class="card">
+
+  <header class="top">
+    <div class="kicker">Study Card · The Fake Coin</div>
+    <h1 id="pageTitle">Introduction</h1>
+  </header>
+
+  <div class="stepper" id="stepper"></div>
+
+  <!-- ============ PAGE 1 — INTRODUCTION ============ -->
+  <section class="page active" data-page="1">
+    <h2>Why This Matters</h2>
+
+    <p class="sec-note">In many real-life situations, people face problems too large to handle all at once — sorting a mountain of paperwork, finding a champion among dozens of teams, or narrowing down one item hidden inside a huge collection. Checking or comparing everything one piece at a time is slow, and it only gets worse as the pile grows. A far more effective approach is to split the problem into two smaller, roughly equal parts, deal with (or rule out) one part, and repeat the same splitting on whatever is left — cutting the effort down dramatically at every step.</p>
+
+    <p class="sec-note">A few everyday examples of this:</p>
+
+    <ul class="reflect-list">
+      <li><b>Tournament brackets:</b> In a 64-team knockout tournament, nobody compares every team against every other team. Teams are paired up, half are eliminated each round, and the pool of contenders keeps shrinking until one champion remains.</li>
+      <li><b>Finding a page in a thick book:</b> Instead of flipping through page by page, you open the book somewhere near the middle, decide whether what you want is earlier or later, and repeat — narrowing it down fast.</li>
+      <li><b>Sorting a huge stack of files:</b> A librarian organizing thousands of documents splits the stack into two smaller stacks, sorts each one separately (splitting further if needed), then combines the sorted results.</li>
+    </ul>
+
+    <p class="sec-note">The common thread: a big, unwieldy problem gets solved efficiently by repeatedly cutting it down into a much smaller version of itself. <b>Keep that idea in mind as you work through the case study on the next page.</b></p>
+  </section>
+
+  <!-- ============ PAGE 2 — THE CASE STUDY ============ -->
+  <section class="page" data-page="2">
+    <h2>A treasury, a scale, and one fake coin</h2>
+    <p class="sec-note">Somewhere in a large pile of identical gold coins, exactly <b>one is fake</b> — a little lighter than the rest. You have a balance scale. It doesn't tell you a weight, only which side is heavier, or if both sides match. Your job: find the fake coin using as <b>few weighings as possible</b>.</p>
+
+    <div class="scenario">
+      <span>🪙 <b>20 – 1,024</b> coins, your choice</span>
+      <span>⚖️ scale shows: left heavier / right heavier / balanced</span>
+      <span>🎯 goal: fewest weighings</span>
+    </div>
+
+    <p class="sec-note" style="margin-top:1rem;">Here's how the game works: pick how many coins you're starting with, then hit weigh. The coins split into two equal pans (and if you picked an odd number, one coin gets set aside instead of being weighed). Watch which side of the scale sinks — that side is heavier, so it's made entirely of real coins. Your job is to eliminate the correct half. Get it right and you keep going with a smaller pile; get it wrong and the fake coin is gone for good. If the pans ever balance exactly, neither one holds the fake — it has to be the coin you set aside. Keep repeating until only one coin is left.</p>
+  </section>
+
+  <!-- ============ PAGE 3 — GAME ============ -->
+  <section class="page" data-page="3">
+    <h2>Weigh, then choose what to eliminate</h2>
+    <p class="sec-note">Pick a coin count, weigh the pans, then decide which half to eliminate. Eliminate the half that actually holds the fake and it's gone for good.</p>
+
+    <div class="panel">
+      <div class="picker-row">
+        <label for="coinInput">Coins (20–1024):</label>
+        <input type="number" id="coinInput" min="20" max="1024" value="600">
+        <input type="range" id="coinRange" min="20" max="1024" value="600">
+        <button class="sim-btn" id="startBtn">Start</button>
+      </div>
+      <div class="example-row">
+        <button class="sim-btn ghost" id="specialCaseBtn">Special case: equal piles (odd count, aside coin is fake)</button>
+      </div>
+
+      <div class="sim-readout">
+        <div><span class="n" id="pileNum2">–</span><span class="l">coins in play</span></div>
+        <div><span class="n" id="weighNum2" style="color:var(--teal);">0</span><span class="l">weighings used</span></div>
+      </div>
+
+      <div class="scale-stage">
+        <svg class="scale-svg" viewBox="0 0 320 175" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="coinGrad2" cx="35%" cy="30%" r="75%">
+              <stop offset="0%" stop-color="var(--gold-light)"/>
+              <stop offset="100%" stop-color="var(--gold)"/>
+            </radialGradient>
+          </defs>
+          <rect x="130" y="150" width="60" height="8" rx="2" fill="var(--ink)"/>
+          <rect x="155" y="76" width="8" height="76" rx="2" fill="var(--ink)"/>
+          <g id="beamGroup2">
+            <polygon points="159,58 150,76 168,76" fill="var(--ink)"/>
+            <rect x="25" y="70" width="270" height="7" rx="3" fill="var(--ink)"/>
+            <line x1="40" y1="76" x2="40" y2="102" stroke="var(--ink)" stroke-width="2"/>
+            <line x1="80" y1="76" x2="80" y2="102" stroke="var(--ink)" stroke-width="2"/>
+            <path d="M30,102 L90,102 L82,128 Q60,138 38,128 Z" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+            <g id="leftCoins2" class="pan-fill" transform="translate(60,100)"></g>
+            <text id="leftLabel2" class="pan-label" x="60" y="146" text-anchor="middle">–</text>
+            <text class="pan-tag" id="leftPanTag" x="60" y="157" text-anchor="middle">PILE A</text>
+            <line x1="240" y1="76" x2="240" y2="102" stroke="var(--ink)" stroke-width="2"/>
+            <line x1="280" y1="76" x2="280" y2="102" stroke="var(--ink)" stroke-width="2"/>
+            <path d="M230,102 L290,102 L282,128 Q260,138 238,128 Z" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+            <g id="rightCoins2" class="pan-fill" transform="translate(260,100)"></g>
+            <text id="rightLabel2" class="pan-label" x="260" y="146" text-anchor="middle">–</text>
+            <text class="pan-tag" id="rightPanTag" x="260" y="157" text-anchor="middle">PILE B</text>
+          </g>
+        </svg>
+
+        <div class="aside-panel empty" id="asidePanel">
+          <div class="aside-emoji" id="asideEmoji">–</div>
+          <div class="aside-emoji-label" id="asideEmojiLabel">No coin set aside<br>(even split)</div>
+        </div>
+      </div>
+
+      <p class="sim-msg" id="simMsg2">Choose a coin count above to begin.</p>
+
+      <div class="sim-actions">
+        <button class="sim-btn" id="weighBtn2" disabled>⚖️ Weigh the Pans</button>
+      </div>
+
+      <p class="sec-note" id="eliminatePrompt" style="text-align:center;margin:.6rem 0 0;display:none;"><b>Your move</b> — eliminate the half you're sure is fake-free. Pick wrong and the fake coin is gone for good.</p>
+      <div class="choice-row hidden" id="choiceRow2">
+        <button class="sim-btn" id="eliminateLeftBtn">Eliminate Pile A</button>
+        <button class="sim-btn" id="eliminatePansBtn">Eliminate Both — Check Aside Coin</button>
+        <button class="sim-btn" id="eliminateRightBtn">Eliminate Pile B</button>
+      </div>
+
+      <div class="sim-actions hidden" id="failActions">
+        <button class="sim-btn" id="retryPileBtn">🔁 Retry Same Pile Size</button>
+      </div>
+
+      <div class="sim-actions" style="margin-top:.6rem;">
+        <button class="sim-btn ghost" id="resetSim2Btn">Start Over — Pick Coins Again</button>
+      </div>
+
+      <table class="mini-table"><tbody id="miniTableBody2"></tbody></table>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 4 — REFLECTION QUESTIONS ============ -->
+  <section class="page" data-page="4">
+    <h2>Think it through</h2>
+    <p class="sec-note">There's no single "correct" wording — write your reasoning in your own words, based on what you just saw in the game.</p>
+
+    <div class="reflect-block">
+      <p class="quiz-q">1. Breaking it down: How did working on smaller parts make the original problem easier to handle?</p>
+      <textarea class="reflect-textarea" id="reflect1" placeholder="Type your answer here..."></textarea>
+    </div>
+
+    <div class="reflect-block">
+      <p class="quiz-q">2. Choosing the split: How did you decide where to divide the problem, and why was that division useful?</p>
+      <textarea class="reflect-textarea" id="reflect2" placeholder="Type your answer here..."></textarea>
+    </div>
+
+    <div class="reflect-block">
+      <p class="quiz-q">3. Solving smaller parts: What made each smaller problem easier to solve than the original one?</p>
+      <textarea class="reflect-textarea" id="reflect3" placeholder="Type your answer here..."></textarea>
+    </div>
+
+    <div class="reflect-block">
+      <p class="quiz-q">4. Repeating the process: What happened to the size and difficulty of the problems each time you divided them again?</p>
+      <textarea class="reflect-textarea" id="reflect4" placeholder="Type your answer here..."></textarea>
+    </div>
+
+    <div class="reflect-block">
+      <p class="quiz-q">5. Comparing approaches: If you solved the whole problem at once instead, what would become harder or more time-consuming? Why?</p>
+      <textarea class="reflect-textarea" id="reflect5" placeholder="Type your answer here..."></textarea>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 5 — CONCEPT EXPLANATION ============ -->
+  <section class="page" data-page="5">
+    <h2>Divide and Conquer</h2>
+
+    <p class="sec-note">Instead of solving a big problem all at once, break it into smaller versions of the same problem, deal with those, and repeat — until what's left is small enough to solve instantly. That's exactly what you did in the game: a big pile became a tiny one, one weighing at a time.</p>
+
+    <ul class="reflect-list">
+      <li><b>Divide</b> — split the problem into smaller equal parts.</li>
+      <li><b>Conquer</b> — solve (or eliminate) each part, often the same way again.</li>
+      <li><b>Combine</b> — join the results back together, if needed.</li>
+    </ul>
+
+    <div class="panel" style="text-align:center;">
+      <p style="font-family:var(--font-mono);font-size:1.1rem;margin:0;">T(n) = T(n/2) + O(1) &nbsp;→&nbsp; O(log₂ n)</p>
+    </div>
+
+    <p class="sec-note" style="margin-top:.8rem;">Cutting a problem in half each step shrinks it exponentially — that's why 1,024 coins only ever took about 10 weighings, not 1,024.</p>
+  </section>
+
+  <!-- ============ PAGE 6 — EXERCISE QUESTIONS ============ -->
+  <section class="page" data-page="6">
+    <h2>Apply what you've learned</h2>
+    <p class="sec-note">These are open-ended — think through your reasoning and write it out, even if there's no single "right" answer.</p>
+
+    <div class="reflect-block">
+      <p class="quiz-q">1. New problem: You have 64 boxes, and one contains a hidden item. You can repeatedly split the boxes into smaller groups. How could you organize the search to avoid checking every box?</p>
+      <textarea class="reflect-textarea" id="exercise1" placeholder="Type your answer here..."></textarea>
+    </div>
+
+    <div class="reflect-block">
+      <p class="quiz-q">2. Recognize the pattern: A problem can be broken into smaller problems that can each be solved independently. What features would make this a good candidate for Divide and Conquer?</p>
+      <textarea class="reflect-textarea" id="exercise2" placeholder="Type your answer here..."></textarea>
+    </div>
+
+    <div class="reflect-block">
+      <p class="quiz-q">3. Choose an approach: You need to find the maximum value in a small list. Would splitting the list necessarily make the solution better? Explain your choice.</p>
+      <textarea class="reflect-textarea" id="exercise3" placeholder="Type your answer here..."></textarea>
+    </div>
+
+    <div class="reflect-block">
+      <p class="quiz-q">4. Spot the misconception: Someone says, "The more pieces we divide a problem into, the more efficient the algorithm becomes." What is wrong with this reasoning?</p>
+      <textarea class="reflect-textarea" id="exercise4" placeholder="Type your answer here..."></textarea>
+    </div>
+
+    <div class="reflect-block">
+      <p class="quiz-q">5. Change the constraints: Your original problem could be split evenly, but now one part is much larger than the others. How might this affect your approach?</p>
+      <textarea class="reflect-textarea" id="exercise5" placeholder="Type your answer here..."></textarea>
+    </div>
+
+    <div class="reflect-block">
+      <p class="quiz-q">6. Compare efficiency: Two algorithms solve the same problem. One repeatedly handles the entire input, while the other works on smaller portions. What would you examine to determine which will scale better?</p>
+      <textarea class="reflect-textarea" id="exercise6" placeholder="Type your answer here..."></textarea>
+    </div>
+
+    <div class="reflect-block">
+      <p class="quiz-q">7. Unfamiliar application: A company wants to find a faulty component in a large network without testing every component. How could the idea of repeatedly narrowing the problem help, and what would determine whether it is efficient?</p>
+      <textarea class="reflect-textarea" id="exercise7" placeholder="Type your answer here..."></textarea>
+    </div>
+
+    <div class="quiz-score" style="margin-top:1.4rem;">
+      <p>You've reached the end of this study card.</p>
+      <button class="sim-btn" id="restartJourneyBtn">Restart from Beginning</button>
+    </div>
+  </section>
+
+  <p class="nav-warning hidden" id="navWarning"></p>
+  <div class="page-nav">
+    <button class="sim-btn ghost" id="prevBtn">← Back</button>
+    <button class="sim-btn" id="nextBtn">Next →</button>
+  </div>
+
+  <footer class="tag">— every weighing throws away half the haystack —</footer>
+
+  <div class="warn-overlay hidden" id="warnOverlay">
+    <div class="warn-box">
+      <p>Going back will reset your progress on this page. Continue?</p>
+      <div class="warn-actions">
+        <button class="sim-btn ghost" id="warnCancel">Cancel</button>
+        <button class="sim-btn" id="warnConfirm">Yes, go back</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= page navigation ================= */
+const TOTAL_PAGES = 6;
+const PAGE_NAMES = ['Introduction','The Case Study','The Game','Reflection Questions','Divide and Conquer','Exercise Questions'];
+let currentPage = 1;
+
+function buildStepper(){
+  const el = document.getElementById('stepper');
+  el.innerHTML = '';
+  for(let i=1;i<=TOTAL_PAGES;i++){
+    if(i>1){
+      const conn = document.createElement('div');
+      conn.className = 'step-connector';
+      el.appendChild(conn);
+    }
+    const step = document.createElement('div');
+    step.className = 'step';
+    step.innerHTML = `<span class="dot">${i}</span>`;
+    step.dataset.page = i;
+    el.appendChild(step);
+  }
+}
+
+function renderPage(){
+  document.getElementById('pageTitle').textContent = PAGE_NAMES[currentPage - 1];
+  document.querySelectorAll('.page').forEach(p => {
+    p.classList.toggle('active', Number(p.dataset.page) === currentPage);
+  });
+  document.querySelectorAll('.step').forEach(s => {
+    const n = Number(s.dataset.page);
+    s.classList.toggle('active', n === currentPage);
+    s.classList.toggle('done', n < currentPage);
+  });
+  document.getElementById('prevBtn').disabled = currentPage === 1;
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.style.visibility = currentPage === TOTAL_PAGES ? 'hidden' : 'visible';
+  document.getElementById('navWarning').classList.add('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function goNext(){
+  const problem = validateBeforeNext();
+  const warnEl = document.getElementById('navWarning');
+  if(problem){
+    warnEl.textContent = problem;
+    warnEl.classList.remove('hidden');
+    return;
+  }
+  warnEl.classList.add('hidden');
+  if(currentPage < TOTAL_PAGES){
+    currentPage += 1;
+    renderPage();
+  }
+}
+
+function validateBeforeNext(){
+  if(currentPage === 3 && state2.weighings < 1){
+    return 'Do at least one weighing before moving on.';
+  }
+  return null;
+}
+
+let pendingLeavePage = null;
+
+function goPrev(){
+  if(currentPage === 1) return;
+  pendingLeavePage = currentPage;
+  document.getElementById('warnOverlay').classList.remove('hidden');
+}
+
+document.getElementById('warnCancel').addEventListener('click', () => {
+  pendingLeavePage = null;
+  document.getElementById('warnOverlay').classList.add('hidden');
+});
+
+document.getElementById('warnConfirm').addEventListener('click', () => {
+  const leaving = pendingLeavePage;
+  document.getElementById('warnOverlay').classList.add('hidden');
+  if(leaving === null) return;
+  if(leaving === 3) resetGame();
+  if(leaving === 4) resetReflection();
+  if(leaving === 6) resetExercises();
+  currentPage = leaving - 1;
+  pendingLeavePage = null;
+  renderPage();
+});
+
+document.getElementById('nextBtn').addEventListener('click', goNext);
+document.getElementById('prevBtn').addEventListener('click', goPrev);
+
+buildStepper();
+renderPage();
+
+/* ================= coin pile graphics ================= */
+function buildCoinStack(groupEl, count){
+  groupEl.innerHTML = '';
+  const layers = Math.max(1, Math.min(5, Math.round(Math.log2(Math.max(count,1)))));
+  for(let i=0;i<layers;i++){
+    const ellipse = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+    ellipse.setAttribute('cx', 0);
+    ellipse.setAttribute('cy', -6 - i*7);
+    ellipse.setAttribute('rx', 22);
+    ellipse.setAttribute('ry', 8);
+    ellipse.setAttribute('class','coin-c');
+    groupEl.appendChild(ellipse);
+  }
+}
+
+/* ================= odd/even explorer — system weighs, YOU choose what to eliminate ================= */
+const leftCoins2 = document.getElementById('leftCoins2');
+const rightCoins2 = document.getElementById('rightCoins2');
+const leftLabel2 = document.getElementById('leftLabel2');
+const rightLabel2 = document.getElementById('rightLabel2');
+const leftPanTag = document.getElementById('leftPanTag');
+const rightPanTag = document.getElementById('rightPanTag');
+const beamGroup2 = document.getElementById('beamGroup2');
+const simMsg2 = document.getElementById('simMsg2');
+const asidePanel = document.getElementById('asidePanel');
+const pileNum2 = document.getElementById('pileNum2');
+const weighNum2 = document.getElementById('weighNum2');
+const tableBody2 = document.getElementById('miniTableBody2');
+const weighBtn2 = document.getElementById('weighBtn2');
+const eliminateLeftBtn = document.getElementById('eliminateLeftBtn');
+const eliminateRightBtn = document.getElementById('eliminateRightBtn');
+const eliminatePansBtn = document.getElementById('eliminatePansBtn');
+const choiceRow2 = document.getElementById('choiceRow2');
+const eliminatePrompt = document.getElementById('eliminatePrompt');
+const coinInput = document.getElementById('coinInput');
+const coinRange = document.getElementById('coinRange');
+
+// state2.fakeIn tracks where the fake truly is this round: 'left' | 'right' | 'aside'
+const state2 = { n: 0, weighings: 0, left: 0, right: 0, aside: 0, fakeIn: 'left', done: false, failed: false };
+
+function setPans2(l, r){
+  buildCoinStack(leftCoins2, l);
+  buildCoinStack(rightCoins2, r);
+  leftLabel2.textContent = l;
+  rightLabel2.textContent = r;
+  leftCoins2.classList.remove('fading');
+  rightCoins2.classList.remove('fading');
+  beamGroup2.style.transform = 'rotate(0deg)';
+}
+
+function clearPans2(){
+  leftCoins2.innerHTML = ''; rightCoins2.innerHTML = '';
+  leftLabel2.textContent = '–'; rightLabel2.textContent = '–';
+  leftPanTag.textContent = 'PILE A';
+  rightPanTag.textContent = 'PILE B';
+  beamGroup2.style.transform = 'rotate(0deg)';
+}
+
+function addRow2(before, after, note){
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${before}</td><td>→ ${after} <span style="color:var(--ink-soft);">(${note})</span></td>`;
+  tableBody2.prepend(tr);
+}
+
+function markCoinAsFake(groupEl){
+  const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+  label.setAttribute('x', 0);
+  label.setAttribute('y', -36);
+  label.setAttribute('text-anchor', 'middle');
+  label.setAttribute('class', 'fake-label');
+  label.textContent = 'FAKE';
+  groupEl.appendChild(label);
+}
+
+function updateAsidePanel(aside){
+  const emoji = document.getElementById('asideEmoji');
+  const label = document.getElementById('asideEmojiLabel');
+  if(aside > 0){
+    asidePanel.classList.remove('empty');
+    emoji.textContent = '🪙';
+    label.innerHTML = 'Set aside<br>(not weighed)';
+  } else {
+    asidePanel.classList.add('empty');
+    emoji.textContent = '—';
+    label.innerHTML = 'No coin set aside<br>(even split)';
+  }
+}
+
+function showSplit2(n, forceFake){
+  state2.n = n;
+  state2.done = false;
+  state2.failed = false;
+  const half = Math.floor(n/2);
+  const aside = n - half*2;
+  state2.left = half; state2.right = half; state2.aside = aside;
+
+  if(forceFake && (forceFake !== 'aside' || aside > 0)){
+    state2.fakeIn = forceFake; // used by the "special case" demo button
+  } else {
+    const r = Math.random() * n;
+    state2.fakeIn = r < half ? 'left' : (r < half*2 ? 'right' : 'aside');
+  }
+
+  leftPanTag.textContent = 'PILE A';
+  rightPanTag.textContent = 'PILE B';
+  setPans2(half, half);
+  updateAsidePanel(aside);
+  pileNum2.textContent = n;
+
+  simMsg2.classList.remove('eliminated');
+  simMsg2.textContent = aside
+    ? `${n} splits into ${half} + ${half}, with 1 coin set aside.`
+    : `${n} splits evenly into ${half} + ${half}.`;
+
+  choiceRow2.classList.add('hidden');
+  eliminatePrompt.style.display = 'none';
+  document.getElementById('failActions').classList.add('hidden');
+  weighBtn2.disabled = false;
+  weighBtn2.textContent = '⚖️ Weigh the Pans';
+}
+
+function startExplorer(n, forceFake){
+  state2.n = n;
+  state2.weighings = 0;
+  state2.done = false;
+  state2.failed = false;
+  weighNum2.textContent = 0;
+  tableBody2.innerHTML = '';
+  simMsg2.classList.remove('eliminated');
+  showSplit2(n, forceFake);
+}
+
+function resetGame(){
+  state2.weighings = 0; state2.done = false; state2.failed = false;
+  weighNum2.textContent = 0;
+  tableBody2.innerHTML = '';
+  updateAsidePanel(0);
+  pileNum2.textContent = '–';
+  simMsg2.classList.remove('eliminated');
+  simMsg2.textContent = 'Choose a coin count above to begin.';
+  choiceRow2.classList.add('hidden');
+  eliminatePrompt.style.display = 'none';
+  document.getElementById('failActions').classList.add('hidden');
+  weighBtn2.disabled = true;
+  clearPans2();
+}
+
+function clampCoins(v){
+  v = Math.round(Number(v) || 20);
+  return Math.max(20, Math.min(1024, v));
+}
+
+coinInput.addEventListener('input', () => { coinRange.value = clampCoins(coinInput.value); });
+coinRange.addEventListener('input', () => { coinInput.value = coinRange.value; });
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  const n = clampCoins(coinInput.value);
+  coinInput.value = n; coinRange.value = n;
+  startExplorer(n);
+});
+
+document.getElementById('specialCaseBtn').addEventListener('click', () => {
+  let n = clampCoins(coinInput.value);
+  if(n % 2 === 0) n = Math.min(1024, n + 1); // force odd
+  coinInput.value = n; coinRange.value = n;
+  startExplorer(n, 'aside');
+  setTimeout(performWeigh, 600); // show the balanced result right away
+});
+
+function performWeigh(){
+  weighBtn2.disabled = true;
+  const { fakeIn } = state2;
+  const tilt = fakeIn === 'left' ? 'right' : (fakeIn === 'right' ? 'left' : 'balanced'); // side that SINKS
+  simMsg2.textContent = 'Weighing...';
+
+  setTimeout(() => {
+    if(tilt === 'balanced'){
+      beamGroup2.style.transform = 'rotate(0deg)';
+      simMsg2.textContent = 'The pans balance perfectly — equal weight on both sides.';
+    } else {
+      beamGroup2.style.transform = tilt === 'left' ? 'rotate(-7deg)' : 'rotate(7deg)';
+      simMsg2.textContent = `${tilt === 'left' ? 'Pile A' : 'Pile B'} sinks lower — it's heavier than ${tilt === 'left' ? 'Pile B' : 'Pile A'}.`;
+    }
+  }, 500);
+
+  setTimeout(() => {
+    eliminatePrompt.style.display = 'block';
+    choiceRow2.classList.remove('hidden');
+    eliminatePansBtn.style.display = state2.aside > 0 ? '' : 'none';
+    eliminateLeftBtn.disabled = false;
+    eliminateRightBtn.disabled = false;
+    eliminatePansBtn.disabled = false;
+  }, 1200);
+}
+weighBtn2.addEventListener('click', performWeigh);
+
+function finishExplorer2(msg){
+  simMsg2.textContent = msg;
+  choiceRow2.classList.add('hidden');
+  eliminatePrompt.style.display = 'none';
+  weighBtn2.disabled = true;
+  state2.done = true;
+}
+
+function loseExplorer2(msg, failedN){
+  simMsg2.classList.add('eliminated');
+  simMsg2.textContent = msg;
+  choiceRow2.classList.add('hidden');
+  eliminatePrompt.style.display = 'none';
+  weighBtn2.disabled = true;
+  state2.failed = true;
+  state2.lastFailedN = failedN;
+  document.getElementById('failActions').classList.remove('hidden');
+}
+
+function makeChoice(choice){
+  eliminateLeftBtn.disabled = true; eliminateRightBtn.disabled = true; eliminatePansBtn.disabled = true;
+  choiceRow2.classList.add('hidden');
+  eliminatePrompt.style.display = 'none';
+
+  const { n, left, right, aside, fakeIn } = state2;
+  state2.weighings += 1;
+  weighNum2.textContent = state2.weighings;
+
+  const eliminatedTheFake =
+    (choice === 'left' && fakeIn === 'left') ||
+    (choice === 'right' && fakeIn === 'right') ||
+    (choice === 'pans' && fakeIn !== 'aside');
+
+  if(eliminatedTheFake){
+    const lostWhere = choice === 'left' ? 'Pile A' : choice === 'right' ? 'Pile B' : 'the two weighed pans';
+    if(choice === 'left') leftCoins2.classList.add('fading');
+    if(choice === 'right') rightCoins2.classList.add('fading');
+    if(choice === 'pans'){ leftCoins2.classList.add('fading'); rightCoins2.classList.add('fading'); }
+    addRow2(n, '—', 'wrong half eliminated');
+    loseExplorer2(`❌ You eliminated ${lostWhere} — the fake coin was right there. It's gone. Game over.`, n);
+    return;
+  }
+
+  // correct elimination
+  let survivor, note;
+  if(choice === 'pans'){
+    leftCoins2.classList.add('fading'); rightCoins2.classList.add('fading');
+    addRow2(n, aside, 'balanced → pans cleared, aside coin remains');
+    pileNum2.textContent = aside;
+    setTimeout(() => confirmAsideCoin(), 700);
+    return;
+  } else if(choice === 'left'){
+    survivor = right; note = 'kept Pile B';
+    leftCoins2.classList.add('fading');
+  } else {
+    survivor = left; note = 'kept Pile A';
+    rightCoins2.classList.add('fading');
+  }
+
+  setTimeout(() => {
+    addRow2(n, survivor, note);
+    pileNum2.textContent = survivor;
+    if(survivor <= 1){
+      const survivorGroup = choice === 'left' ? rightCoins2 : leftCoins2;
+      markCoinAsFake(survivorGroup);
+      finishExplorer2(`🎉 Correct! Fake coin found after ${state2.weighings} weighing${state2.weighings===1?'':'s'}!`);
+    } else {
+      simMsg2.classList.remove('eliminated');
+      simMsg2.textContent = `Good elimination — ${survivor} coins left. Splitting again...`;
+      setTimeout(() => showSplit2(survivor), 900);
+    }
+  }, 600);
+}
+
+// One coin remains, set aside and never yet weighed. Weigh it against a coin
+// we already know is real (borrowed from an eliminated pile) to prove it's fake.
+function confirmAsideCoin(){
+  simMsg2.classList.remove('eliminated');
+  simMsg2.textContent = 'Both pans were clear — now weigh the aside coin against a known real coin.';
+  updateAsidePanel(0);
+
+  leftPanTag.textContent = 'SUSPECT';
+  rightPanTag.textContent = 'KNOWN REAL';
+  setPans2(1, 1);
+  weighBtn2.disabled = true;
+  choiceRow2.classList.add('hidden');
+  eliminatePrompt.style.display = 'none';
+
+  setTimeout(() => {
+    beamGroup2.style.transform = 'rotate(7deg)'; // right (known real) sinks, suspect rises
+    simMsg2.textContent = 'The known-real coin sinks — the suspect coin is lighter.';
+  }, 700);
+
+  setTimeout(() => {
+    rightCoins2.classList.add('fading');
+  }, 1500);
+
+  setTimeout(() => {
+    state2.weighings += 1;
+    weighNum2.textContent = state2.weighings;
+    addRow2(1, '—', 'confirmed: suspect is lighter');
+    leftPanTag.textContent = 'FAKE COIN';
+    markCoinAsFake(leftCoins2);
+    finishExplorer2(`🎉 Confirmed! The aside coin is the fake — found after ${state2.weighings} weighing${state2.weighings===1?'':'s'}!`);
+  }, 2100);
+}
+
+eliminateLeftBtn.addEventListener('click', () => makeChoice('left'));
+eliminateRightBtn.addEventListener('click', () => makeChoice('right'));
+eliminatePansBtn.addEventListener('click', () => makeChoice('pans'));
+document.getElementById('resetSim2Btn').addEventListener('click', resetGame);
+document.getElementById('retryPileBtn').addEventListener('click', () => {
+  const n = state2.lastFailedN;
+  document.getElementById('failActions').classList.add('hidden');
+  if(n) startExplorer(n);
+});
+
+resetGame();
+
+/* ================= reflection page ================= */
+function resetReflection(){
+  ['reflect1', 'reflect2', 'reflect3', 'reflect4', 'reflect5'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+}
+
+/* ================= exercise page ================= */
+function resetExercises(){
+  ['exercise1', 'exercise2', 'exercise3', 'exercise4', 'exercise5', 'exercise6', 'exercise7'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+}
+
+/* ================= final page — restart the whole journey ================= */
+document.getElementById('restartJourneyBtn').addEventListener('click', () => {
+  resetGame();
+  resetReflection();
+  resetExercises();
+  currentPage = 1;
+  renderPage();
+});
+</script>
+</body>
+</html>
