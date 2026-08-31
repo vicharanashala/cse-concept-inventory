@@ -207,18 +207,28 @@ h3{font-family:var(--font-heading);font-weight:600;font-size:1.02rem;margin:0 0 
 }
 .quiz-score p{font-family:var(--font-heading);font-size:1.05rem;font-weight:700;margin:0 0 .8rem;color:var(--ink);}
 
-/* ---------- reflection questions ---------- */
-.reflect-block{margin-bottom:1.3rem;}
+/* ---------- bullet lists (pages 1 & 5) ---------- */
 .reflect-list{margin:.3rem 0 .6rem;padding-left:1.2rem;font-size:.9rem;color:var(--ink-soft);}
 .reflect-list li{margin-bottom:.25rem;}
-.reflect-textarea{
-  width:100%;min-height:90px;padding:.7rem .8rem;
-  border:1px solid var(--border);border-radius:12px;
-  background:var(--paper);color:var(--ink);
-  font-family:var(--font-body);font-size:.9rem;line-height:1.5;
-  resize:vertical;
+
+/* ---------- reflection / exercise question cards ---------- */
+.question-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;
 }
-.reflect-textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
+@media(max-width:720px){.question-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:480px){.question-grid{grid-template-columns:1fr;}}
+.question-card{
+  background:var(--panel);border:1px solid var(--border);border-radius:14px;
+  padding:1.1rem 1.1rem 1.2rem;display:flex;flex-direction:column;gap:.6rem;
+  box-shadow:0 6px 16px var(--shadow-card);
+}
+.question-card .q-num{
+  width:28px;height:28px;border-radius:999px;
+  background:linear-gradient(135deg, var(--accent-light), var(--accent-dark));
+  color:#fff;font-family:var(--font-heading);font-weight:700;font-size:.85rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.question-card .q-text{font-size:.88rem;color:var(--ink);line-height:1.5;margin:0;}
 
 /* ---------- page nav ---------- */
 .page-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.6rem;gap:.8rem;}
@@ -368,31 +378,14 @@ footer.tag{
   <!-- ============ PAGE 4 — REFLECTION QUESTIONS ============ -->
   <section class="page" data-page="4">
     <h2>Think it through</h2>
-    <p class="sec-note">There's no single "correct" wording — write your reasoning in your own words, based on what you just saw in the game.</p>
+    <p class="sec-note">There's no single "correct" wording — think through your reasoning based on what you just saw in the game.</p>
 
-    <div class="reflect-block">
-      <p class="quiz-q">1. Breaking it down: How did working on smaller parts make the original problem easier to handle?</p>
-      <textarea class="reflect-textarea" id="reflect1" placeholder="Type your answer here..."></textarea>
-    </div>
-
-    <div class="reflect-block">
-      <p class="quiz-q">2. Choosing the split: How did you decide where to divide the problem, and why was that division useful?</p>
-      <textarea class="reflect-textarea" id="reflect2" placeholder="Type your answer here..."></textarea>
-    </div>
-
-    <div class="reflect-block">
-      <p class="quiz-q">3. Solving smaller parts: What made each smaller problem easier to solve than the original one?</p>
-      <textarea class="reflect-textarea" id="reflect3" placeholder="Type your answer here..."></textarea>
-    </div>
-
-    <div class="reflect-block">
-      <p class="quiz-q">4. Repeating the process: What happened to the size and difficulty of the problems each time you divided them again?</p>
-      <textarea class="reflect-textarea" id="reflect4" placeholder="Type your answer here..."></textarea>
-    </div>
-
-    <div class="reflect-block">
-      <p class="quiz-q">5. Comparing approaches: If you solved the whole problem at once instead, what would become harder or more time-consuming? Why?</p>
-      <textarea class="reflect-textarea" id="reflect5" placeholder="Type your answer here..."></textarea>
+    <div class="question-grid">
+      <div class="question-card"><div class="q-num">1</div><p class="q-text">Breaking it down: How did working on smaller parts make the original problem easier to handle?</p></div>
+      <div class="question-card"><div class="q-num">2</div><p class="q-text">Choosing the split: How did you decide where to divide the problem, and why was that division useful?</p></div>
+      <div class="question-card"><div class="q-num">3</div><p class="q-text">Solving smaller parts: What made each smaller problem easier to solve than the original one?</p></div>
+      <div class="question-card"><div class="q-num">4</div><p class="q-text">Repeating the process: What happened to the size and difficulty of the problems each time you divided them again?</p></div>
+      <div class="question-card"><div class="q-num">5</div><p class="q-text">Comparing approaches: If you solved the whole problem at once instead, what would become harder or more time-consuming? Why?</p></div>
     </div>
   </section>
 
@@ -418,41 +411,16 @@ footer.tag{
   <!-- ============ PAGE 6 — EXERCISE QUESTIONS ============ -->
   <section class="page" data-page="6">
     <h2>Apply what you've learned</h2>
-    <p class="sec-note">These are open-ended — think through your reasoning and write it out, even if there's no single "right" answer.</p>
+    <p class="sec-note">These are open-ended — think through your reasoning, even if there's no single "right" answer.</p>
 
-    <div class="reflect-block">
-      <p class="quiz-q">1. New problem: You have 64 boxes, and one contains a hidden item. You can repeatedly split the boxes into smaller groups. How could you organize the search to avoid checking every box?</p>
-      <textarea class="reflect-textarea" id="exercise1" placeholder="Type your answer here..."></textarea>
-    </div>
-
-    <div class="reflect-block">
-      <p class="quiz-q">2. Recognize the pattern: A problem can be broken into smaller problems that can each be solved independently. What features would make this a good candidate for Divide and Conquer?</p>
-      <textarea class="reflect-textarea" id="exercise2" placeholder="Type your answer here..."></textarea>
-    </div>
-
-    <div class="reflect-block">
-      <p class="quiz-q">3. Choose an approach: You need to find the maximum value in a small list. Would splitting the list necessarily make the solution better? Explain your choice.</p>
-      <textarea class="reflect-textarea" id="exercise3" placeholder="Type your answer here..."></textarea>
-    </div>
-
-    <div class="reflect-block">
-      <p class="quiz-q">4. Spot the misconception: Someone says, "The more pieces we divide a problem into, the more efficient the algorithm becomes." What is wrong with this reasoning?</p>
-      <textarea class="reflect-textarea" id="exercise4" placeholder="Type your answer here..."></textarea>
-    </div>
-
-    <div class="reflect-block">
-      <p class="quiz-q">5. Change the constraints: Your original problem could be split evenly, but now one part is much larger than the others. How might this affect your approach?</p>
-      <textarea class="reflect-textarea" id="exercise5" placeholder="Type your answer here..."></textarea>
-    </div>
-
-    <div class="reflect-block">
-      <p class="quiz-q">6. Compare efficiency: Two algorithms solve the same problem. One repeatedly handles the entire input, while the other works on smaller portions. What would you examine to determine which will scale better?</p>
-      <textarea class="reflect-textarea" id="exercise6" placeholder="Type your answer here..."></textarea>
-    </div>
-
-    <div class="reflect-block">
-      <p class="quiz-q">7. Unfamiliar application: A company wants to find a faulty component in a large network without testing every component. How could the idea of repeatedly narrowing the problem help, and what would determine whether it is efficient?</p>
-      <textarea class="reflect-textarea" id="exercise7" placeholder="Type your answer here..."></textarea>
+    <div class="question-grid">
+      <div class="question-card"><div class="q-num">1</div><p class="q-text">New problem: You have 64 boxes, and one contains a hidden item. You can repeatedly split the boxes into smaller groups. How could you organize the search to avoid checking every box?</p></div>
+      <div class="question-card"><div class="q-num">2</div><p class="q-text">Recognize the pattern: A problem can be broken into smaller problems that can each be solved independently. What features would make this a good candidate for Divide and Conquer?</p></div>
+      <div class="question-card"><div class="q-num">3</div><p class="q-text">Choose an approach: You need to find the maximum value in a small list. Would splitting the list necessarily make the solution better? Explain your choice.</p></div>
+      <div class="question-card"><div class="q-num">4</div><p class="q-text">Spot the misconception: Someone says, "The more pieces we divide a problem into, the more efficient the algorithm becomes." What is wrong with this reasoning?</p></div>
+      <div class="question-card"><div class="q-num">5</div><p class="q-text">Change the constraints: Your original problem could be split evenly, but now one part is much larger than the others. How might this affect your approach?</p></div>
+      <div class="question-card"><div class="q-num">6</div><p class="q-text">Compare efficiency: Two algorithms solve the same problem. One repeatedly handles the entire input, while the other works on smaller portions. What would you examine to determine which will scale better?</p></div>
+      <div class="question-card"><div class="q-num">7</div><p class="q-text">Unfamiliar application: A company wants to find a faulty component in a large network without testing every component. How could the idea of repeatedly narrowing the problem help, and what would determine whether it is efficient?</p></div>
     </div>
 
     <div class="quiz-score" style="margin-top:1.4rem;">
@@ -560,8 +528,6 @@ document.getElementById('warnConfirm').addEventListener('click', () => {
   document.getElementById('warnOverlay').classList.add('hidden');
   if(leaving === null) return;
   if(leaving === 3) resetGame();
-  if(leaving === 4) resetReflection();
-  if(leaving === 6) resetExercises();
   currentPage = leaving - 1;
   pendingLeavePage = null;
   renderPage();
@@ -888,25 +854,9 @@ document.getElementById('retryPileBtn').addEventListener('click', () => {
 
 resetGame();
 
-/* ================= reflection page ================= */
-function resetReflection(){
-  ['reflect1', 'reflect2', 'reflect3', 'reflect4', 'reflect5'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-}
-
-/* ================= exercise page ================= */
-function resetExercises(){
-  ['exercise1', 'exercise2', 'exercise3', 'exercise4', 'exercise5', 'exercise6', 'exercise7'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-}
-
 /* ================= final page — restart the whole journey ================= */
 document.getElementById('restartJourneyBtn').addEventListener('click', () => {
   resetGame();
-  resetReflection();
-  resetExercises();
   currentPage = 1;
   renderPage();
 });
