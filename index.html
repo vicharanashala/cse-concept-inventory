@@ -3,17 +3,71 @@
 <head>
 <meta charset="UTF-8">
 <title>CS Interactive Case Studies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
-  body { font-family: system-ui, sans-serif; background: #0f172a; color: #f1f5f9; margin: 0; padding: 40px 20px; }
-  h1 { text-align: center; margin-bottom: 40px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 900px; margin: 0 auto; }
-  .card { background: #1e293b; border-radius: 12px; padding: 24px; text-align: center; transition: transform 0.15s; }
-  .card:hover { transform: translateY(-4px); }
-  .card h2 { margin: 0 0 16px; }
-  .card a { display: inline-block; color: #38bdf8; text-decoration: none; font-weight: 600; }
+:root{
+  --bg-1:#FDF1E9; --bg-2:#EDF3FA;
+  --card-bg:#FFFFFF;
+  --ink:#1F2E37; --muted:#54666D; --faint:#93A5AB;
+  --primary:#4A9BD1; --primary-dark:#2B6FA3; --primary-light:#8FCBEF;
+  --amber:#EA8C36; --amber-dark:#C96F1F; --amber-light:#F3A65C;
+  --footer-bg:#22496B;
+  --border:#D9E5F2;
+  --shadow-card:rgba(23,50,77,0.12); --shadow-btn:rgba(43,111,163,0.28);
+}
+*,*::before,*::after{box-sizing:border-box;}
+body{
+  font-family:'Inter', sans-serif;font-weight:400;
+  background:linear-gradient(180deg,var(--bg-1) 0%, var(--bg-2) 40%, var(--bg-2) 100%);
+  background-attachment:fixed;
+  color:var(--ink);margin:0;padding:112px 20px 60px;
+  min-height:100vh;-webkit-font-smoothing:antialiased;
+}
+h1{
+  font-family:'Poppins', sans-serif;font-weight:700;letter-spacing:-0.01em;
+  text-align:center;margin-bottom:40px;color:var(--ink);font-size:clamp(26px,4.4vw,36px);
+}
+.grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:20px;max-width:900px;margin:0 auto;}
+.card{
+  background:var(--card-bg);border-radius:16px;padding:26px 24px;text-align:center;
+  box-shadow:0 10px 24px -8px var(--shadow-card);border:1px solid var(--border);
+  transition:transform 0.15s, box-shadow 0.15s;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 16px 30px -10px var(--shadow-card);}
+.card h2{
+  margin:0 0 16px;font-family:'Poppins', sans-serif;font-weight:700;font-size:19px;color:var(--ink);
+}
+.card a{
+  display:inline-block;color:#fff;text-decoration:none;font-weight:600;font-family:'Poppins', sans-serif;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  border-radius:999px;padding:10px 20px;font-size:14px;
+  box-shadow:0 10px 20px -8px var(--shadow-btn);transition:transform .15s,box-shadow .15s;
+}
+.card a:hover{transform:translateY(-1px);box-shadow:0 12px 24px -6px var(--shadow-btn);}
+
+/* ---- top brand bar: institution logos ---- */
+.brand-bar{
+  position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;
+  padding:12px 22px;z-index:500;pointer-events:none;
+}
+.brand-badge{pointer-events:auto;display:flex;align-items:center;gap:8px;background:transparent;border:none;padding:0;}
+.brand-badge img{height:115px;width:auto;display:block;}
+@media(max-width:640px){
+  .brand-bar{padding:8px 10px;}
+  .brand-badge img{height:55px;}
+  body{padding-top:80px;}
+}
 </style>
 </head>
 <body>
+
+<div class="brand-bar">
+  <div class="brand-badge"><img src="Assets/iitropar.png" alt="IIT Ropar logo"></div>
+  <div class="brand-badge"><img src="Assets/vicharanashala.png" alt="Vicharanshala logo"></div>
+</div>
+
   <h1>CS Interactive Case Studies</h1>
   <div class="grid">
     <div class="card">
