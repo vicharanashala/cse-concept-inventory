@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Junction Street — A Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14171a;
+    --bg-shell: #1a1e22;
+    --bg-panel: #1f242a;
+    --bg-panel-raised: #262c33;
+    --border: #313841;
+    --border-soft: #262b31;
+    --text: #ecebe6;
+    --text-dim: #9ba3ab;
+    --text-faint: #5f6870;
+    --line: #f2c744;
+    --go: #37b24d;
+    --go-dim: #1f3d28;
+    --blocked: #e5484d;
+    --blocked-dim: #3d2426;
+    --info: #4c9fe8;
+    --car-N: #e8b13a;
+    --car-E: #4c9fe8;
+    --car-S: #e5748d;
+    --car-W: #7cd992;
+    --radius: 10px;
+    --shadow: 0 20px 50px -20px rgba(0,0,0,0.6);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #1f252b 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding: 28px 16px 60px;
+  }
+  .shell{
+    width:100%;
+    max-width: 880px;
+    background: var(--bg-shell);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    overflow:hidden;
+    position:relative;
+  }
+  .shell::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:4px;
+    background: repeating-linear-gradient(90deg, var(--line) 0 22px, transparent 22px 40px);
+    opacity:0.8;
+  }
+
+  /* ---------- header / progress ---------- */
+  header{
+    padding: 26px 32px 20px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  h1.title{
+    font-family:'Barlow Condensed', sans-serif;
+    font-weight:700;
+    font-size: 30px;
+    letter-spacing: 0.01em;
+    margin: 0 0 18px;
+    color: var(--text);
+  }
+  .rail{
+    display:flex;
+    align-items:center;
+    gap: 6px;
+  }
+  .rail .seg{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+  }
+  .rail .bar{
+    height:6px;
+    border-radius:3px;
+    background: var(--border);
+    position:relative;
+    overflow:hidden;
+  }
+  .rail .bar::after{
+    content:"";
+    position:absolute; inset:0;
+    background: var(--text-faint);
+    transform: scaleX(0);
+    transform-origin:left;
+    transition: transform .5s ease, background .3s ease;
+  }
+  .rail .seg.done .bar::after{ background: var(--line); transform: scaleX(1); }
+  .rail .seg.current .bar::after{ background: var(--info); transform: scaleX(1); }
+  .rail .label{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+  .rail .seg.current .label{ color: var(--info); }
+  .rail .seg.done .label{ color: var(--line); }
+
+  /* ---------- page viewport ---------- */
+  main{
+    padding: 32px;
+    min-height: 480px;
+  }
+  .page{ display:none; animation: fadeIn .35s ease; }
+  .page.active{ display:block; }
+  @keyframes fadeIn{ from{ opacity:0; transform: translateY(6px);} to{opacity:1; transform:none;} }
+
+  .kicker{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color: var(--info);
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  h2{
+    font-family:'Barlow Condensed', sans-serif;
+    font-size:28px;
+    font-weight:700;
+    margin: 0 0 14px;
+  }
+  p{ line-height:1.65; color: var(--text-dim); margin: 0 0 14px; font-size:15px;}
+  strong{ color: var(--text); }
+
+  .card{
+    background: var(--bg-panel);
+    border:1px solid var(--border-soft);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    margin: 18px 0;
+  }
+  .roster{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:10px;
+    margin-top:18px;
+  }
+  .roster .driver{
+    background: var(--bg-panel);
+    border:1px solid var(--border-soft);
+    border-radius:8px;
+    padding:12px 10px;
+    text-align:center;
+  }
+  .roster .dot{
+    width:10px; height:10px; border-radius:50%;
+    margin: 0 auto 8px;
+  }
+  .roster .name{ font-size:13px; font-weight:600; }
+  .roster .dest{ font-size:11px; color:var(--text-faint); margin-top:2px; font-family:'JetBrains Mono', monospace;}
+
+  /* ---------- junction (game) ---------- */
+  .junction-wrap{
+    display:grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 22px;
+    align-items:start;
+  }
+  @media (max-width: 620px){
+    .junction-wrap{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- literal road board ---------- */
+  .road-board{
+    position:relative;
+    aspect-ratio: 1/1;
+    background: #171a1d;
+    border:1px solid var(--border-soft);
+    border-radius: var(--radius);
+    overflow:hidden;
+  }
+  .hwy-v, .hwy-h{ position:absolute; background:#20242a; z-index:1; }
+  .hwy-v{ top:0; bottom:0; left:50%; width:30%; transform:translateX(-50%); border-left:1px solid var(--border-soft); border-right:1px solid var(--border-soft); }
+  .hwy-h{ left:0; right:0; top:50%; height:30%; transform:translateY(-50%); border-top:1px solid var(--border-soft); border-bottom:1px solid var(--border-soft); }
+  .hwy-v::before{
+    content:""; position:absolute; top:0; bottom:0; left:50%; width:2px; transform:translateX(-50%);
+    background: repeating-linear-gradient(180deg, var(--line) 0 14px, transparent 14px 28px);
+    opacity:0.65;
+  }
+  .hwy-h::before{
+    content:""; position:absolute; left:0; right:0; top:50%; height:2px; transform:translateY(-50%);
+    background: repeating-linear-gradient(90deg, var(--line) 0 14px, transparent 14px 28px);
+    opacity:0.65;
+  }
+  .crosswalk{
+    position:absolute; z-index:2;
+    background: repeating-linear-gradient(var(--stripe-dir), rgba(255,255,255,0.8) 0 4px, transparent 4px 9px);
+  }
+  .crosswalk.cw-N{ top:30%; left:50%; width:28%; height:9px; transform:translateX(-50%); --stripe-dir:90deg; }
+  .crosswalk.cw-S{ bottom:30%; left:50%; width:28%; height:9px; transform:translateX(-50%); --stripe-dir:90deg; }
+  .crosswalk.cw-E{ right:30%; top:50%; height:28%; width:9px; transform:translateY(-50%); --stripe-dir:0deg; }
+  .crosswalk.cw-W{ left:30%; top:50%; height:28%; width:9px; transform:translateY(-50%); --stripe-dir:0deg; }
+  .junction-box{
+    position:absolute; left:50%; top:50%; width:32%; height:32%;
+    transform:translate(-50%,-50%);
+    background:#262c33;
+    border:2px dashed var(--border);
+    border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    z-index:3;
+  }
+  .junction-box span{
+    font-family:'JetBrains Mono', monospace; font-size:13.5px; font-weight:500; color: var(--text);
+    text-align:center; line-height:1.4;
+    background: rgba(16,19,21,0.75); padding:7px 10px; border-radius:6px;
+  }
+  .junction-box.active-pass{ animation: centerPulse .7s ease; }
+  @keyframes centerPulse{
+    0%{ box-shadow: inset 0 0 0 0 rgba(242,199,68,0.7); }
+    100%{ box-shadow: inset 0 0 0 20px rgba(242,199,68,0); }
+  }
+
+  .car-slot{
+    position:absolute;
+    width:36px; height:36px;
+    z-index:4;
+    transform: translate(-50%, -50%);
+    transition: top 1100ms ease, left 1100ms ease, opacity 500ms ease;
+  }
+  .car-chip{
+    position:absolute; left:9px; top:0; width:18px; height:36px;
+    border-radius:5px;
+    background: var(--accent, var(--border));
+    box-shadow: 0 3px 9px rgba(0,0,0,0.5);
+    transform: rotate(var(--angle, 0deg));
+    transition: box-shadow .3s ease;
+  }
+  .car-chip .windshield{
+    position:absolute; top:3px; left:2px; right:2px; height:7px;
+    background: rgba(255,255,255,0.55); border-radius:2px;
+  }
+  .car-chip .car-badge{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Barlow Condensed', sans-serif; font-weight:700; font-size:11.5px; color:#0c0e10;
+    transform: rotate(calc(var(--angle, 0deg) * -1));
+  }
+  .light{
+    position:absolute; top:-10px; right:-10px;
+    width:9px; height:9px; border-radius:50%;
+    background: var(--border);
+    z-index:5;
+    transition: background .2s ease, box-shadow .2s ease;
+  }
+  .light.blink{ animation: lightBlink .9s ease; }
+  @keyframes lightBlink{
+    0%,100%{ background: var(--border); box-shadow:none; }
+    15%,45%,75%{ background: var(--blocked); box-shadow: 0 0 9px 3px rgba(229,72,77,0.75); }
+    30%,60%,90%{ background: var(--border); box-shadow:none; }
+  }
+  .car-slot.moved .car-chip{ box-shadow: 0 0 14px 3px rgba(55,178,77,0.65); }
+  .car-slot.moved .light{ background: var(--go); box-shadow: 0 0 8px 2px rgba(55,178,77,0.65); }
+  .car-slot.reversed{ opacity:0.2; }
+  .queue{
+    position:absolute; top:-10px; left:-6px;
+    display:flex; gap:2px; z-index:5;
+    font-size:8px; letter-spacing:1px; color: var(--blocked);
+    white-space:nowrap;
+  }
+
+  /* ---------- start button ---------- */
+  .start-wrap{ margin-top:16px; text-align:center; }
+  #btnStart{
+    font-size:14px; font-weight:700; padding:13px 28px;
+    border-color: var(--go); color: var(--go);
+    background: rgba(55,178,77,0.1);
+  }
+  .controls-hidden{ display:none !important; }
+
+  /* tension meter */
+  .tension-wrap{ margin: 14px 0 4px; }
+  .tension-label{
+    display:flex; justify-content:space-between;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px; color: var(--text-faint);
+    letter-spacing:0.05em; text-transform:uppercase;
+    margin-bottom:5px;
+  }
+  #tensionPct{ color: var(--text-dim); }
+  .tension-bar{
+    height:8px; border-radius:4px; background: var(--bg-panel);
+    border:1px solid var(--border-soft); overflow:hidden;
+  }
+  .tension-fill{
+    height:100%; width:0%; border-radius:4px;
+    background: linear-gradient(90deg, var(--go), var(--line), var(--blocked));
+    transition: width .4s ease;
+  }
+  .tension-fill.boiling{ animation: boil 1s ease infinite; }
+  @keyframes boil{
+    0%,100%{ filter: brightness(1); }
+    50%{ filter: brightness(1.4); }
+  }
+
+  .console{
+    background:#101315;
+    border:1px solid var(--border-soft);
+    border-radius: var(--radius);
+    display:flex;
+    flex-direction:column;
+    height: 100%;
+    min-height: 320px;
+  }
+  .console .console-head{
+    padding:10px 14px;
+    border-bottom:1px solid var(--border-soft);
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color: var(--text-faint);
+    letter-spacing:0.06em;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .console .console-body{
+    padding: 12px 14px;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height:1.75;
+    color: var(--text-dim);
+    overflow-y:auto;
+    flex:1;
+    max-height: 260px;
+  }
+  .console .console-body p{ margin:0 0 4px; color:inherit; font-size:12px;}
+  .console .console-body .go{ color: var(--go); }
+  .console .console-body .blocked{ color: var(--blocked); }
+  .console .console-body .info{ color: var(--info); }
+  .console .console-body .idea{ color: var(--line); }
+
+  .controls{
+    display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;
+  }
+  .go-grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 18px;
+  }
+  @media (max-width: 620px){
+    .go-grid{ grid-template-columns: repeat(2, 1fr); }
+  }
+  .go-card{
+    --accent: var(--border);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:6px;
+    padding: 20px 10px;
+    border-radius: 12px;
+    border: 2px solid var(--accent);
+    background: var(--bg-panel);
+    cursor:pointer;
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    font-family:'Inter', sans-serif;
+  }
+  .go-card:hover:not(:disabled){
+    transform: translateY(-3px);
+    background: var(--bg-panel-raised);
+    box-shadow: 0 10px 22px -12px var(--accent);
+  }
+  .go-card:active:not(:disabled){ transform: translateY(-1px); }
+  .go-card:disabled{ opacity:0.3; cursor:not-allowed; }
+  .go-card .go-icon{ font-size:20px; color: var(--accent); }
+  .go-card .go-label{ font-weight:700; font-size:15px; color: var(--text); }
+  .go-card .go-sub{ font-family:'JetBrains Mono', monospace; font-size:10px; color: var(--text-faint); }
+  .go-card.flash-blocked{ animation: cardFlash .5s ease; }
+  @keyframes cardFlash{
+    0%,100%{ box-shadow:none; border-color: var(--accent); }
+    40%{ box-shadow: 0 0 0 4px rgba(229,72,77,0.45); border-color: var(--blocked); }
+  }
+  button{
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:13px;
+    border-radius:7px;
+    border:1px solid var(--border);
+    background: var(--bg-panel-raised);
+    color: var(--text);
+    padding: 9px 14px;
+    cursor:pointer;
+    transition: all .15s ease;
+  }
+  button:hover:not(:disabled){ border-color: var(--text-faint); transform: translateY(-1px); }
+  button:active:not(:disabled){ transform: translateY(0); }
+  button:disabled{ opacity:0.35; cursor:not-allowed; }
+  button.mini{ padding:6px 10px; font-size:11px; }
+  button.go-btn{ border-color: var(--go); color: var(--go); }
+  button.reverse-btn{ border-color: var(--blocked); color: var(--blocked); }
+
+  .hint-box{
+    display:none;
+    background: rgba(76,159,232,0.08);
+    border:1px solid rgba(76,159,232,0.35);
+    border-radius:8px;
+    padding: 12px 14px;
+    margin-top:14px;
+    font-size:13px;
+    color: #a9cff2;
+  }
+  .hint-box.show{ display:block; }
+
+  .success-banner{
+    display:none;
+    margin-top:16px;
+    background: rgba(55,178,77,0.1);
+    border:1px solid rgba(55,178,77,0.4);
+    border-radius:8px;
+    padding:14px 16px;
+    color:#9fe0ac;
+    font-size:14px;
+    font-weight:600;
+  }
+  .success-banner.show{ display:block; }
+
+  /* ---------- reflection / quiz ---------- */
+  .qgroup{ margin-bottom: 22px; }
+  .qgroup .qtext{ font-weight:600; color:var(--text); margin-bottom:10px; font-size:14px;}
+  .options{ display:flex; flex-direction:column; gap:8px; }
+  .option{
+    display:flex; align-items:flex-start; gap:10px;
+    padding: 11px 13px;
+    border:1px solid var(--border-soft);
+    border-radius:8px;
+    background: var(--bg-panel);
+    cursor:pointer;
+    transition: border-color .15s ease, background .15s ease;
+    font-size:13.5px;
+    color: var(--text-dim);
+  }
+  .option:hover{ border-color: var(--text-faint); }
+  .option input{ margin-top:2px; accent-color: var(--info); flex-shrink:0; }
+  .option.selected{ border-color: var(--info); background: rgba(76,159,232,0.06); color: var(--text); }
+  .option.correct-flag{ border-color: var(--go); background: rgba(55,178,77,0.07); }
+  .option.wrong-flag{ border-color: var(--blocked); background: rgba(229,72,77,0.07); }
+  .qfeedback{
+    font-size:12.5px;
+    margin-top:8px;
+    padding: 9px 12px;
+    border-radius:6px;
+    display:none;
+    font-family:'JetBrains Mono', monospace;
+  }
+  .qfeedback.show{ display:block; }
+  .qfeedback.ok{ background: var(--go-dim); color:#9fe0ac; }
+  .qfeedback.notyet{ background: var(--bg-panel-raised); color: var(--text-faint); }
+
+  .reveal{
+    display:none;
+    margin-top: 6px;
+  }
+  .reveal.show{ display:block; animation: fadeIn .4s ease; }
+  .ingredient-list{ display:flex; flex-direction:column; gap:10px; margin: 14px 0; }
+  .ingredient{
+    display:flex; gap:12px; align-items:flex-start;
+    padding: 12px 14px;
+    background: var(--bg-panel);
+    border:1px solid var(--border-soft);
+    border-radius:8px;
+  }
+  .ingredient .num{
+    font-family:'Barlow Condensed', sans-serif;
+    font-weight:700;
+    font-size:20px;
+    color: var(--line);
+    min-width: 26px;
+  }
+  .ingredient .txt{ font-size:13.5px; color: var(--text-dim); line-height:1.5; }
+  .ingredient .txt strong{ color:var(--text); }
+
+  .score-banner{
+    display:none;
+    margin: 18px 0;
+    padding: 16px 18px;
+    border-radius:10px;
+    background: var(--bg-panel);
+    border:1px solid var(--border-soft);
+    text-align:center;
+  }
+  .score-banner.show{ display:block; }
+  .score-banner .num{
+    font-family:'Barlow Condensed', sans-serif;
+    font-size:44px;
+    font-weight:700;
+    color: var(--line);
+  }
+  .score-banner .cap{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color: var(--text-faint);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin-top:4px;
+  }
+
+  /* ---------- footer nav ---------- */
+  footer{
+    padding: 18px 32px 26px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-top:1px solid var(--border-soft);
+  }
+  .nav-hint{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    color: var(--text-faint);
+  }
+  #btnNext.pulse{
+    animation: pulseBtn 1.4s ease infinite;
+  }
+  @keyframes pulseBtn{
+    0%,100%{ box-shadow: 0 0 0 0 rgba(76,159,232,0.35); }
+    50%{ box-shadow: 0 0 0 6px rgba(76,159,232,0); }
+  }
+  #btnNext{ border-color: var(--info); color:#cfe6fb; background: rgba(76,159,232,0.1); }
+  #btnRestart{ border-color: var(--line); color: var(--line); }
+
+  /* ---------- modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0;
+    background: rgba(6,8,10,0.72);
+    display:none;
+    align-items:center; justify-content:center;
+    z-index: 50;
+    padding: 20px;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal{
+    background: var(--bg-panel-raised);
+    border:1px solid var(--border);
+    border-radius: 12px;
+    max-width: 360px;
+    width:100%;
+    padding: 22px 22px 18px;
+    box-shadow: var(--shadow);
+  }
+  .modal .mtitle{
+    font-family:'Barlow Condensed', sans-serif;
+    font-size:20px;
+    font-weight:700;
+    color: var(--blocked);
+    margin-bottom:8px;
+  }
+  .modal p{ font-size:13.5px; margin-bottom:18px; }
+  .modal .mrow{ display:flex; gap:10px; justify-content:flex-end; }
+  .modal button.confirm-back{ border-color: var(--blocked); color: var(--blocked); }
+
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-thumb{ background:var(--border); border-radius:4px; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header>
+    <div class="eyebrow">A case study</div>
+    <h1 class="title">Junction Street</h1>
+    <div class="rail" id="rail"></div>
+  </header>
+
+  <main>
+
+    <!-- PAGE 1 — INTRODUCTION -->
+    <section class="page" id="page-1">
+      <div class="kicker">Mile 1 · A Familiar Problem</div>
+      <h2>You've seen this before</h2>
+      <p>Two ships meet in a narrow canal, too tight for both to pass. Each waits for the other to reverse first. Neither does — so both sit there, engines idling, going nowhere.</p>
+      <p>Two roommates share one bathroom and one hair dryer. One's in the shower, waiting for the dryer to free up. The other's drying their hair, waiting for the shower to free up. Both reasonable. Both late.</p>
+      <p>Two people meet in a narrow doorway. Each steps aside to let the other through — and steps into the exact spot the other just left. They do this three or four times before anyone actually gets past.</p>
+      <div class="card">
+        <p style="margin-bottom:0;">Notice the shape: each one is waiting on exactly one other thing to move first. Nobody's wrong. Nothing's broken. Everyone's just stuck.</p>
+      </div>
+      <p>How does something freeze completely when every part of it is just one small step from moving? On the next stop, you'll watch the same shape play out at a street crossing.</p>
+    </section>
+
+    <!-- PAGE 2 — HOW IT WORKS -->
+    <section class="page" id="page-2">
+      <div class="kicker">Mile 2 · Before You Start</div>
+      <h2>How this stop works</h2>
+      <p>Junction Street has an unmarked crossing where four highways meet — North, East, South, and West. There are no traffic lights. There's just one old rule everyone follows: <strong>if two cars arrive together, whoever has a car on their right lets it go first.</strong></p>
+      <div class="card">
+        <p style="margin-bottom:0;">Here's who each driver is waiting on:</p>
+        <div class="roster">
+          <div class="driver"><div class="dot" style="background:#e8b13a;"></div><div class="name">Driver N</div><div class="dest">yields to → W</div></div>
+          <div class="driver"><div class="dot" style="background:#4c9fe8;"></div><div class="name">Driver E</div><div class="dest">yields to → N</div></div>
+          <div class="driver"><div class="dot" style="background:#e5748d;"></div><div class="name">Driver S</div><div class="dest">yields to → E</div></div>
+          <div class="driver"><div class="dot" style="background:#7cd992;"></div><div class="name">Driver W</div><div class="dest">yields to → S</div></div>
+        </div>
+      </div>
+      <p>On the next stop, you'll press <strong>Start</strong> and all four drivers will pull up to the crossing together. Try tapping <strong>Signal</strong> under any driver — you'll see exactly why nothing moves. Keep an eye on the tension meter as you try.</p>
+      <p>After a few blocked attempts, an option will appear letting you wave one driver through, out of turn. That single choice is what actually clears the whole crossing — watch closely to see why.</p>
+      <p style="color:var(--text);"><strong>Your task on the next stop:</strong> press start, let them arrive, and see what actually happens.</p>
+    </section>
+
+    <!-- PAGE 3 — INTERACTIVE GAME -->
+    <section class="page" id="page-3">
+      <div class="kicker">Mile 3 · The Junction</div>
+      <h2>Watch them arrive</h2>
+      <p>Press <strong>Start</strong> and let all four drivers pull up to the crossing at once. Then try to get them moving.</p>
+
+      <div class="tension-wrap">
+        <div class="tension-label"><span>Gridlock tension</span><span id="tensionPct">0%</span></div>
+        <div class="tension-bar"><div class="tension-fill" id="tensionFill"></div></div>
+      </div>
+
+      <div class="junction-wrap">
+        <div class="road-board" id="roadBoard">
+          <div class="hwy-v"></div>
+          <div class="hwy-h"></div>
+          <div class="crosswalk cw-N"></div>
+          <div class="crosswalk cw-S"></div>
+          <div class="crosswalk cw-E"></div>
+          <div class="crosswalk cw-W"></div>
+          <div class="junction-box" id="junctionBox"><span>1 car max</span></div>
+
+          <div class="car-slot slot-N" id="slot-N" style="--accent:var(--car-N); --angle:180deg;">
+            <div class="light" id="light-N"></div>
+            <div class="queue" id="queue-N"></div>
+            <div class="car-chip"><div class="windshield"></div><span class="car-badge">N</span></div>
+          </div>
+          <div class="car-slot slot-S" id="slot-S" style="--accent:var(--car-S); --angle:0deg;">
+            <div class="light" id="light-S"></div>
+            <div class="queue" id="queue-S"></div>
+            <div class="car-chip"><div class="windshield"></div><span class="car-badge">S</span></div>
+          </div>
+          <div class="car-slot slot-E" id="slot-E" style="--accent:var(--car-E); --angle:-90deg;">
+            <div class="light" id="light-E"></div>
+            <div class="queue" id="queue-E"></div>
+            <div class="car-chip"><div class="windshield"></div><span class="car-badge">E</span></div>
+          </div>
+          <div class="car-slot slot-W" id="slot-W" style="--accent:var(--car-W); --angle:90deg;">
+            <div class="light" id="light-W"></div>
+            <div class="queue" id="queue-W"></div>
+            <div class="car-chip"><div class="windshield"></div><span class="car-badge">W</span></div>
+          </div>
+        </div>
+
+        <div class="console">
+          <div class="console-head"><span>TRAFFIC LOG</span><span id="attemptCount">0 signals sent</span></div>
+          <div class="console-body" id="consoleBody">
+            <p class="info">// waiting to begin...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="start-wrap" id="startWrap">
+        <button id="btnStart" onclick="startJourney()">▶ Start — let them arrive</button>
+      </div>
+
+      <div class="go-grid controls-hidden" id="goControls">
+        <button class="go-card" id="gocard-N" style="--accent:var(--car-N);" onclick="signalGo('N')">
+          <span class="go-icon">▲</span>
+          <span class="go-label">Signal N</span>
+          <span class="go-sub">go →</span>
+        </button>
+        <button class="go-card" id="gocard-E" style="--accent:var(--car-E);" onclick="signalGo('E')">
+          <span class="go-icon">▶</span>
+          <span class="go-label">Signal E</span>
+          <span class="go-sub">go →</span>
+        </button>
+        <button class="go-card" id="gocard-S" style="--accent:var(--car-S);" onclick="signalGo('S')">
+          <span class="go-icon">▼</span>
+          <span class="go-label">Signal S</span>
+          <span class="go-sub">go →</span>
+        </button>
+        <button class="go-card" id="gocard-W" style="--accent:var(--car-W);" onclick="signalGo('W')">
+          <span class="go-icon">◀</span>
+          <span class="go-label">Signal W</span>
+          <span class="go-sub">go →</span>
+        </button>
+      </div>
+
+      <div class="hint-box" id="hintBox">
+        Nothing you've tried actually breaks the loop — every driver is still only waiting on the one to their right. What if <strong>one</strong> driver went out of turn, even though it isn't technically their right of way?
+        <div class="controls" id="reverseControls" style="margin-top:10px;">
+          <button class="reverse-btn" onclick="reverseCar('N')">Wave N through</button>
+          <button class="reverse-btn" onclick="reverseCar('E')">Wave E through</button>
+          <button class="reverse-btn" onclick="reverseCar('S')">Wave S through</button>
+          <button class="reverse-btn" onclick="reverseCar('W')">Wave W through</button>
+        </div>
+      </div>
+
+      <div class="success-banner" id="successBanner">✓ Junction clear — all four drivers made it through. Notice what it actually took.</div>
+    </section>
+
+    <!-- PAGE 4 — REFLECTION -->
+    <section class="page" id="page-4">
+      <div class="kicker">Mile 4 · Debrief</div>
+      <h2>What just happened?</h2>
+      <p>Before you keep going, think back on the junction.</p>
+
+      <div class="qgroup">
+        <div class="qtext">1. Why didn't any car move at first, even though each driver only needed one spot to open up?</div>
+        <div class="options" id="r1-options">
+          <label class="option"><input type="radio" name="r1" value="a"> The drivers weren't paying attention</label>
+          <label class="option"><input type="radio" name="r1" value="b"> Each driver was waiting on the very next driver, and that chain of waiting looped all the way back around</label>
+          <label class="option"><input type="radio" name="r1" value="c"> There weren't enough lanes painted on the road</label>
+        </div>
+        <div class="qfeedback" id="r1-feedback"></div>
+      </div>
+
+      <div class="qgroup">
+        <div class="qtext">2. What was actually needed to get everyone moving again?</div>
+        <div class="options" id="r2-options">
+          <label class="option"><input type="radio" name="r2" value="a"> A fifth car joining the junction</label>
+          <label class="option"><input type="radio" name="r2" value="b"> One driver giving up the spot they were holding, even though it wasn't "their turn"</label>
+          <label class="option"><input type="radio" name="r2" value="c"> Everyone honking at the same time</label>
+        </div>
+        <div class="qfeedback" id="r2-feedback"></div>
+      </div>
+
+      <div class="reveal" id="revealPanel">
+        <div class="card">
+          <p style="margin-bottom:10px; color:var(--text); font-weight:600;">Four things had to be true at once for the junction to freeze completely:</p>
+          <div class="ingredient-list">
+            <div class="ingredient"><div class="num">1</div><div class="txt"><strong>Only one car fits at a time.</strong> The crossing couldn't be shared — a spot belonged to whoever was in it.</div></div>
+            <div class="ingredient"><div class="num">2</div><div class="txt"><strong>Everyone held their ground while waiting.</strong> No driver gave up their spot just because they were stuck.</div></div>
+            <div class="ingredient"><div class="num">3</div><div class="txt"><strong>Nobody would go out of turn.</strong> Everyone followed the rule correctly, so no one broke the pattern on their own.</div></div>
+            <div class="ingredient"><div class="num">4</div><div class="txt"><strong>The waiting formed a closed loop.</strong> N waited on W, who waited on S, who waited on E, who waited on N — right back to the start.</div></div>
+          </div>
+          <p style="margin-bottom:0;">Take away any one of those four and the freeze breaks. That's exactly what happened when you waved one driver through, out of turn.</p>
+          <p style="margin-bottom:0; color:var(--text-faint); font-size:12.5px;">You'll spot this same shape in surprising places — two cooks each holding the tool the other one needs, a group chat where everyone's waiting for someone else to reply first, even two computer programs each holding a file the other one is waiting on.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 5 — EXERCISE -->
+    <section class="page" id="page-5">
+      <div class="kicker">Mile 5 · Checkpoint</div>
+      <h2>Spot the pattern elsewhere</h2>
+      <p>Same shape, different scenery. Answer all four, then submit.</p>
+
+      <form id="quizForm">
+        <div class="qgroup">
+          <div class="qtext">1. Chef A holds the only knife and needs the cutting board. Chef B holds the only cutting board and needs the knife. Neither will let go until they're done with it. What happens?</div>
+          <div class="options" data-q="0">
+            <label class="option"><input type="radio" name="q0" value="0"> They instantly swap tools</label>
+            <label class="option"><input type="radio" name="q0" value="1"> Both cooks wait forever — the meal never gets made</label>
+            <label class="option"><input type="radio" name="q0" value="2"> Chef A gives up and starts washing dishes instead</label>
+          </div>
+        </div>
+
+        <div class="qgroup">
+          <div class="qtext">2. Four rowers sit in a circle. Each one is holding an oar that the rower behind them needs, and no one wants to hand theirs over first. What does it take to get the boat moving?</div>
+          <div class="options" data-q="1">
+            <label class="option"><input type="radio" name="q1" value="0"> A fifth rower joins the boat</label>
+            <label class="option"><input type="radio" name="q1" value="1"> One rower hands over their oar, even though it isn't "their turn"</label>
+            <label class="option"><input type="radio" name="q1" value="2"> Everyone rows harder at the same time</label>
+          </div>
+        </div>
+
+        <div class="qgroup">
+          <div class="qtext">3. Two apps each lock a different file, then each tries to also lock the other's file — and neither will release its own lock until it's finished. What's the likely outcome?</div>
+          <div class="options" data-q="2">
+            <label class="option"><input type="radio" name="q2" value="0"> One file wins at random and the other app skips ahead</label>
+            <label class="option"><input type="radio" name="q2" value="1"> Both apps freeze, each one waiting on the other, indefinitely</label>
+            <label class="option"><input type="radio" name="q2" value="2"> The two files merge automatically</label>
+          </div>
+        </div>
+
+        <div class="qgroup">
+          <div class="qtext">4. Which of these was <em>not</em> one of the ingredients behind the Junction Street freeze?</div>
+          <div class="options" data-q="3">
+            <label class="option"><input type="radio" name="q3" value="0"> Each spot could hold only one car at a time</label>
+            <label class="option"><input type="radio" name="q3" value="1"> Drivers held their spot while they waited</label>
+            <label class="option"><input type="radio" name="q3" value="2"> A traffic officer eventually forced one car to reverse</label>
+            <label class="option"><input type="radio" name="q3" value="3"> The waiting formed a closed loop back to the start</label>
+          </div>
+        </div>
+      </form>
+
+      <button id="btnSubmitQuiz" onclick="submitQuiz()" disabled>Submit answers</button>
+
+      <div class="score-banner" id="scoreBanner">
+        <div class="num" id="scoreNum">0 / 4</div>
+        <div class="cap">correct</div>
+      </div>
+
+      <div style="margin-top:22px; display:none;" id="restartWrap">
+        <p style="margin-bottom:12px;">That closed loop of waiting is the whole story here — same shape, different costumes, every time.</p>
+        <button id="btnRestart" onclick="restartJourney()">↺ Restart journey</button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div>
+      <button id="btnBack" onclick="tryGoBack()" style="display:none;">← Back</button>
+    </div>
+    <div class="nav-hint" id="navHint">Complete this stop to continue</div>
+    <div>
+      <button id="btnNext" onclick="tryGoNext()" disabled>Next →</button>
+    </div>
+  </footer>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="mtitle">Heads up</div>
+    <p>Going back will <strong>erase your progress on this stop</strong>. You'll need to complete it again to move forward. Continue?</p>
+    <div class="mrow">
+      <button onclick="closeModal()">Cancel</button>
+      <button class="confirm-back" onclick="confirmGoBack()">Yes, go back</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAGES = [
+  { id:1, label:'Mile 1' },
+  { id:2, label:'Mile 2' },
+  { id:3, label:'Mile 3' },
+  { id:4, label:'Mile 4' },
+  { id:5, label:'Mile 5' },
+];
+
+let state = {
+  current: 1,
+  furthest: 1,
+  game: { attempts:0, hintShown:false, reversed:null, complete:false, started:false, movedSet:new Set(), queue:{N:0,E:0,S:0,W:0} },
+  reflection: { r1:null, r2:null, complete:false },
+  quiz: { answers:[null,null,null,null], submitted:false, score:0, complete:false }
+};
+
+const ORDER = ['N','E','S','W'];
+// right-of-way rule: X yields to TARGET[X] (the car on X's right)
+const TARGET = { N:'W', E:'N', S:'E', W:'S' };
+// travel geometry: which CSS property animates; start (far away), stop (parked behind the crosswalk), cross (its own crosswalk, once released)
+const CAR_AXIS = {
+  N: { prop:'top',  start:6,  stop:22, lane:'left', laneOffset:-11 },
+  S: { prop:'top',  start:94, stop:78, lane:'left', laneOffset:11  },
+  E: { prop:'left', start:94, stop:78, lane:'top',  laneOffset:-11 },
+  W: { prop:'left', start:6,  stop:22, lane:'top',  laneOffset:11  }
+};
+
+function init(){
+  renderRail();
+  initCarsAtStart();
+  showPage(1);
+  renderGame();
+}
+
+/* ---------------- rail / progress ---------------- */
+function renderRail(){
+  const rail = document.getElementById('rail');
+  rail.innerHTML = '';
+  PAGES.forEach(p=>{
+    const seg = document.createElement('div');
+    seg.className = 'seg';
+    if(p.id < state.current) seg.classList.add('done');
+    else if(p.id === state.current) seg.classList.add('current');
+    seg.innerHTML = `<div class="bar"></div><div class="label">${p.label}</div>`;
+    rail.appendChild(seg);
+  });
+}
+
+/* ---------------- page switching ---------------- */
+function showPage(n){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+n).classList.add('active');
+  state.current = n;
+  renderRail();
+  document.getElementById('btnBack').style.display = (n===1) ? 'none' : 'inline-block';
+  updateNextButton();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function updateNextButton(){
+  const btn = document.getElementById('btnNext');
+  const hint = document.getElementById('navHint');
+  let complete = false;
+  if(state.current===1) complete = true; // intro just needs reading
+  if(state.current===2) complete = true; // instructions just need reading
+  if(state.current===3) complete = state.game.complete;
+  if(state.current===4) complete = state.reflection.complete;
+  if(state.current===5) complete = false; // last page uses restart, not next
+
+  btn.disabled = !complete;
+  btn.classList.toggle('pulse', complete && state.current!==5);
+
+  if(state.current===5){
+    btn.style.display='none';
+    hint.textContent='';
+  } else {
+    btn.style.display='inline-block';
+    hint.textContent = complete ? 'Ready to continue' : (
+      state.current===1 ? 'Take a moment, then continue' :
+      state.current===2 ? 'Take a moment, then continue' :
+      state.current===3 ? 'Clear the junction to continue' :
+      'Answer both questions to continue'
+    );
+  }
+}
+
+function tryGoNext(){
+  if(document.getElementById('btnNext').disabled) return;
+  const next = state.current + 1;
+  if(next > 5) return;
+  state.furthest = Math.max(state.furthest, next);
+  showPage(next);
+  if(next===3) renderGame();
+}
+
+/* ---------------- back navigation with warning ---------------- */
+let pendingBackFrom = null;
+function tryGoBack(){
+  pendingBackFrom = state.current;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('show');
+  pendingBackFrom = null;
+}
+function confirmGoBack(){
+  const leaving = pendingBackFrom;
+  document.getElementById('modalOverlay').classList.remove('show');
+  resetPageState(leaving);
+  const dest = leaving - 1;
+  state.furthest = dest;
+  showPage(dest);
+  if(dest===3) renderGame();
+  pendingBackFrom = null;
+}
+
+function resetPageState(pageNum){
+  if(pageNum===3){
+    state.game = { attempts:0, hintShown:false, reversed:null, complete:false, started:false, movedSet:new Set(), queue:{N:0,E:0,S:0,W:0} };
+    document.getElementById('consoleBody').innerHTML = '<p class="info">// waiting to begin...</p>';
+    document.getElementById('hintBox').classList.remove('show');
+    document.getElementById('successBanner').classList.remove('show');
+    document.getElementById('startWrap').classList.remove('controls-hidden');
+    document.getElementById('goControls').classList.add('controls-hidden');
+    document.querySelectorAll('.queue').forEach(q=>q.textContent='');
+    ORDER.forEach(c=>document.getElementById('slot-'+c).classList.remove('reversed','moved'));
+    initCarsAtStart();
+    renderGame();
+  }
+  if(pageNum===4){
+    state.reflection = { r1:null, r2:null, complete:false };
+    document.querySelectorAll('input[name="r1"], input[name="r2"]').forEach(i=>i.checked=false);
+    document.querySelectorAll('#r1-options .option, #r2-options .option').forEach(o=>o.classList.remove('selected','correct-flag','wrong-flag'));
+    document.getElementById('r1-feedback').classList.remove('show');
+    document.getElementById('r2-feedback').classList.remove('show');
+    document.getElementById('revealPanel').classList.remove('show');
+  }
+  if(pageNum===5){
+    state.quiz = { answers:[null,null,null,null], submitted:false, score:0, complete:false };
+    document.querySelectorAll('#quizForm input[type=radio]').forEach(i=>i.checked=false);
+    document.querySelectorAll('#quizForm .option').forEach(o=>o.classList.remove('selected','correct-flag','wrong-flag'));
+    document.getElementById('scoreBanner').classList.remove('show');
+    document.getElementById('restartWrap').style.display='none';
+    document.getElementById('btnSubmitQuiz').disabled = true;
+    document.getElementById('btnSubmitQuiz').style.display='inline-block';
+  }
+}
+
+/* ---------------- PAGE 3: the junction game ---------------- */
+function log(msg, cls){
+  const body = document.getElementById('consoleBody');
+  const p = document.createElement('p');
+  if(cls) p.className = cls;
+  p.textContent = msg;
+  body.appendChild(p);
+  body.scrollTop = body.scrollHeight;
+}
+
+function initCarsAtStart(){
+  ORDER.forEach(c=>{
+    const slot = document.getElementById('slot-'+c);
+    const axis = CAR_AXIS[c];
+    slot.classList.remove('reversed','moved');
+    slot.style.transitionDuration = '0ms';
+    slot.style.opacity = '1';
+    slot.style[axis.lane] = `calc(50% + ${axis.laneOffset}px)`;
+    slot.style[axis.prop] = axis.start + '%';
+  });
+}
+
+function updatePosition(car, pct, durationMs){
+  const slot = document.getElementById('slot-'+car);
+  slot.style.transitionDuration = durationMs + 'ms';
+  slot.style[CAR_AXIS[car].prop] = pct + '%';
+}
+
+function startJourney(){
+  if(state.game.started) return;
+  state.game.started = true;
+  document.getElementById('startWrap').classList.add('controls-hidden');
+  log('Four highways, one crossing. Here they come...', 'info');
+  ORDER.forEach(c => updatePosition(c, CAR_AXIS[c].stop, 1100));
+  setTimeout(()=>{
+    log('All four cars arrive at the line in the same instant — and nobody moves.', 'blocked');
+    document.getElementById('goControls').classList.remove('controls-hidden');
+    renderGame();
+  }, 1300);
+}
+
+function renderGame(){
+  document.getElementById('attemptCount').textContent = state.game.attempts + ' signals sent';
+  document.getElementById('hintBox').classList.toggle('show', state.game.hintShown && !state.game.complete);
+  document.getElementById('successBanner').classList.toggle('show', state.game.complete);
+
+  ORDER.forEach(c=>{
+    const card = document.getElementById('gocard-'+c);
+    if(card) card.disabled = !state.game.started || !!state.game.reversed || state.game.complete;
+    const q = state.game.queue[c] || 0;
+    const qEl = document.getElementById('queue-'+c);
+    if(qEl) qEl.textContent = '▪'.repeat(Math.min(q,5)) + (q > 5 ? '+' : '');
+  });
+
+  if(state.game.complete){
+    document.getElementById('hintBox').classList.remove('show');
+    document.getElementById('goControls').classList.add('controls-hidden');
+  }
+
+  // tension meter
+  const pct = Math.min(100, state.game.attempts * 22);
+  const fill = document.getElementById('tensionFill');
+  fill.style.width = pct + '%';
+  fill.classList.toggle('boiling', pct >= 90 && !state.game.complete);
+  document.getElementById('tensionPct').textContent = state.game.complete ? 'clear' : pct + '%';
+}
+
+function checkUnlock(){
+  if(!state.game.hintShown && state.game.attempts >= 4){
+    state.game.hintShown = true;
+    log('// nothing tried so far breaks the loop — someone has to go out of turn', 'info');
+  }
+}
+
+function signalGo(car){
+  if(!state.game.started || state.game.complete || state.game.reversed) return;
+  state.game.attempts++;
+  state.game.queue[car] = (state.game.queue[car] || 0) + 1;
+
+  const axis = CAR_AXIS[car];
+  const dir = Math.sign(axis.stop - axis.start);
+  updatePosition(car, axis.stop + dir * 4, 150);
+  setTimeout(()=> updatePosition(car, axis.stop, 220), 180);
+
+  const light = document.getElementById('light-'+car);
+  const card = document.getElementById('gocard-'+car);
+  light.classList.add('blink');
+  card.classList.add('flash-blocked');
+  setTimeout(()=>{
+    light.classList.remove('blink');
+    card.classList.remove('flash-blocked');
+  }, 900);
+
+  const target = TARGET[car];
+  log(`Car ${car} inches forward — blocked, Car ${target} has the right of way.`, 'blocked');
+  checkUnlock();
+  renderGame();
+}
+
+function pulseJunction(){
+  const jb = document.getElementById('junctionBox');
+  jb.classList.remove('active-pass');
+  void jb.offsetWidth;
+  jb.classList.add('active-pass');
+}
+
+function exitTarget(car, forward){
+  const axis = CAR_AXIS[car];
+  const dir = Math.sign(axis.stop - axis.start);
+  const goingPositive = forward ? dir > 0 : dir < 0;
+  return goingPositive ? 118 : -18;
+}
+
+function reverseCar(car){
+  if(!state.game.started || state.game.complete || state.game.reversed) return;
+  state.game.reversed = car;
+  const slot = document.getElementById('slot-'+car);
+  slot.classList.add('reversed');
+  updatePosition(car, exitTarget(car, false), 900);
+  setTimeout(()=>{ slot.style.opacity = '0'; }, 150);
+  log(`Car ${car} backs all the way out and clears off, giving up the crossing.`, 'go');
+  renderGame();
+
+  // whoever was waiting on `car` can go next, and so on around the loop
+  let cur = car;
+  const chain = [];
+  for(let i=0;i<3;i++){
+    cur = ORDER.find(c => TARGET[c] === cur);
+    chain.push(cur);
+  }
+  chain.forEach((c, i)=>{
+    setTimeout(()=>{
+      pulseJunction();
+      const slotC = document.getElementById('slot-'+c);
+      updatePosition(c, exitTarget(c, true), 1100);
+      setTimeout(()=>{ slotC.style.opacity = '0'; }, 550);
+      log(`Car ${c} finally goes — straight through and gone.`, 'go');
+      setTimeout(()=>{
+        state.game.movedSet.add(c);
+        slotC.classList.add('moved');
+        renderGame();
+      }, 500);
+      if(i === chain.length - 1){
+        setTimeout(()=>{
+          state.game.complete = true;
+          log('// crossing clear — everyone made it through', 'info');
+          renderGame();
+          updateNextButton();
+        }, 1300);
+      }
+    }, 900 * (i+1));
+  });
+}
+
+/* ---------------- PAGE 4: reflection ---------------- */
+document.addEventListener('change', (e)=>{
+  if(e.target.name==='r1' || e.target.name==='r2'){
+    handleReflectionAnswer(e.target.name, e.target.value);
+  }
+  if(e.target.name && e.target.name.startsWith('q') && e.target.closest('#quizForm')){
+    handleQuizAnswer(e.target.name, e.target.value);
+  }
+});
+
+function handleReflectionAnswer(name, value){
+  state.reflection[name] = value;
+  const group = document.getElementById(name+'-options');
+  group.querySelectorAll('.option').forEach(o=>{
+    o.classList.remove('selected','correct-flag','wrong-flag');
+    if(o.querySelector('input').checked) o.classList.add('selected');
+  });
+  const correctVal = 'b';
+  const fb = document.getElementById(name+'-feedback');
+  fb.classList.add('show');
+  if(value===correctVal){
+    fb.className='qfeedback show ok';
+    fb.textContent = '✓ that\'s the shape of it.';
+  } else {
+    fb.className='qfeedback show notyet';
+    fb.textContent = 'Worth reconsidering — look at the loop of waiting again.';
+  }
+  if(state.reflection.r1 && state.reflection.r2){
+    state.reflection.complete = true;
+    document.getElementById('revealPanel').classList.add('show');
+  }
+  updateNextButton();
+}
+
+/* ---------------- PAGE 5: quiz ---------------- */
+function handleQuizAnswer(name, value){
+  const idx = parseInt(name.replace('q',''));
+  state.quiz.answers[idx] = parseInt(value);
+  const group = document.querySelector(`.options[data-q="${idx}"]`);
+  group.querySelectorAll('.option').forEach(o=>{
+    o.classList.toggle('selected', o.querySelector('input').checked);
+  });
+  const allAnswered = state.quiz.answers.every(a=>a!==null);
+  document.getElementById('btnSubmitQuiz').disabled = !allAnswered;
+}
+
+const QUIZ_CORRECT = [1,1,1,2];
+
+function submitQuiz(){
+  if(state.quiz.answers.some(a=>a===null)) return;
+  let score = 0;
+  state.quiz.answers.forEach((ans, idx)=>{
+    const group = document.querySelector(`.options[data-q="${idx}"]`);
+    const opts = group.querySelectorAll('.option');
+    opts.forEach((o, oi)=>{
+      if(oi===QUIZ_CORRECT[idx]) o.classList.add('correct-flag');
+      else if(oi===ans && ans!==QUIZ_CORRECT[idx]) o.classList.add('wrong-flag');
+    });
+    if(ans===QUIZ_CORRECT[idx]) score++;
+  });
+  state.quiz.score = score;
+  state.quiz.submitted = true;
+  state.quiz.complete = true;
+
+  document.getElementById('scoreNum').textContent = score + ' / 4';
+  document.getElementById('scoreBanner').classList.add('show');
+  document.getElementById('btnSubmitQuiz').style.display='none';
+  document.getElementById('restartWrap').style.display='block';
+  document.querySelectorAll('#quizForm input[type=radio]').forEach(i=>i.disabled=true);
+}
+
+/* ---------------- restart everything ---------------- */
+function restartJourney(){
+  state.current = 1;
+  state.furthest = 1;
+  resetPageState(3);
+  resetPageState(4);
+  resetPageState(5);
+  document.querySelectorAll('#quizForm input[type=radio]').forEach(i=>i.disabled=false);
+  showPage(1);
+}
+
+init();
+</script>
+</body>
+</html>

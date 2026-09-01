@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deadlock Junction — Case Study</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --bg-top:#FDF1E9;
+    --bg:#EDF3FA;
+    --ink:#1F2E37;
+    --ink-2:#F3F8FD;
+    --panel:#FFFFFF;
+    --panel-2:#EAF3FC;
+    --line:#D9E5F2;
+    --track:#B7CBDF;
+    --amber:#EA8C36;
+    --amber-dim:#F3A65C;
+    --orange-dark:#C96F1F;
+    --teal:#4A9BD1;
+    --teal-dim:#8FCBEF;
+    --blue-dark:#2B6FA3;
+    --rust:#3E9C86;
+    --rust-dim:#CDEDE3;
+    --paper:#1F2E37;
+    --muted:#54666D;
+    --faint:#93A5AB;
+    --danger:#D9714F;
+    --violet:#8F7BD6;
+    --violet-dim:#E4DFF7;
+    --dark-banner:#22496B;
+    --success-bg:#DCEAD8;
+    --success-text:#274B26;
+    --success-border:#4B7A4A;
+    --error-bg:#FBE1DC;
+    --error-text:#8A3420;
+    --error-border:#D9714F;
+    --shadow-card:0 4px 18px rgba(23,50,77,0.12);
+    --shadow-btn:0 4px 14px rgba(43,111,163,0.3);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:linear-gradient(180deg, var(--bg-top) 0%, var(--bg) 420px, var(--bg) 100%);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    width:100%;
+    padding:0 20px;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+  }
+  /* ---------- Header / signal rail ---------- */
+  header{
+    padding:22px 0 16px;
+  }
+  .brand{
+    font-family:'Poppins',sans-serif;
+    font-weight:600;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    font-size:12.5px;
+    color:var(--muted);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .brand .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);}
+  .rail{
+    position:relative;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 6px;
+  }
+  .rail::before{
+    content:"";
+    position:absolute;
+    left:6px;right:6px;top:50%;
+    height:2px;
+    background:repeating-linear-gradient(to right, var(--line) 0 10px, transparent 10px 16px);
+    transform:translateY(-50%);
+    z-index:0;
+  }
+  .rail .stop{
+    position:relative;
+    z-index:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    cursor:not-allowed;
+    user-select:none;
+  }
+  .rail .stop .lamp{
+    width:16px;height:16px;
+    border-radius:50%;
+    background:var(--panel);
+    border:2px solid var(--line);
+    transition:all .35s ease;
+  }
+  .rail .stop .label{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:10.5px;
+    color:var(--faint);
+    letter-spacing:.03em;
+    white-space:nowrap;
+  }
+  .rail .stop.done .lamp{background:var(--teal);border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-dim);}
+  .rail .stop.active .lamp{background:var(--amber);border-color:var(--amber);box-shadow:0 0 0 4px var(--amber-dim);}
+  .rail .stop.active .label{color:var(--amber);font-weight:700;}
+  .rail .stop.done .label{color:var(--teal);}
+
+  /* ---------- Page shell ---------- */
+  main{flex:1;display:flex;flex-direction:column;padding:8px 0 28px;}
+  .page{display:none;flex:1;flex-direction:column;animation:fadeUp .45s ease both;}
+  .page.active{display:flex;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+  .eyebrow{
+    font-family:'Poppins',sans-serif;
+    font-weight:700;
+    font-size:11.5px;
+    color:var(--amber);
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Poppins',sans-serif;
+    font-weight:700;
+    font-size:clamp(28px,4.2vw,42px);
+    line-height:1.12;
+    margin:0 0 14px;
+    letter-spacing:-.01em;
+    color:var(--ink);
+  }
+  h2{
+    font-family:'Poppins',sans-serif;
+    font-weight:600;
+    font-size:22px;
+    margin:0 0 10px;
+    letter-spacing:-.005em;
+    color:var(--ink);
+  }
+  p{line-height:1.55;color:var(--muted);margin:0 0 12px;}
+  .lead{font-size:17px;color:var(--ink);}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px 24px;
+    box-shadow:var(--shadow-card);
+  }
+
+  /* ---------- Page 1: intro ---------- */
+  .problem-card{border-left:3px solid var(--danger);}
+  .prompt-box{margin-top:18px;}
+  .vignette-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 20px;}
+  @media(max-width:720px){.vignette-grid{grid-template-columns:1fr;}}
+  .vignette-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 17px;
+    box-shadow:var(--shadow-card);
+  }
+  .vignette-card .v-icon{font-size:22px;margin-bottom:8px;display:block;}
+  .vignette-card .v-title{
+    font-family:'Poppins',sans-serif;font-weight:600;font-size:12.5px;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--teal);margin-bottom:6px;
+  }
+  .vignette-card p{font-size:13.5px;line-height:1.55;margin:0;color:var(--muted);}
+  .observation{
+    background:var(--panel-2);
+    border-left:3px solid var(--amber);
+    border-radius:0 12px 12px 0;
+    padding:14px 18px;
+    margin:6px 0 18px;
+  }
+  .observation p{margin:0;font-size:14.5px;color:var(--ink);}
+  .hook-line{font-size:16.5px;color:var(--ink);font-weight:500;margin-bottom:0;}
+  .prompt-box label{
+    display:block;
+    font-family:'Poppins',sans-serif;
+    font-weight:600;
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:8px;
+    letter-spacing:.03em;
+  }
+  textarea{
+    width:100%;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:12px;
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    padding:12px 14px;
+    resize:vertical;
+    min-height:80px;
+    line-height:1.5;
+  }
+  textarea:focus{outline:2px solid var(--teal);outline-offset:1px;}
+
+  /* ---------- Page 2: mechanics ---------- */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px;}
+  @media(max-width:640px){.two-col{grid-template-columns:1fr;}}
+  .mini-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow-card);}
+  .mini-card h3{
+    font-family:'Poppins',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin:0 0 10px;
+  }
+  .mini-card.challenge h3{color:var(--amber);}
+  ul.tight{margin:0;padding-left:18px;}
+  ul.tight li{color:var(--muted);font-size:14.5px;line-height:1.6;margin-bottom:6px;}
+
+  /* ---------- Page 3: game ---------- */
+  .yard{
+    position:relative;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px 18px 22px;
+    margin-top:14px;
+    overflow:hidden;
+  }
+  .yard::before{
+    content:"";
+    position:absolute;inset:0;
+    background:
+      radial-gradient(600px 200px at 50% 0%, rgba(234,140,54,.07), transparent 60%);
+    pointer-events:none;
+  }
+
+  .scenario-row{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-top:4px;}
+  .seg{display:flex;gap:8px;flex-wrap:wrap;}
+  .seg-btn{
+    background:var(--panel-2);color:var(--teal);
+    padding:9px 16px;font-size:12.5px;font-family:'Poppins',sans-serif;font-weight:600;
+    letter-spacing:.02em;border:1px solid var(--line);border-radius:999px;
+    transition:all .2s ease;
+  }
+  .seg-btn.active{
+    background:linear-gradient(135deg,var(--teal-dim),var(--blue-dark));
+    color:#fff;
+    border-color:transparent;
+    box-shadow:var(--shadow-btn);
+  }
+  .toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;}
+  .toggle input{accent-color:var(--teal);width:16px;height:16px;}
+
+  .track-area{position:relative;margin:10px 0 22px;}
+  .track-area.linear{height:210px;}
+  .track-area.ring{height:340px;max-width:340px;margin-left:auto;margin-right:auto;}
+  .linear-svg{position:absolute;inset:0;z-index:0;pointer-events:none;}
+  .rail-path{
+    fill:none;
+    stroke:var(--track);
+    stroke-width:5;
+    stroke-linecap:round;
+  }
+  .rail-path.tie{
+    stroke:rgba(31,46,55,.22);
+    stroke-width:5;
+    stroke-dasharray:1 13;
+  }
+  .ring-track{
+    position:absolute;inset:15%;
+    border:6px dashed var(--track);
+    border-radius:50%;
+  }
+  .ring-track::after{
+    content:"";
+    position:absolute;inset:-16px;
+    border:1px solid rgba(31,46,55,.06);
+    border-radius:50%;
+  }
+  .ring-spoke{
+    position:absolute;left:50%;top:50%;
+    width:34%;height:2px;margin-top:-1px;
+    background:var(--track);
+    transform-origin:0 50%;
+    opacity:.5;
+    z-index:0;
+  }
+  .ring-hub{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:76px;height:76px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--panel-2), var(--panel));
+    border:2px solid var(--line);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-family:'Poppins',sans-serif;font-weight:600;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);text-align:center;line-height:1.5;z-index:1;
+    box-shadow:var(--shadow-card);
+  }
+  .ring-hub span{font-size:9px;letter-spacing:.03em;text-transform:none;color:var(--amber);opacity:.9;}
+
+  .station{
+    position:absolute;top:50%;transform:translate(-50%,-50%);
+    width:14px;height:14px;border-radius:3px;background:var(--track);
+  }
+  .platform{
+    position:absolute;transform:translate(-50%,-50%);
+    display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1;
+  }
+  .platform .p-dot{width:16px;height:16px;border-radius:4px;background:var(--panel);border:2px solid var(--track);}
+  .platform .p-label{font-family:'Poppins',sans-serif;font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+  .junction-wrap{
+    position:absolute;top:50%;transform:translate(-50%,-50%);
+    border:1.5px dashed var(--amber-dim);border-radius:16px;
+    background:rgba(234,140,54,.06);z-index:0;
+  }
+  .junction-label{
+    position:absolute;top:-24px;left:50%;transform:translateX(-50%);
+    font-family:'Poppins',sans-serif;font-weight:600;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--amber);opacity:.95;white-space:nowrap;
+  }
+
+  .zone{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    width:110px;height:60px;
+    border-radius:12px;
+    border:2px dashed var(--line);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    transition:all .4s ease;
+    background:var(--panel);
+    z-index:1;
+  }
+  .zone.ringzone{width:88px;height:50px;}
+  .zone .zname{font-family:'Poppins',sans-serif;font-weight:600;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);text-align:center;}
+  .zone .zowner{font-family:'Inter',sans-serif;font-size:10px;color:var(--faint);}
+  .zone.held-a{border-color:var(--teal);border-style:solid;background:rgba(74,155,209,.14);}
+  .zone.held-a .zname{color:var(--teal);}
+  .zone.held-b{border-color:var(--amber);border-style:solid;background:rgba(234,140,54,.14);}
+  .zone.held-b .zname{color:var(--amber);}
+  .zone.held-c{border-color:var(--rust);border-style:solid;background:rgba(62,156,134,.15);}
+  .zone.held-c .zname{color:var(--rust);}
+  .zone.held-d{border-color:var(--violet);border-style:solid;background:rgba(143,123,214,.15);}
+  .zone.held-d .zname{color:var(--violet);}
+  @keyframes pulseGlow{0%,100%{filter:brightness(1);}50%{filter:brightness(1.06);}}
+  .zone.held-a,.zone.held-b,.zone.held-c,.zone.held-d{animation:pulseGlow 2s ease-in-out infinite;}
+
+  .train{
+    position:absolute;
+    width:60px;height:30px;
+    transform:translate(-50%,-50%);
+    border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Poppins',sans-serif;
+    font-weight:700;
+    font-size:12.5px;
+    color:var(--ink);
+    transition:left 1s cubic-bezier(.4,.05,.2,1), top 1s cubic-bezier(.4,.05,.2,1), offset-distance 1.1s cubic-bezier(.4,.05,.2,1), box-shadow .3s ease;
+    box-shadow:0 3px 10px rgba(23,50,77,.28);
+    z-index:2;
+  }
+  .train.a{background:var(--teal);}
+  .train.b{background:var(--amber);}
+  .train.c{background:var(--rust);color:#fff;}
+  .train.d{background:var(--violet);color:#fff;}
+  .train.blocked{animation:jitter 1.4s ease-in-out infinite;box-shadow:0 0 0 3px rgba(217,113,79,.5);}
+  @keyframes jitter{0%,100%{margin-top:0;}50%{margin-top:2px;}}
+
+  .status-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;}
+  .status-chip{
+    flex:1;min-width:180px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:13.5px;
+    box-shadow:var(--shadow-card);
+  }
+  .status-chip .who{font-family:'Poppins',sans-serif;font-weight:600;letter-spacing:.04em;font-size:12.5px;text-transform:uppercase;margin-bottom:4px;}
+  .status-chip.a .who{color:var(--teal);}
+  .status-chip.b .who{color:var(--amber);}
+  .status-chip.c .who{color:var(--rust);}
+  .status-chip.d .who{color:var(--violet);}
+  .status-chip .state{color:var(--muted);font-family:'Inter',sans-serif;font-size:12px;}
+
+  .controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;}
+  .btn-c{background:linear-gradient(135deg,#6FC9B3,var(--rust));color:#fff;box-shadow:0 4px 14px rgba(62,156,134,.3);}
+  .btn-d{background:linear-gradient(135deg,var(--violet-dim),var(--violet));color:#fff;box-shadow:0 4px 14px rgba(143,123,214,.32);}
+
+  .log{
+    margin-top:16px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    font-family:'Inter',sans-serif;
+    font-size:12px;
+    color:var(--muted);
+    max-height:110px;
+    overflow-y:auto;
+  }
+  .log div{margin-bottom:3px;}
+
+  .token-badge{
+    display:inline-flex;align-items:center;gap:8px;
+    background:linear-gradient(135deg,var(--teal-dim),var(--teal));
+    border:none;
+    border-radius:999px;
+    padding:7px 16px;
+    font-family:'Poppins',sans-serif;
+    font-weight:600;
+    font-size:12px;
+    color:#fff;
+    box-shadow:var(--shadow-btn);
+    margin:4px 0 2px;
+  }
+  .token-badge .key{font-size:14px;}
+  .token-badge .holder{color:#fff;font-weight:700;}
+
+  .train.queued{
+    box-shadow:0 0 0 3px rgba(234,140,54,.55);
+    animation:queuePulse 1.8s ease-in-out infinite;
+  }
+  @keyframes queuePulse{0%,100%{opacity:1;}50%{opacity:.72;}}
+
+  .deadlock-banner{
+    margin-top:16px;
+    background:var(--error-bg);
+    border:1px solid var(--error-border);
+    border-radius:14px;
+    padding:16px 18px;
+    display:none;
+  }
+  .deadlock-banner.show{display:block;animation:fadeUp .35s ease both;}
+  .deadlock-banner h3{
+    font-family:'Poppins',sans-serif;
+    color:var(--error-text);
+    margin:0 0 8px;
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+  }
+  .deadlock-banner p{color:var(--error-text);font-size:13.5px;margin:0 0 10px;}
+  .deadlock-banner .recovery-label{color:var(--muted);font-size:12.5px;margin:10px 0 8px;}
+  #waitForGraph{display:flex;justify-content:center;}
+  #rollbackRow{display:flex;gap:10px;flex-wrap:wrap;}
+  .rollback-btn{border-color:var(--error-border)!important;color:var(--error-text)!important;}
+
+  .solution-box{
+    margin-top:16px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 18px;
+    box-shadow:var(--shadow-card);
+  }
+  .solution-box h3{
+    font-family:'Poppins',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin:0 0 10px;
+  }
+
+  /* ---------- Buttons ---------- */
+  button{font-family:'Poppins',sans-serif;cursor:pointer;border:none;}
+  .btn{
+    padding:10px 20px;
+    border-radius:999px;
+    font-size:14px;
+    font-weight:600;
+    transition:transform .15s ease, box-shadow .2s ease, filter .15s ease;
+  }
+  .btn:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.04);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .btn-teal{background:linear-gradient(135deg,var(--teal-dim),var(--blue-dark));color:#fff;box-shadow:var(--shadow-btn);}
+  .btn-teal:hover:not(:disabled){box-shadow:0 6px 18px rgba(43,111,163,.4);}
+  .btn-amber{background:linear-gradient(135deg,var(--amber-dim),var(--orange-dark));color:#fff;box-shadow:0 4px 14px rgba(201,111,31,.32);}
+  .btn-amber:hover:not(:disabled){box-shadow:0 6px 18px rgba(201,111,31,.42);}
+  .btn-outline{background:transparent;border:1.5px solid var(--teal);color:var(--teal);}
+  .btn-outline:hover:not(:disabled){background:rgba(74,155,209,.08);}
+  .btn-ghost{background:transparent;color:var(--muted);}
+  .btn-danger{background:linear-gradient(135deg,#E39A7D,var(--danger));color:#fff;box-shadow:0 4px 14px rgba(217,113,79,.35);}
+
+  /* ---------- Page 4: reflection ---------- */
+  .echo{
+    background:var(--panel-2);
+    border-left:3px solid var(--amber);
+    border-radius:0 10px 10px 0;
+    padding:12px 14px;
+    font-size:13.5px;
+    color:var(--muted);
+    margin:8px 0 20px;
+    font-style:italic;
+  }
+  .q-block{margin-bottom:18px;}
+  .q-block label{display:block;font-size:14.5px;color:var(--ink);margin-bottom:8px;font-weight:500;}
+  .q-num{color:var(--amber);font-family:'Poppins',sans-serif;font-weight:700;margin-right:6px;}
+
+  /* ---------- Page 5: quiz ---------- */
+  .quiz-item{margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--line);}
+  .quiz-item:last-child{border-bottom:none;}
+  .quiz-q{font-size:15px;font-weight:600;margin-bottom:10px;color:var(--ink);}
+  .opt{
+    display:flex;align-items:center;gap:10px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 14px;
+    margin-bottom:8px;
+    cursor:pointer;
+    font-size:14px;
+    color:var(--ink);
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .opt:hover{border-color:var(--faint);}
+  .opt.selected{border-color:var(--teal);background:rgba(74,155,209,.08);}
+  .opt input{accent-color:var(--teal);}
+  .opt.correct{border-color:var(--success-border);background:var(--success-bg);color:var(--success-text);}
+  .opt.incorrect{border-color:var(--error-border);background:var(--error-bg);color:var(--error-text);}
+
+  .score-card{
+    text-align:center;
+    padding:32px 20px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-card);
+  }
+  .score-num{font-family:'Poppins',sans-serif;font-size:52px;color:var(--teal);font-weight:700;}
+  .score-label{color:var(--muted);font-size:13.5px;font-family:'Poppins',sans-serif;font-weight:600;letter-spacing:.05em;text-transform:uppercase;}
+
+  /* ---------- Footer nav ---------- */
+  footer{
+    position:sticky;bottom:0;
+    padding:16px 0 6px;
+  }
+  .nav-row{
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--dark-banner);
+    border-radius:16px;
+    padding:14px 18px;
+    box-shadow:0 6px 20px rgba(23,50,77,.25);
+  }
+  .nav-row .btn-ghost{color:rgba(255,255,255,.85);}
+  .nav-hint{font-family:'Poppins',sans-serif;font-weight:600;font-size:11px;color:rgba(255,255,255,.75);letter-spacing:.05em;}
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(31,46,55,.5);
+    display:none;align-items:center;justify-content:center;z-index:50;padding:20px;
+  }
+  .modal-overlay.show{display:flex;animation:fadeUp .25s ease both;}
+  .modal{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:24px 26px;
+    max-width:380px;
+    width:100%;
+    box-shadow:0 12px 36px rgba(23,50,77,.22);
+  }
+  .modal h3{font-family:'Poppins',sans-serif;color:var(--amber);margin:0 0 10px;font-size:17px;font-weight:700;}
+  .modal p{font-size:14px;color:var(--muted);margin:0 0 18px;}
+  .modal .row{display:flex;gap:10px;justify-content:flex-end;}
+
+  @media(max-width:480px){
+    .rail .stop .label{font-size:8.5px;letter-spacing:0;}
+    .zone{width:88px;height:52px;}
+    .zone .zname{font-size:10.5px;}
+    .zone .zowner{font-size:9px;}
+    .train{width:48px;height:26px;font-size:11px;}
+    .status-chip{min-width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="dot"></span>DEADLOCK JUNCTION — CASE STUDY</div>
+    <div class="rail" id="rail">
+      <div class="stop" data-i="0"><div class="lamp"></div><div class="label">PROBLEM</div></div>
+      <div class="stop" data-i="1"><div class="lamp"></div><div class="label">THE YARD</div></div>
+      <div class="stop" data-i="2"><div class="lamp"></div><div class="label">SIMULATION</div></div>
+      <div class="stop" data-i="3"><div class="lamp"></div><div class="label">DEBRIEF</div></div>
+      <div class="stop" data-i="4"><div class="lamp"></div><div class="label">CHECKPOINT</div></div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- PAGE 0: INTRO -->
+    <section class="page" data-page="0">
+      <div class="eyebrow">Introduction</div>
+      <h1>You've seen this before</h1>
+
+      <div class="vignette-grid">
+        <div class="vignette-card">
+          <span class="v-icon">🚢</span>
+          <div class="v-title">The Canal</div>
+          <p>Two ships meet in a narrow canal, too tight for both to pass. Each waits for the other to reverse first. Neither does — so both sit there, engines idling, going nowhere.</p>
+        </div>
+        <div class="vignette-card">
+          <span class="v-icon">🚿</span>
+          <div class="v-title">The Bathroom</div>
+          <p>Two roommates share one bathroom and one hair dryer. One's in the shower, waiting for the dryer to free up. The other's drying their hair, waiting for the shower to free up. Both reasonable. Both late.</p>
+        </div>
+        <div class="vignette-card">
+          <span class="v-icon">🚪</span>
+          <div class="v-title">The Doorway</div>
+          <p>Two people meet in a narrow doorway. Each steps aside to let the other through — and steps into the exact spot the other just left. They do this three or four times before anyone actually gets past.</p>
+        </div>
+      </div>
+
+      <div class="observation">
+        <p>Notice the shape: each one is waiting on exactly one other thing to move first. Nobody's wrong. Nothing's broken. Everyone's just stuck.</p>
+      </div>
+
+      <p class="hook-line">How does something freeze completely when every part of it is just one small step from moving? On the next stop, you'll watch the same shape play out — at a rail junction, with two trains and no dispatcher.</p>
+
+      <div class="prompt-box">
+        <label>What would you do?</label>
+        <textarea id="initialAnswer" placeholder="Write your first instinct — no wrong answers here."></textarea>
+      </div>
+    </section>
+
+    <!-- PAGE 1: MECHANICS + CHALLENGES -->
+    <section class="page" data-page="1">
+      <div class="eyebrow">The Yard</div>
+      <h2>How this works</h2>
+      <div class="two-col">
+        <div class="mini-card">
+          <h3>Rules of the yard</h3>
+          <ul class="tight">
+            <li>You control both trains, one move at a time.</li>
+            <li>A train must claim a section before entering it.</li>
+            <li>A claimed section can't be taken back until the train fully clears it.</li>
+          </ul>
+        </div>
+        <div class="mini-card challenge">
+          <h3>Your challenge</h3>
+          <ul class="tight">
+            <li>Get both trains through — without a standoff.</li>
+            <li>The order you move them in is the whole game.</li>
+            <li>One bad sequence, and both trains freeze for good.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 2: GAME -->
+    <section class="page" data-page="2">
+      <div class="eyebrow">Simulation</div>
+      <h2>Run the junction</h2>
+      <p style="margin-bottom:14px;">Advance each train in whatever order you like. Watch what happens when trains need the same ground at the same time.</p>
+
+      <div class="scenario-row">
+        <div class="seg" id="scenarioSwitch">
+          <button class="seg-btn active" data-scenario="two" type="button">2 Trains — Bridge &amp; Tunnel</button>
+          <button class="seg-btn" data-scenario="four" type="button">4 Trains — Roundabout</button>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="preventionToggle">
+          <span>Prevention mode — one train in the junction at a time</span>
+        </label>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin:6px 0 0;">When this is on, a train must hold the system token before entering the junction at all — so only one train can ever be holding shared track, and a circular wait can't form. Watch the 🔑 badge and the amber "queued" trains below.</p>
+
+      <div id="tokenBadgeWrap" style="display:none;">
+        <div class="token-badge"><span class="key">🔑</span>Right-of-way: <span class="holder" id="tokenHolder">open</span></div>
+      </div>
+
+      <div class="yard">
+        <div class="track-area" id="trackArea"></div>
+        <div class="status-row" id="statusRow"></div>
+        <div class="controls" id="controlsRow"></div>
+        <div class="log" id="gameLog"></div>
+
+        <div class="deadlock-banner" id="deadlockBanner">
+          <h3>Deadlock detected</h3>
+          <p id="deadlockText"></p>
+          <div id="waitForGraph"></div>
+          <p class="recovery-label">Recover by rolling one train back to the start — this snaps the circular wait, a real technique called <strong>deadlock recovery by preemption</strong>.</p>
+          <div id="rollbackRow"></div>
+          <button class="btn btn-outline" id="resetFromBanner" style="margin-top:12px;">Reset the whole scenario instead</button>
+        </div>
+      </div>
+
+      <div class="solution-box">
+        <h3>How to actually solve it</h3>
+        <ul class="tight">
+          <li><strong>Break the circular wait:</strong> agree on one global order for requesting resources so a cycle can never form.</li>
+          <li><strong>Break hold-and-wait:</strong> require a train to grab everything it needs at once, or nothing at all.</li>
+          <li><strong>Allow preemption:</strong> let a dispatcher forcibly reclaim a held section from a stalled train.</li>
+          <li><strong>Limit concurrency:</strong> flip on Prevention Mode above — only one train may be inside the junction system at a time, so nobody can be left holding one piece while wanting another.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PAGE 3: REFLECTION -->
+    <section class="page" data-page="3">
+      <div class="eyebrow">Debrief</div>
+      <h2>Reflection</h2>
+      <div class="echo" id="echoAnswer"></div>
+
+      <div class="q-block">
+        <label><span class="q-num">01</span>What pattern showed up right before things froze?</label>
+        <textarea data-q="q1" placeholder="Describe what each train was holding and waiting for at that moment."></textarea>
+      </div>
+      <div class="q-block">
+        <label><span class="q-num">02</span>Mutual exclusion, hold-and-wait, no preemption, circular wait — which one, if broken, would have prevented this? How?</label>
+        <textarea data-q="q2" placeholder="Pick one condition and explain the fix."></textarea>
+      </div>
+      <div class="q-block">
+        <label><span class="q-num">03</span>If "deadlock" had never been named or studied as a concept, how would you have figured out what went wrong here?</label>
+        <textarea data-q="q3" placeholder="Think about debugging it cold, with no theory to reach for."></textarea>
+      </div>
+      <div class="q-block">
+        <label><span class="q-num">04</span>What single rule change to the yard would make this standoff impossible, permanently?</label>
+        <textarea data-q="q4" placeholder="One rule. State it plainly."></textarea>
+      </div>
+    </section>
+
+    <!-- PAGE 4: QUIZ -->
+    <section class="page" data-page="4">
+      <div class="eyebrow">Checkpoint</div>
+      <h2>Quick quiz</h2>
+      <div id="quizArea"></div>
+      <div id="scoreArea" style="display:none;"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="backBtn">← Back</button>
+      <div class="nav-hint" id="navHint">1 / 5</div>
+      <button class="btn btn-teal" id="nextBtn">Next →</button>
+    </div>
+  </footer>
+</div>
+
+<div class="modal-overlay" id="backModal">
+  <div class="modal">
+    <h3>Heads up</h3>
+    <p id="modalText">Going back will clear your progress on this page. You'll need to redo it if you return. Continue?</p>
+    <div class="row">
+      <button class="btn btn-ghost" id="cancelBack">Cancel</button>
+      <button class="btn btn-danger" id="confirmBack">Go back anyway</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const totalPages = 5;
+  let current = 0;
+  let maxReached = 0;
+
+  const pages = document.querySelectorAll('.page');
+  const stops = document.querySelectorAll('.rail .stop');
+  const backBtn = document.getElementById('backBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const navHint = document.getElementById('navHint');
+  const backModal = document.getElementById('backModal');
+  const modalText = document.getElementById('modalText');
+
+  const nextLabels = ['Enter the Yard →','Start the Simulation →','Debrief →','Take the Checkpoint →','Restart Journey'];
+
+  function renderNav(){
+    pages.forEach(p => p.classList.toggle('active', +p.dataset.page === current));
+    stops.forEach(s => {
+      const i = +s.dataset.i;
+      s.classList.toggle('active', i === current);
+      s.classList.toggle('done', i < current);
+    });
+    backBtn.style.visibility = current === 0 ? 'hidden' : 'visible';
+    navHint.textContent = (current+1) + ' / ' + totalPages;
+
+    if(current === totalPages - 1 && quizState.submitted){
+      nextBtn.textContent = 'Restart Journey';
+      nextBtn.disabled = false;
+    } else if(current === totalPages - 1){
+      nextBtn.textContent = 'Submit Quiz';
+      nextBtn.disabled = false;
+    } else {
+      nextBtn.textContent = nextLabels[current];
+      nextBtn.disabled = false;
+    }
+  }
+
+  function goToPage(i){
+    current = i;
+    if(i > maxReached) maxReached = i;
+    if(i === 0) resetEverything(false);
+    if(i === 2) syncGameUI();
+    if(i === 3) syncReflectionEcho();
+    if(i === 4) renderQuiz();
+    renderNav();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  // ---------- pending "leave" resets ----------
+  function resetPage(i){
+    if(i === 2) resetGameState();
+    if(i === 3) resetReflectionState();
+    if(i === 4) resetQuizState();
+  }
+
+  backBtn.addEventListener('click', () => {
+    modalText.textContent = "Going back will clear your progress on this page — you'll need to redo it if you return here. Continue?";
+    backModal.classList.add('show');
+  });
+  document.getElementById('cancelBack').addEventListener('click', () => backModal.classList.remove('show'));
+  document.getElementById('confirmBack').addEventListener('click', () => {
+    backModal.classList.remove('show');
+    resetPage(current);
+    goToPage(current - 1);
+  });
+
+  nextBtn.addEventListener('click', () => {
+    if(current === totalPages - 1){
+      if(!quizState.submitted){
+        submitQuiz();
+        renderNav();
+      } else {
+        resetEverything(true);
+        goToPage(0);
+      }
+      return;
+    }
+    goToPage(current + 1);
+  });
+
+  // ================= GAME (Page 2) =================
+  const SCENARIOS = {
+    two: {
+      trackType: 'linear',
+      resourceLabels: { bridge:'Bridge', tunnel:'Tunnel' },
+      resourcePos: { bridge:{left:'35%',top:'50%'}, tunnel:{left:'65%',top:'50%'} },
+      trainDefs: [
+        { id:'A', color:'a', needs:['bridge','tunnel'], pos:[{left:'5%',top:'50%'},{left:'35%',top:'50%'},{left:'95%',top:'50%'}] },
+        { id:'B', color:'b', needs:['tunnel','bridge'], pos:[{left:'95%',top:'50%'},{left:'65%',top:'50%'},{left:'5%',top:'50%'}] }
+      ]
+    },
+    four: {
+      trackType: 'ring',
+      resourceLabels: { north:'North Arc', east:'East Arc', south:'South Arc', west:'West Arc' },
+      resourcePos: { north:{left:'50%',top:'12%'}, east:{left:'88%',top:'50%'}, south:{left:'50%',top:'88%'}, west:{left:'12%',top:'50%'} },
+      trainDefs: [
+        { id:'T1', color:'a', needs:['north','east'],  pos:[{left:'50%',top:'-4%'}, {left:'50%',top:'12%'}, {left:'92%',top:'22%'}] },
+        { id:'T2', color:'b', needs:['east','south'],  pos:[{left:'104%',top:'50%'},{left:'88%',top:'50%'}, {left:'78%',top:'92%'}] },
+        { id:'T3', color:'c', needs:['south','west'],  pos:[{left:'50%',top:'104%'},{left:'50%',top:'88%'}, {left:'8%',top:'78%'}] },
+        { id:'T4', color:'d', needs:['west','north'],  pos:[{left:'-4%',top:'50%'}, {left:'12%',top:'50%'}, {left:'22%',top:'8%'}] }
+      ]
+    }
+  };
+
+  let scenarioKey = 'two';
+  let preventionMode = false;
+  let resources = {};
+  let trains = [];
+  let systemToken = null;
+  let deadlocked = false;
+  let gameLogEntries = [];
+
+  function labelFor(key){
+    return SCENARIOS[scenarioKey].resourceLabels[key].toLowerCase();
+  }
+
+  function loadScenario(){
+    const def = SCENARIOS[scenarioKey];
+    resources = {};
+    Object.keys(def.resourceLabels).forEach(r => resources[r] = null);
+    trains = def.trainDefs.map(t => ({ id:t.id, color:t.color, needs:t.needs.slice(), pos:t.pos, stage:0, waiting:null }));
+    systemToken = null;
+    deadlocked = false;
+    gameLogEntries = [];
+    document.getElementById('waitForGraph').innerHTML = '';
+    document.getElementById('rollbackRow').innerHTML = '';
+    document.getElementById('deadlockText').textContent = '';
+    buildTrackDOM(def);
+    buildStatusDOM();
+    buildControlsDOM();
+    syncGameUI();
+  }
+
+  const LINEAR_STAGE_OFFSET = [0, 38, 100]; // % along path per stage: start, first resource claimed, arrived
+
+  function computeLinearPaths(area){
+    const rect = area.getBoundingClientRect();
+    const W = Math.max(1, Math.round(rect.width));
+    const H = Math.max(1, Math.round(rect.height));
+    const px = p => (p / 100 * W).toFixed(1);
+    const py = p => (p / 100 * H).toFixed(1);
+    // Train A: Platform A (upper siding) -> merges into shared line -> straight through Bridge+Tunnel -> diverges to Platform B (upper arrival siding)
+    const aPathD = 'M '+px(2)+','+py(30)+' C '+px(14)+','+py(30)+' '+px(20)+','+py(50)+' '+px(32)+','+py(50)+
+      ' L '+px(68)+','+py(50)+' C '+px(80)+','+py(50)+' '+px(86)+','+py(60)+' '+px(98)+','+py(60);
+    // Train B: Platform B (lower siding) -> merges into shared line -> straight back through Tunnel+Bridge -> diverges to Platform A (lower arrival siding)
+    const bPathD = 'M '+px(98)+','+py(70)+' C '+px(86)+','+py(70)+' '+px(80)+','+py(50)+' '+px(68)+','+py(50)+
+      ' L '+px(32)+','+py(50)+' C '+px(20)+','+py(50)+' '+px(14)+','+py(40)+' '+px(2)+','+py(40);
+    return { W, H, aPathD, bPathD };
+  }
+
+  function refreshLinearGeometry(){
+    if(SCENARIOS[scenarioKey].trackType !== 'linear') return;
+    const area = document.getElementById('trackArea');
+    if(!area) return;
+    const { W, H, aPathD, bPathD } = computeLinearPaths(area);
+    const svg = area.querySelector('.linear-svg');
+    if(svg){
+      svg.setAttribute('viewBox', '0 0 '+W+' '+H);
+      const paths = svg.querySelectorAll('path');
+      if(paths[0]) paths[0].setAttribute('d', aPathD);
+      if(paths[1]) paths[1].setAttribute('d', aPathD);
+      if(paths[2]) paths[2].setAttribute('d', bPathD);
+      if(paths[3]) paths[3].setAttribute('d', bPathD);
+    }
+    const trainA = document.getElementById('train-A');
+    const trainB = document.getElementById('train-B');
+    if(trainA) trainA.style.offsetPath = 'path("'+aPathD+'")';
+    if(trainB) trainB.style.offsetPath = 'path("'+bPathD+'")';
+  }
+
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(refreshLinearGeometry, 180);
+  });
+
+  function buildTrackDOM(def){
+    const area = document.getElementById('trackArea');
+    area.className = 'track-area ' + def.trackType;
+    let html = '';
+    let linearPaths = null;
+    if(def.trackType === 'linear'){
+      linearPaths = computeLinearPaths(area);
+      const W = linearPaths.W, H = linearPaths.H;
+      html += '<svg class="linear-svg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+
+        '<path class="rail-path" d="'+linearPaths.aPathD+'"></path>'+
+        '<path class="rail-path tie" d="'+linearPaths.aPathD+'"></path>'+
+        '<path class="rail-path" d="'+linearPaths.bPathD+'"></path>'+
+        '<path class="rail-path tie" d="'+linearPaths.bPathD+'"></path>'+
+        '</svg>';
+      html += '<div class="junction-wrap" style="left:50%;top:50%;width:38%;height:120px;"><div class="junction-label">Junction</div></div>';
+      html += '<div class="platform" style="left:2%;top:35%;"><div class="p-dot"></div><div class="p-label">Platform A</div></div>';
+      html += '<div class="platform" style="left:98%;top:65%;"><div class="p-dot"></div><div class="p-label">Platform B</div></div>';
+    } else {
+      html += '<div class="ring-track"></div>';
+      html += '<div class="ring-spoke" style="transform:rotate(0deg);"></div>';
+      html += '<div class="ring-spoke" style="transform:rotate(90deg);"></div>';
+      html += '<div class="ring-spoke" style="transform:rotate(180deg);"></div>';
+      html += '<div class="ring-spoke" style="transform:rotate(270deg);"></div>';
+      html += '<div class="ring-hub">Junction<br><span>⟳ shared, one at a time</span></div>';
+    }
+    Object.keys(def.resourceLabels).forEach(key => {
+      const p = def.resourcePos[key];
+      const ringCls = def.trackType === 'ring' ? ' ringzone' : '';
+      html += '<div class="zone'+ringCls+'" id="zone-'+key+'" style="left:'+p.left+';top:'+p.top+';">'+
+        '<div class="zname">'+def.resourceLabels[key]+'</div>'+
+        '<div class="zowner" id="owner-'+key+'">open</div></div>';
+    });
+    def.trainDefs.forEach(t => {
+      if(def.trackType === 'linear'){
+        const pathD = t.id === 'A' ? linearPaths.aPathD : linearPaths.bPathD;
+        html += '<div class="train '+t.color+'" id="train-'+t.id+'" style="transform:none;offset-anchor:50% 50%;offset-rotate:0deg;offset-path:path(&quot;'+pathD+'&quot;);offset-distance:0%;">'+t.id+'</div>';
+      } else {
+        html += '<div class="train '+t.color+'" id="train-'+t.id+'" style="left:'+t.pos[0].left+';top:'+t.pos[0].top+';">'+t.id+'</div>';
+      }
+    });
+    area.innerHTML = html;
+    document.getElementById('tokenBadgeWrap').style.display = preventionMode ? 'block' : 'none';
+  }
+
+  function buildStatusDOM(){
+    const row = document.getElementById('statusRow');
+    row.innerHTML = trains.map(t =>
+      '<div class="status-chip '+t.color+'"><div class="who">Train '+t.id+'</div><div class="state" id="state-'+t.id+'"></div></div>'
+    ).join('');
+  }
+
+  function buildControlsDOM(){
+    const row = document.getElementById('controlsRow');
+    const btnClass = { a:'btn-teal', b:'btn-amber', c:'btn-c', d:'btn-d' };
+    row.innerHTML = trains.map(t =>
+      '<button class="btn '+btnClass[t.color]+'" id="adv-'+t.id+'">Advance Train '+t.id+'</button>'
+    ).join('') + '<button class="btn btn-outline" id="resetGame">Reset scenario</button>';
+
+    trains.forEach(t => {
+      document.getElementById('adv-'+t.id).addEventListener('click', () => advance(t.id));
+    });
+    document.getElementById('resetGame').addEventListener('click', loadScenario);
+  }
+
+  function log(msg){
+    gameLogEntries.unshift(msg);
+    if(gameLogEntries.length > 14) gameLogEntries.pop();
+    document.getElementById('gameLog').innerHTML = gameLogEntries.map(m => '<div>'+m+'</div>').join('');
+  }
+
+  function describeState(t){
+    if(deadlocked && t.waiting) return 'BLOCKED — waiting on '+ (t.waiting === 'token' ? 'right-of-way' : labelFor(t.waiting)) + ' (frozen)';
+    if(t.stage === 2) return 'arrived — crossing complete';
+    if(t.waiting === 'token') return 'waiting for right-of-way';
+    if(t.waiting) return 'blocked — waiting on '+labelFor(t.waiting);
+    if(t.stage === 1) return 'holding '+labelFor(t.needs[0])+' — needs '+labelFor(t.needs[1])+' next';
+    return 'at start — needs '+labelFor(t.needs[0])+', then '+labelFor(t.needs[1]);
+  }
+
+  function syncGameUI(){
+    const isLinear = SCENARIOS[scenarioKey].trackType === 'linear';
+    trains.forEach(t => {
+      const el = document.getElementById('train-'+t.id);
+      if(isLinear){
+        el.style.offsetDistance = LINEAR_STAGE_OFFSET[t.stage] + '%';
+      } else {
+        const p = t.pos[t.stage];
+        el.style.left = p.left; el.style.top = p.top;
+      }
+      el.classList.toggle('queued', t.waiting === 'token');
+      el.classList.toggle('blocked', !!t.waiting && t.waiting !== 'token');
+      document.getElementById('state-'+t.id).textContent = describeState(t);
+      document.getElementById('adv-'+t.id).disabled = t.stage === 2 || deadlocked;
+    });
+
+    Object.keys(resources).forEach(key => {
+      const zone = document.getElementById('zone-'+key);
+      const owner = resources[key];
+      zone.classList.remove('held-a','held-b','held-c','held-d');
+      if(owner){
+        const t = trains.find(tt => tt.id === owner);
+        zone.classList.add('held-'+t.color);
+        document.getElementById('owner-'+key).textContent = 'held by train '+owner;
+      } else {
+        document.getElementById('owner-'+key).textContent = 'open';
+      }
+    });
+
+    if(preventionMode){
+      document.getElementById('tokenBadgeWrap').style.display = 'block';
+      document.getElementById('tokenHolder').textContent = systemToken ? ('Train '+systemToken) : 'open — any train may take it';
+    } else {
+      document.getElementById('tokenBadgeWrap').style.display = 'none';
+    }
+
+    document.getElementById('deadlockBanner').classList.toggle('show', deadlocked);
+  }
+
+  function advance(trainId){
+    const train = trains.find(t => t.id === trainId);
+    if(deadlocked || train.stage === 2) return;
+
+    if(preventionMode && train.stage === 0){
+      if(systemToken === null){
+        systemToken = trainId;
+        log('Train '+trainId+' takes the right-of-way.');
+      } else if(systemToken !== trainId){
+        train.waiting = 'token';
+        log('Train '+trainId+' is waiting for the right-of-way (held by Train '+systemToken+').');
+        syncGameUI();
+        return;
+      }
+    }
+
+    const needed = train.needs[train.stage];
+    const owner = resources[needed];
+
+    if(owner === null || owner === trainId){
+      resources[needed] = trainId;
+      train.waiting = null;
+      if(train.stage === 0){
+        train.stage = 1;
+        log('Train '+trainId+' claims the '+labelFor(needed)+'.');
+      } else {
+        // final resource: train fully clears the junction, release everything it holds
+        train.stage = 2;
+        resources[train.needs[0]] = null;
+        resources[train.needs[1]] = null;
+        if(preventionMode && systemToken === trainId){
+          systemToken = null;
+          log('Train '+trainId+' clears the junction and releases the right-of-way.');
+        } else {
+          log('Train '+trainId+' claims the '+labelFor(needed)+' and clears the junction.');
+        }
+      }
+    } else {
+      train.waiting = needed;
+      log('Train '+trainId+' is waiting — the '+labelFor(needed)+' is held by Train '+owner+'.');
+    }
+
+    checkDeadlockGraph();
+    syncGameUI();
+  }
+
+  function checkDeadlockGraph(){
+    const blocked = trains.filter(t => t.waiting);
+    const blockedIds = new Set(blocked.map(t => t.id));
+    const nextOf = {};
+    blocked.forEach(t => {
+      const ownerId = t.waiting === 'token' ? systemToken : resources[t.waiting];
+      nextOf[t.id] = (ownerId && blockedIds.has(ownerId)) ? ownerId : null;
+    });
+    for(const start of Object.keys(nextOf)){
+      let path = [start], cur = start, guard = 0;
+      while(nextOf[cur] && guard < 12){
+        cur = nextOf[cur];
+        guard++;
+        if(cur === start){
+          deadlocked = true;
+          const chain = path.map(id => 'Train '+id).join(' → ') + ' → Train ' + start;
+          document.getElementById('deadlockText').textContent =
+            'Circular wait formed: ' + chain + '. Each train is holding what the next one needs and waiting on what the one before it holds — nobody can move without outside help.';
+          log('Circular wait: ' + chain);
+          renderWaitForGraph(path);
+          renderRollbackButtons(path);
+          return;
+        }
+        if(path.includes(cur)) break;
+        path.push(cur);
+      }
+    }
+  }
+
+  function renderWaitForGraph(cycle){
+    const n = cycle.length;
+    const cx = 90, cy = 90, R = 58, nodeR = 20;
+    const colorVar = { a:'var(--teal)', b:'var(--amber)', c:'var(--rust)', d:'var(--violet)' };
+    const pts = cycle.map((id, i) => {
+      const angle = (-90 + i * (360 / n)) * Math.PI / 180;
+      return { id, x: cx + R * Math.cos(angle), y: cy + R * Math.sin(angle) };
+    });
+    let lines = '';
+    for(let i = 0; i < n; i++){
+      const p1 = pts[i], p2 = pts[(i + 1) % n];
+      const dx = p2.x - p1.x, dy = p2.y - p1.y, dist = Math.sqrt(dx*dx + dy*dy) || 1;
+      const ux = dx / dist, uy = dy / dist;
+      const x1 = p1.x + ux * nodeR, y1 = p1.y + uy * nodeR;
+      const x2 = p2.x - ux * (nodeR + 7), y2 = p2.y - uy * (nodeR + 7);
+      lines += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="var(--danger)" stroke-width="2.5" marker-end="url(#wfArrow)" />';
+    }
+    const nodes = pts.map(p => {
+      const t = trains.find(tt => tt.id === p.id);
+      const fill = colorVar[t.color] || '#ccc';
+      return '<circle cx="'+p.x+'" cy="'+p.y+'" r="'+nodeR+'" fill="'+fill+'" stroke="#1F2E37" stroke-width="1.5"/>'+
+        '<text x="'+p.x+'" y="'+(p.y+4)+'" text-anchor="middle" font-family="Poppins, sans-serif" font-size="11" font-weight="700" fill="#1F2E37">'+p.id+'</text>';
+    }).join('');
+    const svg = '<svg viewBox="0 0 180 180" width="190" height="190">'+
+      '<defs><marker id="wfArrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--danger)"/></marker></defs>'+
+      lines + nodes + '</svg>';
+    document.getElementById('waitForGraph').innerHTML = svg;
+  }
+
+  function renderRollbackButtons(cycle){
+    document.getElementById('rollbackRow').innerHTML = cycle.map(id =>
+      '<button class="btn btn-outline rollback-btn" data-train="'+id+'">↩ Send Train '+id+' back</button>'
+    ).join('');
+    document.querySelectorAll('.rollback-btn').forEach(btn => {
+      btn.addEventListener('click', () => rollbackTrain(btn.dataset.train));
+    });
+  }
+
+  function rollbackTrain(trainId){
+    const t = trains.find(x => x.id === trainId);
+    if(!t) return;
+    if(t.stage === 1 && resources[t.needs[0]] === trainId){
+      resources[t.needs[0]] = null;
+    }
+    if(preventionMode && systemToken === trainId){
+      systemToken = null;
+    }
+    t.stage = 0;
+    t.waiting = null;
+    deadlocked = false;
+    log('Train '+trainId+' rolled back to start, releasing what it held — deadlock recovery by preemption.');
+    checkDeadlockGraph();
+    syncGameUI();
+  }
+
+  function resetGameState(){
+    loadScenario();
+  }
+
+  document.getElementById('resetFromBanner').addEventListener('click', loadScenario);
+  document.querySelectorAll('#scenarioSwitch .seg-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      scenarioKey = btn.dataset.scenario;
+      document.querySelectorAll('#scenarioSwitch .seg-btn').forEach(b => b.classList.toggle('active', b === btn));
+      loadScenario();
+    });
+  });
+  document.getElementById('preventionToggle').addEventListener('change', (e) => {
+    preventionMode = e.target.checked;
+    loadScenario();
+  });
+
+  loadScenario();
+
+  // ================= REFLECTION (Page 3) =================
+  const reflectionAnswers = { q1:'', q2:'', q3:'', q4:'' };
+  document.querySelectorAll('[data-q]').forEach(el => {
+    el.addEventListener('input', () => { reflectionAnswers[el.dataset.q] = el.value; });
+  });
+  function resetReflectionState(){
+    Object.keys(reflectionAnswers).forEach(k => reflectionAnswers[k] = '');
+    document.querySelectorAll('[data-q]').forEach(el => el.value = '');
+  }
+  function syncReflectionEcho(){
+    const val = document.getElementById('initialAnswer').value.trim();
+    const echo = document.getElementById('echoAnswer');
+    echo.textContent = val ? ('You first said: "'+val+'"') : 'You didn\u2019t write an initial answer on page one — that\u2019s alright, reflect fresh below.';
+  }
+
+  // ================= QUIZ (Page 4) =================
+  const quizQuestions = [
+    {
+      q: 'What is a "circular wait" in a deadlock?',
+      options: [
+        'Each process is waiting for a resource the next process in the chain holds, looping back to the first.',
+        'A process that keeps retrying the same request forever.',
+        'A resource that is never allocated to anyone.',
+        'Two processes finishing at exactly the same time.'
+      ],
+      correct: 0
+    },
+    {
+      q: 'In the rail simulation, which condition let one train keep the bridge while waiting for the tunnel?',
+      options: [
+        'No preemption — a held resource can\u2019t be forcibly taken away.',
+        'Mutual exclusion — only one train fits on a track at a time.',
+        'Randomized scheduling.',
+        'Starvation prevention.'
+      ],
+      correct: 0
+    },
+    {
+      q: 'Which of these is NOT one of the four necessary conditions for deadlock?',
+      options: [
+        'Mutual exclusion',
+        'Hold and wait',
+        'Fair scheduling',
+        'Circular wait'
+      ],
+      correct: 2
+    },
+    {
+      q: 'What is the simplest way to prevent the exact deadlock shown in this simulation?',
+      options: [
+        'Require both trains to request resources in the same fixed order (e.g., always bridge before tunnel).',
+        'Make the trains faster.',
+        'Remove the tunnel entirely.',
+        'Add a third train.'
+      ],
+      correct: 0
+    },
+    {
+      q: 'Why can\u2019t a deadlock resolve itself without outside intervention?',
+      options: [
+        'Each party is stuck holding a resource it won\u2019t release until it gets one that will never come free.',
+        'The processes are too slow to notice.',
+        'It always resolves itself given enough time.',
+        'One process always crashes first.'
+      ],
+      correct: 0
+    }
+  ];
+  const quizState = { answers: {}, submitted: false };
+
+  function renderQuiz(){
+    const area = document.getElementById('quizArea');
+    const scoreArea = document.getElementById('scoreArea');
+    if(quizState.submitted){
+      area.style.display = 'none';
+      scoreArea.style.display = 'block';
+      return;
+    }
+    area.style.display = 'block';
+    scoreArea.style.display = 'none';
+    area.innerHTML = quizQuestions.map((item, qi) => {
+      const opts = item.options.map((opt, oi) => {
+        const sel = quizState.answers[qi] === oi ? 'selected' : '';
+        return '<div class="opt '+sel+'" data-qi="'+qi+'" data-oi="'+oi+'">'+
+          '<input type="radio" name="q'+qi+'" '+(sel ? 'checked' : '')+' />'+
+          '<span>'+opt+'</span></div>';
+      }).join('');
+      return '<div class="quiz-item"><div class="quiz-q">'+(qi+1)+'. '+item.q+'</div>'+opts+'</div>';
+    }).join('');
+
+    area.querySelectorAll('.opt').forEach(el => {
+      el.addEventListener('click', () => {
+        const qi = +el.dataset.qi, oi = +el.dataset.oi;
+        quizState.answers[qi] = oi;
+        renderQuiz();
+      });
+    });
+  }
+
+  function submitQuiz(){
+    let score = 0;
+    quizQuestions.forEach((item, qi) => { if(quizState.answers[qi] === item.correct) score++; });
+    quizState.submitted = true;
+    quizState.score = score;
+
+    const area = document.getElementById('quizArea');
+    area.style.display = 'block';
+    document.getElementById('scoreArea').style.display = 'none';
+    area.innerHTML = quizQuestions.map((item, qi) => {
+      const opts = item.options.map((opt, oi) => {
+        let cls = '';
+        if(oi === item.correct) cls = 'correct';
+        else if(quizState.answers[qi] === oi) cls = 'incorrect';
+        return '<div class="opt '+cls+'"><input type="radio" disabled '+(quizState.answers[qi]===oi?'checked':'')+' /><span>'+opt+'</span></div>';
+      }).join('');
+      return '<div class="quiz-item"><div class="quiz-q">'+(qi+1)+'. '+item.q+'</div>'+opts+'</div>';
+    }).join('');
+
+    const scoreArea = document.getElementById('scoreArea');
+    scoreArea.style.display = 'block';
+    scoreArea.innerHTML = '<div class="score-card" style="margin-top:18px;">'+
+      '<div class="score-num">'+score+' / '+quizQuestions.length+'</div>'+
+      '<div class="score-label">Checkpoint score</div></div>';
+  }
+
+  function resetQuizState(){
+    quizState.answers = {};
+    quizState.submitted = false;
+  }
+
+  // ================= FULL RESET =================
+  function resetEverything(clearIntro){
+    resetGameState();
+    resetReflectionState();
+    resetQuizState();
+    if(clearIntro){
+      document.getElementById('initialAnswer').value = '';
+      maxReached = 0;
+    }
+  }
+
+  renderNav();
+})();
+</script>
+
+</body>
+</html>
