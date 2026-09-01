@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Birthday Gift Hunt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================
+   THEME — soft sky blue & warm peach/orange, per design tokens.
+   ========================================================== */
+:root{
+  --bg-page:#EDF3FA; --bg-peach:#FDF1E9;
+  --bg-1:#EDF3FA; --bg-2:#EDF3FA; --bg-3:#EDF3FA; --bg-4:#EDF3FA;
+  --primary:#4A9BD1; --primary-dark:#2B6FA3; --primary-light:#8FCBEF; --primary-deep:#2B6FA3;
+  --gold:#EA8C36; --gold-dark:#C96F1F; --gold-light:#F3A65C;
+  --party:#4A9BD1; --green:#4B7A4A; --red:#D9714F;
+  --ink:#1F2E37; --muted:#54666D; --faint:#93A5AB;
+  --card:#FFFFFF; --border:#D9E5F2;
+  --success-bg:#DCEAD8; --success-text:#274B26; --success-border:#4B7A4A;
+  --error-bg:#FBE1DC; --error-text:#8A3420; --error-border:#D9714F;
+  --footer-bg:#22496B;
+  --glass:rgba(255,255,255,0.001); --glass-strong:rgba(255,255,255,0.7); --glass-border:#D9E5F2;
+  --shadow:0 10px 26px -14px rgba(23,50,77,0.12);
+  --radius:22px;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;font-family:'Inter', sans-serif;font-weight:400;color:var(--ink);
+  background:linear-gradient(180deg, var(--bg-peach) 0%, var(--bg-page) 22%, var(--bg-page) 100%);
+  background-attachment:fixed;
+  min-height:100vh;
+}
+h1,h2,.display{font-family:'Poppins', sans-serif;font-weight:700;letter-spacing:-0.01em;}
+p{line-height:1.6;color:var(--ink);}
+button{font-family:'Poppins', sans-serif;font-weight:600;cursor:pointer;}
+.wrap{max-width:920px;margin:0 auto;padding:86px 20px 70px;}
+
+/* ---- stepper ---- */
+.stepper{max-width:680px;margin:0 auto 30px;display:flex;align-items:center;justify-content:center;padding:0 12px;}
+.step-item{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative;}
+.step-circle{
+  width:32px;height:32px;border-radius:50%;background:rgba(74,155,209,0.08);color:var(--primary-deep);font-weight:700;font-size:13px;font-family:'Poppins',sans-serif;
+  display:flex;align-items:center;justify-content:center;border:2px solid rgba(74,155,209,0.25);transition:.25s;z-index:2;
+}
+.step-label{font-size:10px;font-weight:700;color:var(--primary-deep);text-align:center;letter-spacing:.03em;}
+.step-line{position:absolute;top:16px;left:-50%;width:100%;height:2px;background:rgba(74,155,209,0.2);z-index:1;}
+.step-item:first-child .step-line{display:none;}
+.step-item.done .step-circle{background:var(--green);border-color:var(--green);color:#fff;}
+.step-item.done .step-line{background:var(--green);}
+.step-item.active .step-circle{background:linear-gradient(135deg,var(--primary-light),var(--gold));border-color:var(--gold);color:#fff;box-shadow:0 0 0 4px rgba(234,140,54,.25);}
+.step-item.active .step-label{color:var(--gold-dark);}
+
+/* ---- section framing: single-section view ---- */
+.section{display:none;}
+.section.active-view{display:block;animation:sectionFade .35s ease;}
+@keyframes sectionFade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;font-family:'Inter',sans-serif;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--gold-dark);
+  background:rgba(234,140,54,0.12);padding:6px 14px;border-radius:999px;margin-bottom:12px;
+}
+.section-title{font-size:clamp(24px,4vw,36px);color:var(--ink);margin:0 0 8px;text-align:center;text-shadow:none;font-family:'Poppins',sans-serif;}
+.section-sub{max-width:620px;margin:0 auto 18px;text-align:center;font-size:14.5px;color:var(--muted);}
+.hero{text-align:center;}
+.hero h1{font-size:clamp(28px,4.6vw,42px);color:var(--ink);margin:0 0 12px;text-shadow:none;font-family:'Poppins',sans-serif;}
+
+/* content sits directly on the open background, no boxed panel */
+.card{
+  background:transparent;border:none;border-radius:0;
+  box-shadow:none;padding:6px 0 0;
+}
+.btn{
+  border:none;border-radius:999px;padding:13px 22px;font-weight:600;font-size:15px;color:#fff;font-family:'Poppins',sans-serif;
+  background:linear-gradient(135deg,var(--primary-light),var(--primary-dark));
+  box-shadow:0 12px 24px -10px rgba(43,111,163,.3);transition:transform .15s,box-shadow .15s;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 14px 28px -10px rgba(43,111,163,.4);}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn.big{font-size:17px;padding:16px 30px;}
+.btn.secondary{background:transparent;color:var(--primary-dark);border:1.5px solid var(--primary);box-shadow:none;}
+.btn.ghost{background:transparent;color:var(--primary-deep);box-shadow:none;border:1.5px solid var(--border);padding:10px 16px;}
+.btn.back-btn{display:inline-flex;align-items:center;gap:6px;}
+.section-nav{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:22px;}
+
+/* ---- problem / intro content ---- */
+.problem-card{text-align:left;max-width:680px;margin:20px auto 0;}
+.problem-card p{margin:0 0 12px;font-size:15px;}
+.problem-card p:last-child{margin-bottom:0;}
+.problem-card b{color:var(--primary-deep);}
+.floor-preview{
+  max-width:420px;margin:20px auto 0;background:var(--card);border-radius:16px;
+  border:1px solid var(--border);padding:16px 20px;font-family:'Inter', sans-serif;
+  box-shadow:0 10px 26px -18px rgba(23,50,77,0.12);
+}
+.floor-preview .fp-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--border);}
+.floor-preview .fp-row:last-child{border-bottom:none;}
+.floor-preview .fp-tag{font-size:10.5px;font-weight:700;color:var(--primary-dark);text-transform:uppercase;letter-spacing:.04em;min-width:78px;}
+.floor-preview .fp-rooms{font-size:13px;color:var(--ink);font-weight:600;}
+.rule-chip{
+  display:inline-flex;align-items:center;gap:8px;margin-top:16px;
+  background:rgba(234,140,54,0.14);color:var(--gold-dark);font-weight:700;font-size:13.5px;
+  padding:8px 16px;border-radius:999px;
+}
+
+/* ---- house / game ---- */
+.house{max-width:560px;margin:20px auto 0;display:flex;flex-direction:column;gap:14px;}
+.floor-row{}
+.floor-label{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;text-align:center;opacity:.9;}
+.rooms-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.room-card{
+  position:relative;flex:1;min-width:96px;max-width:140px;border-radius:14px;padding:12px 8px;text-align:center;
+  background:rgba(255,255,255,0.6);border:2px solid var(--border);
+  opacity:.45;filter:grayscale(.5);transition:.3s;pointer-events:none;
+}
+.room-card .r-icon{font-size:24px;display:block;margin-bottom:4px;}
+.room-card .r-name{font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.2;}
+.room-card .r-badge{
+  position:absolute;top:-8px;right:-6px;background:var(--success-border);color:#fff;font-size:10px;font-weight:700;
+  width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 3px 6px rgba(23,50,77,.25);
+}
+.room-card .r-child{position:absolute;top:-14px;left:50%;translate:-50% 0;font-size:20px;
+  animation:bounceIn .5s ease;filter:drop-shadow(0 3px 4px rgba(23,50,77,.3));}
+@keyframes bounceIn{0%{transform:translate(-50%,-10px) scale(.4);opacity:0;}60%{transform:translate(-50%,2px) scale(1.15);opacity:1;}100%{transform:translate(-50%,0) scale(1);}}
+.room-card.frontier{
+  opacity:1;filter:none;pointer-events:auto;cursor:pointer;
+  background:#fff;border-color:var(--gold);
+  animation:frontierPulse 1.5s ease-in-out infinite;
+}
+@keyframes frontierPulse{0%,100%{box-shadow:0 0 0 0 rgba(234,140,54,.5);}50%{box-shadow:0 0 0 10px rgba(234,140,54,0);}}
+.room-card.frontier:hover{transform:translateY(-3px) scale(1.04);}
+.room-card.visited{opacity:1;filter:none;background:rgba(255,255,255,.9);border-color:var(--success-border);}
+.room-card.visited.is-gift{border-color:var(--primary);background:linear-gradient(160deg,#fff,#EAF6FF);}
+.room-card.front-door{max-width:150px;margin:0 auto;background:rgba(255,255,255,.9);opacity:1;filter:none;border-color:var(--gold);}
+
+/* ---- graph visualization (nodes + edges) ---- */
+.graph-wrap{position:relative;height:500px;margin:20px auto 0;max-width:640px;}
+.graph-edges{position:absolute;inset:0;width:100%;height:100%;}
+.graph-edges line{stroke:rgba(74,155,209,.35);stroke-width:1.6;transition:stroke .35s, stroke-width .35s;}
+.graph-edges line.gedge-active{stroke:var(--gold);stroke-width:2.6;}
+.gnode{
+  position:absolute;transform:translate(-50%,-50%);width:76px;height:76px;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  background:rgba(255,255,255,.6);border:3px solid var(--border);opacity:.4;filter:grayscale(.55);
+  transition:all .3s cubic-bezier(.4,0,.2,1);pointer-events:none;z-index:2;
+}
+.gnode .g-icon{font-size:21px;line-height:1;}
+.gnode .g-name{font-size:8px;font-weight:700;color:var(--ink);margin-top:2px;line-height:1.1;padding:0 2px;}
+.gnode.front-door{width:88px;height:88px;opacity:1;filter:none;background:#fff;border-color:var(--gold);}
+.gnode.queued{
+  opacity:1;filter:none;pointer-events:auto;cursor:pointer;
+  background:#fff;border-color:var(--gold);
+  animation:frontierPulse 1.5s ease-in-out infinite;
+}
+.gnode.queued:hover{transform:translate(-50%,-50%) scale(1.08);}
+.gnode.visited{opacity:1;filter:none;background:rgba(255,255,255,.92);border-color:var(--success-border);}
+.gnode.is-gift{border-color:var(--primary);background:linear-gradient(160deg,#fff,#EAF6FF);
+  box-shadow:0 0 22px rgba(74,155,209,.5);
+  animation:giftFoundPop .6s ease;}
+@keyframes giftFoundPop{
+  0%{transform:translate(-50%,-50%) scale(1);}
+  30%{transform:translate(-50%,-50%) scale(1.35) rotate(-8deg);}
+  55%{transform:translate(-50%,-50%) scale(.9) rotate(6deg);}
+  75%{transform:translate(-50%,-50%) scale(1.15) rotate(-3deg);}
+  100%{transform:translate(-50%,-50%) scale(1) rotate(0deg);}
+}
+.gnode .g-gift-pop{
+  position:absolute;top:-24px;left:50%;translate:-50% 0;font-size:26px;z-index:5;
+  animation:giftFloat 1.3s ease-in-out infinite;
+  filter:drop-shadow(0 3px 5px rgba(0,0,0,.3));
+}
+@keyframes giftFloat{
+  0%,100%{transform:translate(-50%,0) scale(1) rotate(-6deg);}
+  50%{transform:translate(-50%,-9px) scale(1.12) rotate(6deg);}
+}
+.gnode .g-badge{position:absolute;top:-6px;right:-4px;background:var(--success-border);color:#fff;font-size:9.5px;font-weight:700;
+  width:19px;height:19px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 3px 6px rgba(23,50,77,.25);z-index:3;}
+.gnode .g-child{position:absolute;top:-18px;left:50%;translate:-50% 0;font-size:19px;z-index:4;
+  animation:bounceIn .5s ease;filter:drop-shadow(0 3px 4px rgba(23,50,77,.3));}
+
+/* ---- options panel (what you can check right now, no jargon) ---- */
+.options-panel{margin-top:16px;background:var(--card);border:1px solid var(--glass-border);
+  border-radius:14px;padding:12px 16px;box-shadow:0 10px 26px -18px rgba(23,50,77,0.12);}
+.options-label{font-size:11.5px;font-weight:700;color:var(--primary-dark);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;}
+.options-sub{font-weight:600;text-transform:none;letter-spacing:normal;color:var(--muted);font-size:10.5px;}
+.options-strip{display:flex;gap:8px;flex-wrap:wrap;min-height:34px;align-items:center;}
+.option-chip{background:#fff;border:1.5px solid var(--gold);color:var(--primary-dark);font-weight:700;
+  font-size:12px;padding:6px 12px;border-radius:999px;white-space:nowrap;animation:sectionFade .3s;}
+.options-empty-note{font-size:12.5px;color:var(--muted);font-style:italic;}
+
+/* ---- speed control ---- */
+.speed-wrap{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--primary-dark);
+  background:#fff;border:1.5px solid var(--border);border-radius:999px;padding:6px 12px;}
+.speed-wrap input{accent-color:var(--primary);}
+#autoplay-btn.active-auto{background:linear-gradient(135deg,var(--gold-light),var(--gold-dark));color:#fff;border-color:transparent;}
+
+.status-line{font-size:14.5px;font-weight:700;color:var(--primary-deep);min-height:22px;margin:16px 0 0;text-align:center;text-shadow:none;}
+.counters{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:16px 0 4px;}
+.counter-pill{background:var(--card);border:1px solid var(--glass-border);border-radius:12px;
+  padding:9px 16px;font-size:12.5px;font-weight:700;color:var(--primary-dark);text-align:center;min-width:96px;
+  box-shadow:0 10px 26px -18px rgba(23,50,77,0.12);}
+.counter-pill span{display:block;font-size:19px;color:var(--ink);}
+.game-controls{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:18px;}
+.hint-line{font-size:12.5px;color:var(--muted);text-align:center;margin-top:8px;}
+.hint-box{margin-top:10px;font-size:13.5px;background:rgba(234,140,54,.14);border-left:4px solid var(--gold);
+  padding:10px 14px;border-radius:10px;display:none;color:var(--ink);}
+.hint-box.show{display:block;animation:sectionFade .3s;}
+
+/* ---- mid-game pop question ---- */
+.pop-question{display:none;margin-top:20px;background:rgba(234,140,54,.1);border:1.5px solid var(--gold-light);
+  border-radius:16px;padding:20px;text-align:center;}
+.pop-question.show{display:block;animation:sectionFade .35s;}
+.pop-question h3{margin:0 0 12px;font-size:16px;color:var(--ink);}
+.pq-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
+.pq-options button{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:12px;font-weight:600;color:var(--ink);}
+.pq-options button.correct{background:var(--success-bg);border-color:var(--success-border);color:var(--success-text);}
+.pq-options button.wrong{background:var(--error-bg);border-color:var(--error-border);color:var(--error-text);}
+.pq-options button:disabled{cursor:default;}
+.pq-feedback{margin-top:10px;font-size:13.5px;font-weight:600;display:none;}
+.pq-feedback.show{display:block;animation:sectionFade .3s;}
+
+/* ---- reveal ---- */
+.reveal{display:none;margin-top:22px;text-align:center;padding:26px;border-radius:18px;
+  background:linear-gradient(135deg,rgba(234,140,54,.14),rgba(74,155,209,.14));border:1px solid var(--glass-border);}
+.reveal.show{display:block;animation:sectionFade .4s;}
+.reveal h2{margin:4px 0 8px;font-size:clamp(24px,3.6vw,34px);font-family:'Poppins',sans-serif;
+  background:linear-gradient(135deg,var(--primary-dark),var(--primary));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.level-strip{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:14px 0;}
+.level-chip{background:#fff;border:1.5px solid var(--border);border-radius:999px;padding:6px 12px;font-weight:700;font-size:12.5px;color:var(--primary-dark);}
+.level-chip.win{background:rgba(74,155,209,.14);border-color:var(--primary);color:var(--primary-deep);}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13.5px;}
+table td{padding:7px 10px;border-bottom:1px solid var(--border);text-align:left;}
+table td:first-child{font-weight:700;color:var(--primary-dark);width:46%;}
+
+.queue-reveal{margin-top:18px;padding-top:16px;border-top:1px dashed var(--border);text-align:left;}
+.queue-reveal h3{font-size:16px;color:var(--primary-deep);text-align:center;margin-bottom:8px;font-family:'Poppins', sans-serif;}
+.queue-reveal p{font-size:13.5px;margin-bottom:8px;}
+.queue-reveal p:last-child{margin-bottom:0;}
+.queue-demo-strip{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0;}
+.queue-demo-strip span{background:#fff;border:1.5px solid var(--gold);border-radius:999px;padding:6px 12px;font-weight:700;font-size:12px;color:var(--primary-dark);}
+.queue-demo-strip .qd-arrow{border:none;background:none;color:var(--muted);padding:6px 0;font-weight:700;}
+
+.key-learnings{margin-top:18px;padding-top:16px;border-top:1px dashed var(--border);}
+.key-learnings h3{font-size:16px;color:var(--primary-deep);text-align:center;margin-bottom:10px;font-family:'Poppins', sans-serif;}
+.kl-grid{display:flex;flex-direction:column;gap:10px;}
+.kl-item{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--glass-border);
+  border-radius:14px;padding:12px 14px;text-align:left;box-shadow:0 10px 26px -18px rgba(23,50,77,0.1);}
+.kl-icon{font-size:20px;flex-shrink:0;line-height:1.3;}
+.kl-item b{display:block;font-size:13.5px;color:var(--primary-deep);margin-bottom:3px;}
+.kl-item p{font-size:12.5px;color:var(--muted);line-height:1.5;margin:0;}
+
+/* ---- reflection ---- */
+.qblock{margin-bottom:22px;}
+.qblock:last-of-type{margin-bottom:0;}
+.qblock label{font-weight:700;display:block;margin-bottom:8px;color:var(--ink);font-size:14.5px;}
+textarea.reflect{
+  width:100%;min-height:66px;border-radius:12px;border:1.5px solid var(--border);padding:12px 14px;
+  font-family:'Inter',sans-serif;font-size:14.5px;resize:vertical;background:rgba(255,255,255,0.85);color:var(--ink);
+}
+textarea.reflect:focus{outline:2px solid var(--gold);}
+.continue-hint{margin:14px 0 0;font-size:13px;color:var(--muted);text-align:center;font-style:italic;}
+.answer-summary{display:none;margin-top:24px;padding-top:20px;border-top:1.5px dashed var(--border);}
+.answer-summary.show{display:block;animation:sectionFade .35s;}
+.answer-summary h3{margin:0 0 12px;font-size:16px;color:var(--primary-deep);font-family:'Poppins', sans-serif;text-align:center;}
+.summary-item{background:var(--bg-peach);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px;border-left:4px solid var(--gold);}
+.summary-item:last-child{margin-bottom:0;}
+.summary-item .sq{font-weight:700;font-size:13px;color:var(--ink);margin-bottom:4px;}
+.summary-item .sa{font-size:13.5px;color:var(--primary-dark);margin-bottom:6px;white-space:pre-wrap;line-height:1.5;}
+.summary-item .sref{font-size:13px;color:var(--muted);border-top:1px solid var(--border);padding-top:8px;line-height:1.55;}
+
+/* ---- workbook ---- */
+.wb-score{
+  display:flex;justify-content:center;gap:18px;flex-wrap:wrap;font-weight:700;color:var(--primary-dark);
+  background:var(--card);border:1px solid var(--glass-border);border-radius:12px;padding:10px 18px;
+  margin-bottom:20px;font-size:13px;box-shadow:0 10px 26px -18px rgba(23,50,77,0.1);
+}
+.wb-question{margin-bottom:22px;}
+.wb-question:last-child{margin-bottom:0;}
+.wb-question .wb-q-text{font-weight:700;margin-bottom:10px;font-size:14.5px;color:var(--ink);}
+.quiz-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;}
+.quiz-options button{
+  background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:11px;font-weight:600;color:var(--ink);
+  transition:.15s;text-align:left;
+}
+.quiz-options button:hover{border-color:var(--gold);}
+.quiz-options button.correct{background:var(--success-bg);border-color:var(--success-border);color:var(--success-text);}
+.quiz-options button.wrong{background:var(--error-bg);border-color:var(--error-border);color:var(--error-text);}
+.quiz-options button:disabled{cursor:default;}
+.wb-feedback{margin-top:10px;font-size:13.5px;font-weight:600;color:var(--ink);display:none;}
+.wb-feedback.show{display:block;animation:sectionFade .3s;}
+
+/* ---- modal ---- */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(15,30,45,0.55);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;z-index:950;padding:20px;
+}
+.modal-backdrop.show{display:flex;animation:sectionFade .25s;}
+.modal-card{
+  background:#fff;border-radius:24px;max-width:460px;width:100%;padding:34px 30px;text-align:center;
+  box-shadow:0 30px 70px -20px rgba(23,50,77,0.45);position:relative;
+}
+.modal-card .modal-emoji{font-size:48px;}
+.modal-card h2{margin:6px 0 4px;font-size:26px;color:var(--primary-deep);font-family:'Poppins',sans-serif;}
+.modal-score-num{font-family:'Poppins', sans-serif;font-size:38px;font-weight:700;color:var(--primary);margin:10px 0;}
+.modal-tier{font-weight:700;font-size:15px;margin-bottom:10px;color:var(--ink);}
+.modal-dash{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0;text-align:left;}
+.modal-dash .d-tile{background:var(--bg-peach);border:1px solid var(--border);border-radius:10px;padding:8px 10px;}
+.modal-dash .d-k{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.modal-dash .d-v{font-size:15px;font-weight:700;color:var(--primary-dark);}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:var(--muted);}
+
+#confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:900;}
+footer{text-align:center;padding:22px 20px;margin-top:20px;color:#fff;font-size:12.5px;background:var(--footer-bg);}
+
+/* ---- open question cards (used for reflection + exercise) ---- */
+.qgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:8px;}
+.qcard{
+  background:var(--card);border:1px solid var(--border);border-radius:18px;
+  padding:22px 22px 20px;
+  box-shadow:0 14px 30px -18px rgba(23,50,77,.2);min-height:170px;display:flex;flex-direction:column;gap:10px;
+  transition:transform .18s, box-shadow .18s;
+}
+.qcard:hover{transform:translateY(-3px);box-shadow:0 18px 34px -16px rgba(23,50,77,.25);}
+.qcard .q-num{font-family:'Poppins', sans-serif;font-weight:700;font-size:13.5px;color:var(--primary);letter-spacing:.03em;}
+.qcard .q-text{font-size:15px;color:var(--ink);line-height:1.6;font-weight:600;}
+@media(max-width:640px){
+  .qgrid{grid-template-columns:1fr;}
+  .qcard{min-height:auto;padding:18px 18px 16px;}
+}
+
+/* ---- concept / blueprint room: expandable interactive cards ---- */
+.concept-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:8px;}
+.concept-card{
+  background:var(--card);border:1px solid var(--border);border-radius:18px;
+  padding:18px 20px;cursor:pointer;
+  box-shadow:0 14px 30px -18px rgba(23,50,77,.18);transition:transform .18s, box-shadow .18s;
+}
+.concept-card:hover{transform:translateY(-3px);}
+.concept-card .cc-head{display:flex;align-items:center;gap:10px;}
+.concept-card .cc-icon{font-size:24px;}
+.concept-card .cc-title{font-weight:700;font-size:15px;color:var(--primary-deep);font-family:'Poppins', sans-serif;}
+.concept-card .cc-toggle{margin-left:auto;font-size:13px;color:var(--muted);font-weight:700;}
+.concept-card .cc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;font-size:13.5px;color:var(--ink);line-height:1.6;}
+.concept-card.open .cc-body{max-height:260px;margin-top:12px;}
+.concept-card.open{border-color:var(--gold);}
+
+/* ---- BFS animated tree demo (Blueprint Room) ---- */
+.bfs-demo-wrap{margin-bottom:26px;padding-bottom:22px;border-bottom:1px dashed var(--border);}
+.bfs-demo-wrap h3{text-align:center;font-size:18px;color:var(--primary-deep);margin:0 0 6px;font-family:'Poppins',sans-serif;}
+.bfs-demo-wrap > p.bfs-demo-sub{text-align:center;font-size:13.5px;color:var(--muted);margin:0 0 14px;}
+.bfs-demo{max-width:380px;margin:0 auto;background:var(--card);border-radius:16px;
+  border:1px solid var(--border);padding:10px;box-shadow:0 10px 26px -18px rgba(23,50,77,0.12);}
+.bfs-demo svg{width:100%;height:auto;display:block;}
+.bfs-demo-edge{stroke:rgba(74,155,209,.35);stroke-width:2;transition:stroke .3s, stroke-width .3s;}
+.bfs-demo-edge.active{stroke:var(--gold);stroke-width:3;}
+.bfs-demo-node circle{fill:#fff;stroke:rgba(74,155,209,.45);stroke-width:2;transition:.3s;}
+.bfs-demo-node text{font-size:12px;font-weight:700;fill:var(--ink);font-family:'Poppins', sans-serif;}
+.bfs-demo-node.current circle{fill:var(--gold);stroke:var(--gold);}
+.bfs-demo-node.visited circle{fill:var(--success-bg);stroke:var(--success-border);}
+.bfs-demo-status{text-align:center;font-size:13.5px;font-weight:700;color:var(--primary-deep);margin-top:10px;min-height:20px;}
+.bfs-demo-queue{text-align:center;font-size:12.5px;color:var(--muted);margin-top:2px;min-height:18px;}
+.bfs-info p{font-size:13.5px;}
+
+@media(max-width:640px){
+  .wrap{padding:96px 14px 50px;}
+  .room-card{min-width:78px;padding:10px 6px;}
+  .room-card .r-icon{font-size:20px;}
+  .room-card .r-name{font-size:10px;}
+}
+
+/* ---- top brand bar: institution logos ---- */
+.brand-bar{
+  position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;
+  padding:12px 22px;z-index:500;pointer-events:none;
+}
+.brand-badge{
+  pointer-events:auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:transparent;
+  border:none;
+  border-radius:0;
+  padding:0;
+  box-shadow:none;
+  backdrop-filter:none;
+}
+.brand-badge img{height:105px;width:auto;display:block;}
+.brand-badge .brand-text{font-weight:700;font-size:12.5px;color:var(--primary-deep);line-height:1.15;font-family:'Poppins',sans-serif;}
+.brand-badge.wordmark{padding:9px 16px;}
+.brand-badge.wordmark .brand-text{font-size:15px;letter-spacing:.04em;font-weight:700;color:var(--primary-deep);}
+.brand-badge.wordmark .brand-sub{font-size:9.5px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;display:block;}
+@media(max-width:640px){
+  .brand-bar{padding:8px 10px;}
+  .brand-badge img{height:45px;}
+  .brand-badge{padding:0;}
+  .brand-badge .brand-text{font-size:10.5px;}
+}
+
+/* ---- reset search button: gentle attention-grabbing pulse ---- */
+#restart-btn{
+  position:relative;border-color:var(--error-border)!important;color:var(--error-text)!important;
+  animation:resetGlow 2.2s ease-in-out infinite;
+}
+@keyframes resetGlow{
+  0%,100%{box-shadow:0 0 0 0 rgba(217,113,79,.4);}
+  50%{box-shadow:0 0 0 8px rgba(217,113,79,0);}
+}
+#restart-btn .r-spin{display:inline-block;transition:transform .4s;}
+#restart-btn:hover .r-spin{transform:rotate(180deg);}
+</style>
+</head>
+<body>
+<canvas id="confetti-canvas"></canvas>
+
+<div class="brand-bar">
+
+  <div class="brand-badge">
+    <img src="../Assets/iitropar.png" alt="IIT Ropar logo">
+  </div>
+
+  <div class="brand-badge">
+    <img src="../Assets/vicharanashala.png" alt="Vicharanshala logo">
+  </div>
+
+</div>
+
+<div class="wrap">
+
+  <div class="stepper" id="stepper">
+    <div class="step-item active" id="step-1"><span class="step-line"></span><span class="step-circle">1</span><span class="step-label">The Puzzle</span></div>
+    <div class="step-item" id="step-2"><span class="step-line"></span><span class="step-circle">2</span><span class="step-label">Front Door</span></div>
+    <div class="step-item" id="step-3"><span class="step-line"></span><span class="step-circle">3</span><span class="step-label">Gift Hunt</span></div>
+    <div class="step-item" id="step-4"><span class="step-line"></span><span class="step-circle">4</span><span class="step-label">Search Diary</span></div>
+    <div class="step-item" id="step-5"><span class="step-line"></span><span class="step-circle">5</span><span class="step-label">Blueprint Room</span></div>
+    <div class="step-item" id="step-6"><span class="step-line"></span><span class="step-circle">6</span><span class="step-label">Trial Rooms</span></div>
+  </div>
+
+  <!-- ================= CHAPTER 1: THE PUZZLE (generic) ================= -->
+  <section class="section active-view" id="sec-problem">
+    <div class="hero">
+      <span class="eyebrow">Chapter 1 · The Puzzle</span>
+      <h1>🤔 Just Think About It</h1>
+      <div class="problem-card">
+        <p>Imagine you're standing in a huge place, a maze, a city, a cave, or a game world. Somewhere around you is something you're looking for: a treasure, a friend, an exit, or a charging station. You cannot see the entire area, so you have to discover new places as you move.</p>
+        <p>From where you are, you can only see the places directly connected to your current location. As you explore, each place may lead you to several more places, gradually revealing more of the surroundings.</p>
+        <p style="font-weight:700;color:var(--primary-deep);">This raises an important question: How can you search through these places so that a nearby target is found as quickly as possible, without unnecessarily exploring places that are much farther away first?</p>
+        <p>Solving this problem requires a systematic way to decide which places to explore first and which places to leave for later.</p>
+        <p style="margin-bottom:0;text-align:center;font-weight:700;color:var(--primary-deep);font-style:italic;">Let's see exactly what that looks like 👇</p>
+      </div>
+      <div class="section-nav">
+        <button class="btn big" id="problem-continue">Continue to the Front Door ➜</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CHAPTER 2: FRONT DOOR (Intro) ================= -->
+  <section class="section" id="sec-intro">
+    <div class="hero">
+      <span class="eyebrow">Chapter 2 · Front Door</span>
+      <h1>🎁 Somewhere in this house... a gift.</h1>
+      <div class="problem-card">
+        <p style="text-align:center;">It's a birthday, and a gift is hidden somewhere inside the house. The child starts at the <b>Front Door</b>, you decide which room gets checked next. Only nearby rooms will glow, click one. Watch closely as you play. There's a pattern here worth noticing.</p>
+        <div class="floor-preview">
+          <div class="fp-row"><span class="fp-tag">3rd Floor</span><span class="fp-rooms">🧸 Playroom · 📦 Storage Room</span></div>
+          <div class="fp-row"><span class="fp-tag">2nd Floor</span><span class="fp-rooms">📖 Study · 🍼 Nursery · 🪜 Stairway Landing</span></div>
+          <div class="fp-row"><span class="fp-tag">1st Floor</span><span class="fp-rooms">🛏️ Bedroom · 📚 Library · 💼 Office</span></div>
+          <div class="fp-row"><span class="fp-tag">Ground Floor</span><span class="fp-rooms">🛋️ Living Room · 🍳 Kitchen · 🍽️ Dining Room · 🧳 Lobby</span></div>
+          <div class="fp-row"><span class="fp-tag">Start</span><span class="fp-rooms">🚪 Front Door</span></div>
+        </div>
+        <div style="text-align:center;">
+          <div class="rule-chip">🚧 Rule: only rooms next to an already-checked room will ever glow</div>
+        </div>
+      </div>
+      <div class="section-nav">
+        <button class="btn ghost back-btn" id="intro-back">⬅ Back to the Puzzle</button>
+        <button class="btn big" id="intro-continue">Start the Search ➜</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CHAPTER 3: THE SEARCH (Game) ================= -->
+  <section class="section" id="sec-game">
+    <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">Chapter 3 · The Gift Hunt</span>
+    <h2 class="section-title">Search the House, Room by Room</h2>
+    <p class="section-sub">
+  <strong style="color: var(--ink);">NOTE:</strong>
+  <b>Play manually by clicking glowing rooms, or press Start Auto-Play to watch it happen, your choice!</b>
+  </p>
+
+
+    <div class="card">
+      <div class="graph-wrap" id="graph-wrap">
+        <svg class="graph-edges" id="graph-edges" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+      </div>
+
+      <div class="options-panel">
+        <div class="options-label">🚪 Your Options From Here <span class="options-sub">(rooms you can check right now)</span></div>
+        <div class="options-strip" id="options-strip"></div>
+      </div>
+
+      <p class="status-line" id="status">The child is standing at the Front Door. Click a glowing room to check it.</p>
+
+      <div class="counters">
+        <div class="counter-pill">Rooms checked<span id="c-checked">0</span>/<span id="c-total">12</span></div>
+        <div class="counter-pill">Floor cleared<span id="c-floor">Start</span></div>
+        <div class="counter-pill">Rooms glowing<span id="c-frontier">4</span></div>
+      </div>
+
+      <div class="game-controls">
+        <button class="btn secondary" id="autoplay-btn">▶ Start Auto-Play</button>
+        <div class="speed-wrap">
+          <label for="speed-slider">Speed</label>
+          <input type="range" id="speed-slider" min="0.5" max="2" step="0.5" value="1">
+          <span id="speed-label">1x</span>
+        </div>
+        <button class="btn secondary" id="hint-btn">💡 Hint</button>
+        <button class="btn ghost" id="restart-btn"><span class="r-spin">🔄</span> Reset Search</button>
+      </div>
+      <p class="hint-line" id="mode-hint"></p>
+      <div class="hint-box" id="hint-box">💡 Try to click every glowing room on the current floor before any room upstairs even has a chance to glow, that's the pattern to watch for.</div>
+
+      <!-- mid-game reflection check-in, asked once, never on the first click, never on the winning click -->
+      <div class="pop-question" id="pop-question">
+        <h3 id="pq-text">🤔 How are you finding the gift room?</h3>
+        <div class="pq-options" id="pq-options"></div>
+        <p class="pq-feedback" id="pq-feedback"></p>
+        <div class="section-nav" style="margin-top:8px;">
+          <button class="btn secondary" id="pq-continue" style="display:none;">Continue Searching →</button>
+        </div>
+      </div>
+
+      <div class="reveal" id="reveal">
+        <div style="font-size:44px;">🎉🎁🎉</div>
+        <h2>You found the gift in <span id="reveal-steps">0</span> rooms checked!</h2>
+        <p id="reveal-location-line">Here's the order you checked rooms in, notice how it moved floor by floor:</p>
+        <div class="level-strip" id="level-strip"></div>
+        <p style="margin-top:10px;font-size:13px;font-style:italic;color:var(--muted);">Curious why this pattern always works? Head to the Blueprint Room for the full breakdown, plus a quick animated demo.</p>
+
+        <div class="section-nav">
+          <button class="btn ghost back-btn" id="game-back">⬅ Back to Front Door</button>
+          <button class="btn" id="game-continue">Continue to the Search Diary ➜</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CHAPTER 4: SEARCH DIARY (Reflection) ================= -->
+  <section class="section" id="sec-reflect">
+    <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">Chapter 4 · Search Diary</span>
+    <h2 class="section-title">What did you notice?</h2>
+    <p class="section-sub">Sit with these for a moment, there's no single "correct" wording, just think them through in your own words.</p>
+    <div class="card">
+      <div class="qgrid">
+        <div class="qcard"><span class="q-num">Q1 · Exploring Nearby First</span><span class="q-text">Why did checking all nearby rooms before moving farther away make the search more systematic?</span></div>
+        <div class="qcard"><span class="q-num">Q2 · Keeping the Order</span><span class="q-text">When several rooms were waiting to be explored, why was it useful to check them in the order they were discovered?</span></div>
+        <div class="qcard"><span class="q-num">Q3 · Changing the Strategy</span><span class="q-text">What would become harder or less reliable if you always explored the newest discovered room first instead?</span></div>
+        <div class="qcard"><span class="q-num">Q4 · Finding the Shortest Route</span><span class="q-text">Why does checking closer rooms first help you find the shortest route?</span></div>
+        <div class="qcard"><span class="q-num">Q5 · Discovering the Strategy</span><span class="q-text">Based on what you experienced in the game, what rules would you give another person so they could repeat the same search successfully?</span></div>
+      </div>
+
+      <div class="section-nav">
+        <button class="btn ghost back-btn" id="reflect-back">⬅ Back to the Hunt</button>
+        <button class="btn" id="reflect-continue">Continue to the Blueprint Room ➜</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CHAPTER 5: BLUEPRINT ROOM (Concept explanation, interactive) ================= -->
+  <section class="section" id="sec-concept">
+    <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">Chapter 5 · Blueprint Room</span>
+    <h2 class="section-title">How the search really worked</h2>
+    <p class="section-sub">Tap a card to open it up and see the idea behind what you just did.</p>
+    <div class="card">
+      <div class="bfs-demo-wrap">
+        <h3>🌳 Watch BFS in Action</h3>
+        <p class="bfs-demo-sub">Here's the exact same strategy, on a simple tree this time. Press play and watch the order it lights up in.</p>
+        <div class="bfs-demo">
+          <svg viewBox="0 0 300 190" id="bfs-tree-svg"></svg>
+        </div>
+        <div class="bfs-demo-status" id="bfs-demo-status">Press play to begin.</div>
+        <div class="bfs-demo-queue" id="bfs-demo-queue"></div>
+        <div class="section-nav" style="margin-top:10px;">
+          <button class="btn secondary" id="bfs-demo-play">▶ Play BFS Animation</button>
+        </div>
+
+        <div class="bfs-info" style="margin-top:20px;">
+          <p style="text-align:center;">This is <b>Breadth-First Search (BFS)</b>! Here's what you just discovered in the house:</p>
+          <table>
+            <tr><td>You (the searcher)</td><td>→ the algorithm doing the traversal</td></tr>
+            <tr><td>A Room</td><td>→ a node in the graph</td></tr>
+            <tr><td>A Doorway / Staircase</td><td>→ an edge connecting two nodes</td></tr>
+            <tr><td>"Only nearby rooms glow"</td><td>→ only unvisited neighbours join the frontier</td></tr>
+            <tr><td>Checking all rooms on a floor first</td><td>→ visiting every node at the current level before the next</td></tr>
+          </table>
+          <p style="margin-top:10px;font-size:13.5px;text-align:center;">This level-by-level strategy is exactly why BFS always finds the <b>shortest path</b> in an unweighted graph: nothing farther away is ever checked before everything closer has been. 🎓</p>
+        </div>
+      </div>
+
+      <div class="concept-grid" id="concept-grid">
+        <div class="concept-card" data-open="false">
+          <div class="cc-head"><span class="cc-icon">🧭</span><span class="cc-title">The Strategy</span><span class="cc-toggle">+</span></div>
+          <div class="cc-body">Check every room nearby before going farther. You never skip ahead to a room two floors up while ground-floor rooms are still unchecked. This is what "breadth" means in Breadth-First Search: spreading outward evenly, one full ring at a time.</div>
+        </div>
+        <div class="concept-card" data-open="false">
+          <div class="cc-head"><span class="cc-icon">🔢</span><span class="cc-title">The Queue</span><span class="cc-toggle">+</span></div>
+          <div class="cc-body">Those "options from here" chips were a real queue the whole time. New discoveries always joined the <b>back</b> of the line, and the room you were allowed to check next always came from the <b>front</b>. That First-In, First-Out (FIFO) rule alone is what guarantees the level-by-level pattern.</div>
+        </div>
+        <div class="concept-card" data-open="false">
+          <div class="cc-head"><span class="cc-icon">✅</span><span class="cc-title">Marking Visited</span><span class="cc-toggle">+</span></div>
+          <div class="cc-body">Every room you checked was locked in as visited, so it never glowed again. Without that, a room could be added to the queue more than once, and in a graph with cycles the search could loop forever.</div>
+        </div>
+        <div class="concept-card" data-open="false">
+          <div class="cc-head"><span class="cc-icon">📏</span><span class="cc-title">Why It's the Shortest Route</span><span class="cc-toggle">+</span></div>
+          <div class="cc-body">Because every room on a floor is fully checked before any room on the next floor even joins the queue, the very first time you reach a room is guaranteed to be by the shortest possible path from the Front Door, as long as every step (every doorway) costs the same.</div>
+        </div>
+        <div class="concept-card" data-open="false">
+          <div class="cc-head"><span class="cc-icon">🌍</span><span class="cc-title">Where You'll See It</span><span class="cc-toggle">+</span></div>
+          <div class="cc-body">Shortest-route finders, "people you may know" suggestions, web crawlers, network broadcast alerts, and countless puzzle solvers all lean on this exact breadth-first idea: spread outward one full layer at a time.</div>
+        </div>
+        <div class="concept-card" data-open="false">
+          <div class="cc-head"><span class="cc-icon">⚖️</span><span class="cc-title">Where It Breaks Down</span><span class="cc-toggle">+</span></div>
+          <div class="cc-body">BFS assumes every connection costs the same one step. The moment some doorways are "farther" than others (different costs), checking rooms in discovery order no longer guarantees the shortest route, a different strategy is needed.</div>
+        </div>
+      </div>
+
+      <div class="section-nav">
+        <button class="btn ghost back-btn" id="concept-back">⬅ Back to Search Diary</button>
+        <button class="btn" id="concept-continue">Continue to the Trial Rooms ➜</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CHAPTER 6: TRIAL ROOMS (Exercise) ================= -->
+  <section class="section" id="sec-workbook">
+    <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">Chapter 6 · Trial Rooms</span>
+    <h2 class="section-title">Put the idea to the test</h2>
+    <p class="section-sub">New situations to think through using what you just discovered.</p>
+    <div class="card">
+      <div class="qgrid">
+        <div class="qcard"><span class="q-num">1 · New Problem</span><span class="q-text">A rescue team needs to find the nearest safe room in a building. The building has many connected rooms, and moving through each corridor takes one step. How could you organize the search so that nearby rooms are checked before farther rooms?</span></div>
+        <div class="qcard"><span class="q-num">2 · Recognize the Pattern</span><span class="q-text">A search starts from one location and explores all locations one step away before moving to locations two steps away. What features of a problem would make this type of search useful?</span></div>
+        <div class="qcard"><span class="q-num">3 · Choose an Approach</span><span class="q-text">You need to find a target in a graph where every connection has the same cost. Would you prefer to explore one path deeply or explore locations level by level? Explain your choice.</span></div>
+        <div class="qcard"><span class="q-num">4 · Spot the Misconception</span><span class="q-text">Someone says, "BFS always gives the shortest path because it visits every vertex." What is wrong with this reasoning?</span></div>
+        <div class="qcard"><span class="q-num">5 · Change the Constraints</span><span class="q-text">BFS is being used to find the shortest route, but now different connections can have different costs. How might this change your choice of search strategy?</span></div>
+        <div class="qcard"><span class="q-num">6 · Compare Efficiency</span><span class="q-text">Two searches explore the same graph. One explores locations level by level, while the other follows one path as far as possible before backtracking. What factors would you examine to decide which search is more suitable for a particular problem?</span></div>
+        <div class="qcard"><span class="q-num">7 · Unfamiliar Application</span><span class="q-text">A communication network has several starting points where an alert is detected at the same time. The company wants to know how quickly the alert could reach every other device. How could a level-by-level search help, and what would determine how efficiently it works?</span></div>
+      </div>
+
+      <div class="section-nav">
+        <button class="btn ghost back-btn" id="workbook-back">⬅ Back to Blueprint Room</button>
+        <button class="btn" id="workbook-finish">🏁 Finish ➜</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   HOUSE GRAPH — rooms, floors (BFS levels), and connections.
+   Level 0 = Front Door (start). Level 1 = Ground Floor. Level 2 =
+   First Floor. Level 3 = Second Floor. Level 4 = Third Floor. The
+   gift is placed randomly among the Second or Third Floor rooms
+   every time a fresh search begins, so it's never in the same
+   spot two plays in a row, and it's not always on the top floor.
+   ============================================================ */
+const ROOMS = {
+  FrontDoor:{name:"Front Door", icon:"🚪", level:0},
+  Living:{name:"Living Room", icon:"🛋️", level:1},
+  Kitchen:{name:"Kitchen", icon:"🍳", level:1},
+  Dining:{name:"Dining Room", icon:"🍽️", level:1},
+  Lobby:{name:"Lobby", icon:"🧳", level:1},
+  Bedroom:{name:"Bedroom", icon:"🛏️", level:2},
+  Library:{name:"Library", icon:"📚", level:2},
+  Office:{name:"Office", icon:"💼", level:2},
+  Study:{name:"Study", icon:"📖", level:3},
+  Nursery:{name:"Nursery", icon:"🍼", level:3},
+  Landing:{name:"Stairway Landing", icon:"🪜", level:3},
+  Playroom:{name:"Playroom", icon:"🧸", level:4},
+  Storage:{name:"Storage Room", icon:"📦", level:4}
+};
+const TOTAL_TO_CHECK = Object.keys(ROOMS).length - 1; // everything except Front Door itself
+
+/* Graph edges (adjacency list) — the real connections the queue is built
+   from. Front Door connects to every ground-floor room; the Lobby is the
+   staircase up to the first floor; the Office is the staircase up to the
+   second floor; the Landing continues up to the third floor, where the
+   gift could also be hiding. */
+const ADJ = {
+  FrontDoor:["Living","Kitchen","Dining","Lobby"],
+  Living:[], Kitchen:[], Dining:[],
+  Lobby:["Bedroom","Library","Office"],
+  Bedroom:[], Library:[],
+  Office:["Study","Nursery","Landing"],
+  Study:[], Nursery:[],
+  Landing:["Playroom","Storage"],
+  Playroom:[], Storage:[]
+};
+const EDGES = [];
+Object.keys(ADJ).forEach(p=> ADJ[p].forEach(c=> EDGES.push([p,c])));
+
+/* Node positions as percentages of the graph-wrap container, used both for
+   placing each node div and for drawing the SVG connector lines. */
+const NODE_POS = {
+  FrontDoor:{x:50,y:93},
+  Living:{x:10,y:72}, Kitchen:{x:37,y:72}, Dining:{x:63,y:72}, Lobby:{x:90,y:72},
+  Bedroom:{x:25,y:50}, Library:{x:50,y:50}, Office:{x:75,y:50},
+  Study:{x:22,y:28}, Nursery:{x:50,y:28}, Landing:{x:78,y:28},
+  Playroom:{x:66,y:6}, Storage:{x:90,y:6}
+};
+
+/* The gift is re-hidden on every fresh search: it can land on any room
+   from the Second Floor or Third Floor (level 3 or 4), never Ground or
+   First Floor, and never the same room two plays in a row. */
+const GIFT_CANDIDATES = Object.keys(ROOMS).filter(k => ROOMS[k].level >= 3);
+let GIFT_KEY = GIFT_CANDIDATES[Math.floor(Math.random()*GIFT_CANDIDATES.length)];
+
+/* ============================================================
+   CONFETTI
+   ============================================================ */
+const cvs = document.getElementById("confetti-canvas");
+const ctx = cvs.getContext("2d");
+const COLORS = ["#4A9BD1","#EA8C36","#2B6FA3","#F3A65C","#8FCBEF","#C96F1F"];
+function resizeCvs(){ cvs.width=innerWidth; cvs.height=innerHeight; }
+resizeCvs(); window.addEventListener("resize", resizeCvs);
+function fireConfetti(){
+  const pieces=[];
+  for(let i=0;i<130;i++) pieces.push({x:Math.random()*cvs.width,y:-20-Math.random()*200,
+    vx:(Math.random()-.5)*3, vy:2+Math.random()*3, size:5+Math.random()*6,
+    color:COLORS[i%COLORS.length], rot:Math.random()*360, vr:(Math.random()-.5)*10});
+  let frame=0;
+  function tick(){
+    ctx.clearRect(0,0,cvs.width,cvs.height); frame++; let alive=false;
+    pieces.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; if(p.y<cvs.height+20) alive=true;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle=p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6); ctx.restore(); });
+    if(alive && frame<260) requestAnimationFrame(tick); else ctx.clearRect(0,0,cvs.width,cvs.height);
+  }
+  tick();
+}
+
+/* ============================================================
+   SECTION NAVIGATION — single-section view. Only one chapter is
+   ever visible, so later exercises can't be scrolled to.
+   ============================================================ */
+const SECTION_IDS = ["sec-problem","sec-intro","sec-game","sec-reflect","sec-concept","sec-workbook"];
+function showSection(id){
+  SECTION_IDS.forEach(s=> document.getElementById(s).classList.toggle("active-view", s===id));
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function setStep(n){
+  for(let i=1;i<=6;i++){
+    const el = document.getElementById("step-"+i);
+    if(!el) continue;
+    el.classList.remove("active","done");
+    if(i<n) el.classList.add("done");
+    else if(i===n) el.classList.add("active");
+  }
+}
+
+/* ============================================================
+   GAME STATE — a genuine FIFO queue drives the whole search.
+   Rooms are only ever pushed onto bfsQueue once a room they're
+   adjacent to (via ADJ) has actually been checked, and the next
+   floor's rooms are only enqueued once the current queue has been
+   fully drained — this keeps the classic "clear this level, then
+   the next" BFS pattern intact while still using a real queue.
+   ============================================================ */
+let visited = new Set(["FrontDoor"]);
+let visitOrder = ["FrontDoor"];
+let bfsQueue = [];   // the actual queue: rooms discovered, waiting to be checked
+let steps = 0; // rooms checked, not counting Front Door
+let questionAtStep = null;
+let questionAsked = false;
+let pendingQuestion = false;
+let found = false;
+let lastRunStats = null;
+let autoState = "stopped"; // stopped | playing | paused
+let autoSpeed = 1;
+
+function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function roomsAtLevel(lvl){ return Object.keys(ROOMS).filter(k=>ROOMS[k].level===lvl); }
+function enqueueChildrenOf(parentKeys){
+  const already = new Set(bfsQueue);
+  parentKeys.forEach(p=>{
+    (ADJ[p]||[]).forEach(child=>{
+      if(!visited.has(child) && !already.has(child)){ bfsQueue.push(child); already.add(child); }
+    });
+  });
+}
+function clearedLevel(){
+  let lvl = 0;
+  while(true){
+    const next = roomsAtLevel(lvl+1);
+    if(next.length===0) break;
+    if(next.every(k=>visited.has(k))) lvl++; else break;
+  }
+  return lvl;
+}
+function currentFrontier(){ return [...bfsQueue]; } // whatever's currently in the queue is glowing
+function setupQuestionForRound(){
+  questionAtStep = randInt(2,5); // never the very first click, safely before the final floor
+  questionAsked = false;
+}
+setupQuestionForRound();
+enqueueChildrenOf(["FrontDoor"]); // seed the queue with the Front Door's neighbours
+
+/* ============================================================
+   RENDER — nodes + SVG edges (a real graph, not a floor plan)
+   ============================================================ */
+function delay(ms){ return new Promise(res=>setTimeout(res,ms)); }
+function buildHouseDom(){
+  const wrap = document.getElementById("graph-wrap");
+  const svg = document.getElementById("graph-edges");
+  svg.innerHTML = "";
+  [...wrap.querySelectorAll(".gnode")].forEach(n=>n.remove());
+
+  EDGES.forEach(([p,c])=>{
+    const a = NODE_POS[p], b = NODE_POS[c];
+    const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+    line.setAttribute("x1", a.x); line.setAttribute("y1", a.y);
+    line.setAttribute("x2", b.x); line.setAttribute("y2", b.y);
+    line.id = "edge-"+p+"-"+c;
+    svg.appendChild(line);
+  });
+
+  Object.keys(ROOMS).forEach(key=>{
+    const room = ROOMS[key], pos = NODE_POS[key];
+    const el = document.createElement("div");
+    el.className = "gnode" + (key==="FrontDoor" ? " front-door" : "");
+    el.id = "room-"+key;
+    el.style.left = pos.x+"%"; el.style.top = pos.y+"%";
+    el.innerHTML = `<span class="g-icon">${room.icon}</span><span class="g-name">${room.name}</span>`;
+    el.addEventListener("click", ()=>{ if(autoState!=="playing") checkRoom(key); });
+    wrap.appendChild(el);
+  });
+}
+function renderOptionsPanel(){
+  const strip = document.getElementById("options-strip");
+  strip.innerHTML = "";
+  if(bfsQueue.length===0){
+    strip.innerHTML = `<span class="options-empty-note">Nothing new to check yet.</span>`;
+    return;
+  }
+  bfsQueue.forEach(key=>{
+    const chip = document.createElement("span");
+    chip.className = "option-chip";
+    chip.textContent = `${ROOMS[key].icon} ${ROOMS[key].name}`;
+    strip.appendChild(chip);
+  });
+}
+function renderHouse(){
+  const frontier = currentFrontier();
+  Object.keys(ROOMS).forEach(key=>{
+    const el = document.getElementById("room-"+key);
+    el.classList.remove("queued","visited","is-gift");
+    const oldChild = el.querySelector(".g-child"); if(oldChild) oldChild.remove();
+    const oldBadge = el.querySelector(".g-badge"); if(oldBadge) oldBadge.remove();
+    const oldGiftPop = el.querySelector(".g-gift-pop"); if(oldGiftPop) oldGiftPop.remove();
+    if(visited.has(key)){
+      el.classList.add("visited");
+      if(key===GIFT_KEY){
+        el.classList.add("is-gift");
+        const giftPop = document.createElement("span");
+        giftPop.className = "g-gift-pop";
+        giftPop.textContent = "🎁";
+        el.appendChild(giftPop);
+      }
+      const order = visitOrder.indexOf(key);
+      if(order>0){
+        const badge = document.createElement("span");
+        badge.className = "g-badge";
+        badge.textContent = order;
+        el.appendChild(badge);
+      }
+    } else if(frontier.includes(key)){
+      el.classList.add("queued");
+    }
+  });
+  EDGES.forEach(([p,c])=>{
+    const line = document.getElementById("edge-"+p+"-"+c);
+    if(line) line.classList.toggle("gedge-active", visited.has(c));
+  });
+  const currentKey = visitOrder[visitOrder.length-1];
+  const currentEl = document.getElementById("room-"+currentKey);
+  if(currentEl && !currentEl.querySelector(".g-child")){
+    const child = document.createElement("span");
+    child.className = "g-child";
+    child.textContent = "🧒";
+    currentEl.appendChild(child);
+  }
+  document.getElementById("c-checked").textContent = steps;
+  document.getElementById("c-frontier").textContent = frontier.length;
+  const lvl = clearedLevel();
+  const floorNames = ["Start","Ground Floor","First Floor","Second Floor","Third Floor"];
+  document.getElementById("c-floor").textContent = floorNames[lvl];
+  renderOptionsPanel();
+}
+
+/* ============================================================
+   CORE ACTION
+   ============================================================ */
+function checkRoom(key){
+  if(found || pendingQuestion) return;
+  const qIdx = bfsQueue.indexOf(key);
+  if(qIdx === -1) return; // not in the queue / not clickable yet
+  bfsQueue.splice(qIdx, 1); // dequeue this room
+
+  visited.add(key);
+  visitOrder.push(key);
+  steps++;
+
+  if(key === GIFT_KEY){
+    renderHouse();
+    found = true;
+    autoState = "stopped"; updateAutoBtn();
+    document.getElementById("status").textContent = `🎁 Found it! The gift was hidden in the ${ROOMS[key].name}!`;
+    lastRunStats = {
+      steps, visitOrder: visitOrder.slice(1), // exclude Front Door
+      floorsCleared: ROOMS[key].level - 1
+    };
+    setTimeout(()=>{
+      document.getElementById("reveal-steps").textContent = steps;
+      document.getElementById("reveal-location-line").textContent =
+        `The gift was hidden in the ${ROOMS[key].name}! Here's the order you checked rooms in, notice how it moved floor by floor:`;
+      const strip = document.getElementById("level-strip");
+      strip.innerHTML = "";
+      visitOrder.slice(1).forEach((k,i)=>{
+        const chip = document.createElement("span");
+        chip.className = "level-chip" + (k===GIFT_KEY ? " win" : "");
+        chip.textContent = `${i+1}. ${ROOMS[k].icon} ${ROOMS[k].name}`;
+        strip.appendChild(chip);
+      });
+      document.getElementById("reveal").classList.add("show");
+      fireConfetti();
+    }, 400);
+    return;
+  }
+
+  if(bfsQueue.length === 0){
+    // this level/batch is fully drained — enqueue the next level as a batch
+    const finishedLevelKeys = roomsAtLevel(ROOMS[key].level);
+    enqueueChildrenOf(finishedLevelKeys);
+  }
+  renderHouse();
+
+  document.getElementById("status").textContent = `Checked the ${ROOMS[key].name}. ${currentFrontier().length ? "More rooms are glowing!" : ""}`;
+
+  if(!questionAsked && steps === questionAtStep){
+    questionAsked = true;
+    triggerPopQuestion();
+  }
+}
+
+/* ============================================================
+   MID-GAME CHECK-IN QUESTION
+   ============================================================ */
+const PQ_BANK = [
+  {
+    text: "🤔 How are you finding the gift?",
+    options: [
+      { text:"Checking nearby rooms first, before going farther", correct:true },
+      { text:"Guessing rooms at random", correct:false },
+      { text:"I already know exactly where it is", correct:false }
+    ],
+    feedbackCorrect: "✅ Exactly! Checking everything nearby first is the whole strategy.",
+    feedbackWrong: "Not quite, look at the order you're checking rooms in, it's actually nearby-first."
+  },
+  {
+    text: "🤔 What rule would you give a robot searching this house?",
+    options: [
+      { text:"Check every nearby room before going farther away", correct:true },
+      { text:"Pick a random unchecked room each time", correct:false },
+      { text:"Follow one path as deep as possible first", correct:false }
+    ],
+    feedbackCorrect: "✅ Right! Nearby first is exactly what keeps this search efficient.",
+    feedbackWrong: "Not quite, the winning rule is: check every nearby room before anything farther away."
+  }
+];
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function triggerPopQuestion(){
+  pendingQuestion = true;
+  const q = PQ_BANK[randInt(0,PQ_BANK.length-1)];
+  const shuffledOptions = shuffle(q.options);
+  document.getElementById("pq-text").textContent = q.text;
+  const optsEl = document.getElementById("pq-options");
+  optsEl.innerHTML = "";
+  shuffledOptions.forEach(opt=>{
+    const b = document.createElement("button");
+    b.textContent = opt.text;
+    b.addEventListener("click", ()=>{
+      [...optsEl.children].forEach(x=>x.disabled=true);
+      const fb = document.getElementById("pq-feedback");
+      if(opt.correct){ b.classList.add("correct"); fb.textContent = q.feedbackCorrect; }
+      else{
+        b.classList.add("wrong");
+        [...optsEl.children].find((_,idx)=> shuffledOptions[idx].correct).classList.add("correct");
+        fb.textContent = q.feedbackWrong;
+      }
+      fb.classList.add("show");
+      document.getElementById("pq-continue").style.display = "inline-flex";
+    });
+    optsEl.appendChild(b);
+  });
+  document.getElementById("pq-feedback").classList.remove("show");
+  document.getElementById("pop-question").classList.add("show");
+  setTimeout(()=> document.getElementById("pop-question").scrollIntoView({behavior:"smooth", block:"center"}), 50);
+}
+document.getElementById("pq-continue").addEventListener("click", ()=>{
+  pendingQuestion = false;
+  document.getElementById("pop-question").classList.remove("show");
+});
+
+/* ============================================================
+   RESTART
+   ============================================================ */
+function restartSearch(relockForward){
+  GIFT_KEY = GIFT_CANDIDATES[Math.floor(Math.random()*GIFT_CANDIDATES.length)];
+  visited = new Set(["FrontDoor"]);
+  visitOrder = ["FrontDoor"];
+  bfsQueue = [];
+  enqueueChildrenOf(["FrontDoor"]);
+  steps = 0; found = false; pendingQuestion = false;
+  autoState = "stopped"; updateAutoBtn();
+  setupQuestionForRound();
+  lastRunStats = null;
+  document.getElementById("reveal").classList.remove("show");
+  document.getElementById("pop-question").classList.remove("show");
+  document.getElementById("status").textContent = "The child is standing at the Front Door. Click a glowing room to check it.";
+  renderHouse();
+  if(relockForward){
+    clearAllAnswers();
+    setStep(3);
+  }
+}
+document.getElementById("hint-btn").addEventListener("click", ()=> document.getElementById("hint-box").classList.toggle("show"));
+document.getElementById("restart-btn").addEventListener("click", ()=> restartSearch(true));
+
+/* ============================================================
+   AUTO-PLAY — Start / Pause / Resume / Reset / Speed control.
+   The Reset button (above) already fully re-seeds the queue; this
+   engine just drives automatic clicks through whatever is
+   currently in bfsQueue, pausing itself whenever a check-in
+   question pops up and resuming once it's answered.
+   ============================================================ */
+function updateAutoBtn(){
+  const btn = document.getElementById("autoplay-btn");
+  if(autoState==="playing"){ btn.textContent = "⏸ Pause"; btn.classList.add("active-auto"); }
+  else if(autoState==="paused"){ btn.textContent = "▶ Resume"; btn.classList.remove("active-auto"); }
+  else { btn.textContent = "▶ Start Auto-Play"; btn.classList.remove("active-auto"); }
+  document.getElementById("mode-hint").textContent = autoState==="playing"
+    ? "Auto Play is running, sit back and watch, or pause anytime to take over manually."
+    : "Play manually by clicking glowing rooms, or press Start Auto-Play to watch it happen, your choice!";
+}
+async function autoTick(){
+  if(autoState !== "playing") return;
+  if(found){ autoState = "stopped"; updateAutoBtn(); return; }
+  if(pendingQuestion){ setTimeout(autoTick, 400); return; }
+  const frontier = currentFrontier();
+  if(frontier.length){ checkRoom(frontier[0]); }
+  await delay(900/autoSpeed);
+  if(autoState==="playing") autoTick();
+}
+document.getElementById("autoplay-btn").addEventListener("click", ()=>{
+  if(autoState==="playing"){
+    autoState = "paused";
+  } else {
+    autoState = "playing";
+    autoTick();
+  }
+  updateAutoBtn();
+});
+document.getElementById("speed-slider").addEventListener("input", (e)=>{
+  autoSpeed = parseFloat(e.target.value);
+  document.getElementById("speed-label").textContent = autoSpeed + "x";
+});
+
+/* ============================================================
+   CHAPTER 4 (Search Diary) & CHAPTER 6 (Trial Rooms)
+   These are now open reflection / practice prompts only, shown as
+   cards. No answers are collected and no reference answers are
+   displayed, so there's nothing to validate before moving on.
+   ============================================================ */
+
+/* ---------------- reset game state on backward navigation ---------------- */
+function clearAllAnswers(){
+  // kept as a hook so backward navigation can still fully reset the
+  // search if a person backs all the way out to replay it.
+}
+
+/* ============================================================
+   CHAPTER 5: BLUEPRINT ROOM — animated BFS-on-a-tree demo
+   ============================================================ */
+const BFS_TREE = {
+  nodes: {
+    A:{x:150,y:22}, B:{x:80,y:88}, C:{x:220,y:88},
+    D:{x:40,y:156}, E:{x:120,y:156}, F:{x:180,y:156}, G:{x:260,y:156}
+  },
+  edges: [["A","B"],["A","C"],["B","D"],["B","E"],["C","F"],["C","G"]]
+};
+function buildBfsDemoSvg(){
+  const svg = document.getElementById("bfs-tree-svg");
+  svg.innerHTML = "";
+  BFS_TREE.edges.forEach(([p,c])=>{
+    const a = BFS_TREE.nodes[p], b = BFS_TREE.nodes[c];
+    const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+    line.setAttribute("x1",a.x); line.setAttribute("y1",a.y);
+    line.setAttribute("x2",b.x); line.setAttribute("y2",b.y);
+    line.setAttribute("class","bfs-demo-edge");
+    line.id = "bfs-edge-"+p+"-"+c;
+    svg.appendChild(line);
+  });
+  Object.keys(BFS_TREE.nodes).forEach(key=>{
+    const pos = BFS_TREE.nodes[key];
+    const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+    g.setAttribute("class","bfs-demo-node");
+    g.id = "bfs-node-"+key;
+    const circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    circle.setAttribute("cx",pos.x); circle.setAttribute("cy",pos.y); circle.setAttribute("r",17);
+    const text = document.createElementNS("http://www.w3.org/2000/svg","text");
+    text.setAttribute("x",pos.x); text.setAttribute("y",pos.y+5); text.setAttribute("text-anchor","middle");
+    text.textContent = key;
+    g.appendChild(circle); g.appendChild(text);
+    svg.appendChild(g);
+  });
+}
+let bfsDemoRunning = false;
+async function playBfsDemo(){
+  if(bfsDemoRunning) return;
+  bfsDemoRunning = true;
+  document.querySelectorAll(".bfs-demo-node").forEach(n=> n.classList.remove("visited","current"));
+  document.querySelectorAll(".bfs-demo-edge").forEach(e=> e.classList.remove("active"));
+  const statusEl = document.getElementById("bfs-demo-status");
+  const queueEl = document.getElementById("bfs-demo-queue");
+  let queue = ["A"];
+  const seen = new Set(["A"]);
+  statusEl.textContent = "Starting at A...";
+  queueEl.textContent = "Queue: [A]";
+  await delay(500);
+  while(queue.length){
+    const cur = queue.shift();
+    const node = document.getElementById("bfs-node-"+cur);
+    node.classList.add("current");
+    statusEl.textContent = "Visiting " + cur + "...";
+    await delay(650);
+    node.classList.remove("current");
+    node.classList.add("visited");
+    BFS_TREE.edges.filter(([p])=> p===cur).forEach(([p,c])=>{
+      if(!seen.has(c)){
+        seen.add(c);
+        queue.push(c);
+        document.getElementById("bfs-edge-"+p+"-"+c).classList.add("active");
+      }
+    });
+    queueEl.textContent = queue.length ? "Queue: [" + queue.join(", ") + "]" : "Queue: empty";
+    await delay(350);
+  }
+  statusEl.textContent = "Done! Visit order: A → B → C → D → E → F → G";
+  bfsDemoRunning = false;
+}
+buildBfsDemoSvg();
+document.getElementById("bfs-demo-play").addEventListener("click", playBfsDemo);
+
+/* ============================================================
+   CHAPTER 5: BLUEPRINT ROOM — interactive concept cards
+   ============================================================ */
+function wireConceptCards(){
+  document.querySelectorAll(".concept-card").forEach(card=>{
+    card.addEventListener("click", ()=>{
+      const isOpen = card.classList.toggle("open");
+      card.querySelector(".cc-toggle").textContent = isOpen ? "–" : "+";
+    });
+  });
+}
+wireConceptCards();
+
+/* ============================================================
+   EVENT WIRING
+   ============================================================ */
+document.getElementById("problem-continue").addEventListener("click", ()=>{
+  setStep(2);
+  showSection("sec-intro");
+});
+document.getElementById("intro-back").addEventListener("click", ()=>{
+  setStep(1);
+  showSection("sec-problem");
+});
+document.getElementById("intro-continue").addEventListener("click", ()=>{
+  setStep(3);
+  showSection("sec-game");
+});
+document.getElementById("game-back").addEventListener("click", ()=>{
+  setStep(2);
+  showSection("sec-intro");
+});
+document.getElementById("game-continue").addEventListener("click", ()=>{
+  setStep(4);
+  showSection("sec-reflect");
+});
+document.getElementById("reflect-back").addEventListener("click", ()=>{
+  setStep(3);
+  showSection("sec-game");
+});
+document.getElementById("reflect-continue").addEventListener("click", ()=>{
+  setStep(5);
+  showSection("sec-concept");
+});
+document.getElementById("concept-back").addEventListener("click", ()=>{
+  setStep(4);
+  showSection("sec-reflect");
+});
+document.getElementById("concept-continue").addEventListener("click", ()=>{
+  setStep(6);
+  showSection("sec-workbook");
+});
+document.getElementById("workbook-back").addEventListener("click", ()=>{
+  setStep(5);
+  showSection("sec-concept");
+});
+document.getElementById("workbook-finish").addEventListener("click", ()=>{
+  restartSearch(false);
+  setStep(1);
+  showSection("sec-problem");
+});
+
+/* ---------------- initial paint ---------------- */
+document.getElementById("c-total").textContent = TOTAL_TO_CHECK;
+buildHouseDom();
+renderHouse();
+
+})();
+</script>
+</body>
+</html>
