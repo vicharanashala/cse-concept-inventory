@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operation Padlock — A Public-Key Cryptography Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-top:#EAF4FC;
+    --bg-bottom:#F6FAFD;
+    --card:#FFFFFF;
+    --blue:#2E6FDB;
+    --blue-dark:#1E4FAE;
+    --blue-tint:#E7F0FD;
+    --orange:#F2994A;
+    --orange-dark:#DD7B21;
+    --orange-tint:#FDECDA;
+    --text:#1B2A41;
+    --text-muted:#5B6B82;
+    --border:#E3EBF5;
+    --green:#2E9E6C;
+    --green-tint:#E4F6EE;
+    --red:#D8564A;
+    --red-tint:#FCE9E7;
+    --shadow-sm: 0 2px 10px rgba(28,55,100,0.06);
+    --shadow-md: 0 12px 32px rgba(28,55,100,0.10);
+    --shadow-lg: 0 20px 60px rgba(28,55,100,0.14);
+    --radius-lg: 22px;
+    --radius-md: 14px;
+    --radius-pill: 999px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; min-height:100vh;
+    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 45%, var(--bg-top) 100%);
+    font-family:'Inter', sans-serif; color:var(--text); -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:'Poppins', sans-serif; color:var(--text); margin:0 0 0.5em 0; letter-spacing:-0.01em;}
+  p{line-height:1.6; color:var(--text-muted); margin:0 0 1em 0;}
+  strong{color:var(--text);}
+  ::selection{background:var(--blue-tint); color:var(--blue-dark);}
+
+  .eyebrow{
+    display:inline-block; font-family:'Inter', sans-serif; font-size:12px; font-weight:700;
+    letter-spacing:0.14em; text-transform:uppercase; color:var(--blue);
+    background:var(--blue-tint); padding:6px 14px; border-radius:var(--radius-pill); margin-bottom:16px;
+  }
+
+  .shell{max-width:860px; margin:0 auto; padding:0 24px 100px;}
+  header.topbar{
+    position:sticky; top:0; z-index:50; background:rgba(246,250,253,0.85);
+    backdrop-filter:blur(10px); border-bottom:1px solid var(--border); padding:16px 0 14px;
+  }
+  .topbar-inner{max-width:860px; margin:0 auto; padding:0 24px;}
+  .brand-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .brand{font-family:'Poppins',sans-serif; font-weight:700; font-size:15px; color:var(--text); display:flex; align-items:center; gap:8px;}
+  .brand-badge{width:26px;height:26px;border-radius:8px; background:linear-gradient(135deg, var(--blue), var(--orange)); display:flex;align-items:center;justify-content:center; color:#fff; font-size:14px;}
+  .help-btn{border:1px solid var(--border); background:#fff; color:var(--text-muted); width:32px;height:32px;border-radius:50%; cursor:pointer; font-family:'Poppins',sans-serif; font-weight:700; font-size:14px; transition:.2s;}
+  .help-btn:hover{border-color:var(--blue); color:var(--blue);}
+
+  .progress-nav{display:flex; align-items:flex-start; justify-content:space-between; gap:4px;}
+  .prog-step{flex:1; display:flex; flex-direction:column; align-items:center; cursor:pointer; position:relative; padding-top:2px;}
+  .prog-step .dot{width:26px;height:26px;border-radius:50%; background:#fff; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--text-muted); font-family:'Poppins',sans-serif; transition:.25s; z-index:2;}
+  .prog-step .label{font-size:10.5px; margin-top:6px; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:.04em; text-align:center;}
+  .prog-step::before{content:''; position:absolute; top:13px; left:-50%; width:100%; height:2px; background:var(--border); z-index:1;}
+  .prog-step:first-child::before{display:none;}
+  .prog-step.done .dot{background:var(--blue); border-color:var(--blue); color:#fff;}
+  .prog-step.done::before{background:var(--blue);}
+  .prog-step.active .dot{background:var(--orange); border-color:var(--orange); color:#fff; box-shadow:0 0 0 5px var(--orange-tint);}
+  .prog-step.active .label{color:var(--orange-dark);}
+  .prog-step.done .label{color:var(--blue);}
+  .prog-step.locked{cursor:not-allowed;}
+
+  main{padding-top:44px;}
+  .page{display:none; animation:fadeUp .5s ease;}
+  .page.active{display:block;}
+  @keyframes fadeUp{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);}}
+  .page-head{text-align:center; max-width:640px; margin:0 auto 30px;}
+  .page-head h1{font-size:clamp(24px,4vw,32px);}
+  .page-head .lede{font-size:16px; margin-top:8px;}
+
+  .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:26px; margin-bottom:20px;}
+  .card.tight{padding:18px;}
+
+  .btn{font-family:'Inter',sans-serif; font-weight:700; font-size:14.5px; border-radius:var(--radius-pill); padding:13px 26px; border:none; cursor:pointer; transition:.2s transform, .2s box-shadow, .2s background, .2s opacity; display:inline-flex; align-items:center; gap:8px;}
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--blue); color:#fff; box-shadow:0 8px 20px rgba(46,111,219,0.28);}
+  .btn-primary:hover{background:var(--blue-dark);}
+  .btn-secondary{background:var(--orange); color:#fff; box-shadow:0 8px 20px rgba(242,153,74,0.28);}
+  .btn-secondary:hover{background:var(--orange-dark);}
+  .btn-outline{background:#fff; color:var(--text); border:1.5px solid var(--border);}
+  .btn-outline:hover{border-color:var(--blue); color:var(--blue);}
+  .btn:disabled{opacity:0.4; cursor:not-allowed; box-shadow:none; transform:none;}
+
+  .page-footer{display:flex; justify-content:space-between; align-items:center; margin-top:28px;}
+
+  .scenario-visual{display:flex; align-items:center; justify-content:space-between; background:var(--bg-top); border-radius:var(--radius-md); padding:22px 16px; margin:16px 0; position:relative;}
+  .actor{display:flex; flex-direction:column; align-items:center; gap:6px; width:90px;}
+  .actor .avatar{width:52px;height:52px;border-radius:50%; background:#fff; border:2px solid var(--border); display:flex;align-items:center;justify-content:center; font-size:24px; box-shadow:var(--shadow-sm);}
+  .actor .name{font-size:12.5px; font-weight:700; font-family:'Poppins',sans-serif;}
+  .actor .role{font-size:10.5px; color:var(--text-muted);}
+  .channel{flex:1; height:2px; background:repeating-linear-gradient(90deg, var(--border) 0 8px, transparent 8px 14px); margin:0 10px; position:relative; top:-12px; text-align:center;}
+  .eve-watch{position:absolute; top:-24px; left:50%; transform:translateX(-50%); font-size:12px; white-space:nowrap; color:var(--text-muted); font-weight:600;}
+
+  /* what-would-you-do prompt */
+  .prompt-card{border:1.5px dashed var(--blue); background:var(--blue-tint);}
+  .prompt-card h4{font-size:15px; margin-bottom:8px;}
+  .prompt-card textarea{width:100%; margin-top:8px; border:1.5px solid var(--border); border-radius:var(--radius-md); padding:12px 14px; font-family:'Inter',sans-serif; font-size:14px; resize:vertical; min-height:60px; background:#fff;}
+  .prompt-card textarea:focus{outline:none; border-color:var(--blue);}
+
+  /* setup rules */
+  .rule-list{list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:12px;}
+  .rule-list li{display:flex; gap:12px; align-items:flex-start; font-size:14.5px; color:var(--text);}
+  .rule-list .ico{font-size:18px; flex-shrink:0;}
+
+  /* ---------- Activity / game ---------- */
+  .activity-meta{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+  .round-pill{font-size:12px; font-weight:700; color:var(--blue); background:var(--blue-tint); padding:6px 14px; border-radius:var(--radius-pill);}
+  .round-dots{display:flex; gap:6px;}
+  .round-dots span{width:8px;height:8px;border-radius:50%; background:var(--border);}
+  .round-dots span.on{background:var(--orange);}
+
+  .journey-wrap{margin-bottom:16px;}
+  .journey-track{position:relative; display:flex; justify-content:space-between; align-items:flex-start; padding:0 10px; height:52px;}
+  .journey-track .stop{display:flex; flex-direction:column; align-items:center; gap:4px; width:50px; z-index:2;}
+  .journey-track .stop .avatar{width:32px;height:32px;border-radius:50%; background:#fff; border:2px solid var(--border); display:flex;align-items:center;justify-content:center; font-size:15px;}
+  .journey-track .stop .stop-label{font-size:9.5px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.03em;}
+  .journey-track .track-line{position:absolute; top:15px; left:34px; right:34px; height:2px; background:var(--border); z-index:1;}
+  .box-marker{position:absolute; top:1px; font-size:19px; transform:translateX(-50%); transition:left 1.1s ease; z-index:3; left:0%;}
+  .journey-caption{text-align:center; font-size:12px; color:var(--text-muted); font-weight:700; margin-top:2px;}
+
+  .game-instruction{font-size:15px; color:var(--text); font-weight:600; text-align:center; margin-bottom:6px;}
+  .game-zone{display:flex; flex-direction:column; align-items:center; gap:18px; margin:16px 0 6px;}
+  @keyframes floaty{0%,100%{transform:translateY(0);} 50%{transform:translateY(-5px);}}
+  @keyframes lockPulse{
+    0%{transform:scale(1) rotate(0deg);}
+    35%{transform:scale(1.18) rotate(-8deg);}
+    60%{transform:scale(0.94) rotate(6deg);}
+    100%{transform:scale(1) rotate(0deg);}
+  }
+  .drop-target{
+    width:170px;height:170px;border-radius:24px; border:3px dashed var(--border); background:var(--bg-top);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-size:46px; cursor:pointer; transition:.25s background-color, .25s border-color, .2s transform, .3s box-shadow; text-align:center;
+    animation:floaty 3s ease-in-out infinite; position:relative;
+  }
+  .drop-target.dragover{border-color:var(--blue); background:var(--blue-tint); transform:scale(1.05); animation:none;}
+  .drop-target.success{border-style:solid; border-color:var(--green); background:var(--green-tint); animation:none; box-shadow:0 0 0 8px var(--green-tint), 0 0 30px rgba(46,158,108,0.35);}
+  .drop-target.success #boxEmoji{display:inline-block; animation:lockPulse .6s ease;}
+  .drop-target.fail{animation:shake .45s; background:var(--red-tint); border-color:var(--red);}
+  .drop-target .hint{font-size:11px; font-family:'Inter'; color:var(--text-muted); margin-top:8px; font-weight:600; padding:0 10px;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);} 20%{transform:translateX(-8px);} 40%{transform:translateX(8px);}
+    60%{transform:translateX(-6px);} 80%{transform:translateX(6px);}
+  }
+  .drag-items{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; max-width:480px;}
+  .drag-item{background:#fff;border:1.5px solid var(--border); border-radius:var(--radius-pill); padding:11px 18px; font-size:13.5px; font-weight:600; cursor:grab; transition:.18s; user-select:none;}
+  .drag-item:hover{border-color:var(--blue); transform:translateY(-3px) rotate(-1deg); box-shadow:var(--shadow-sm);}
+  .drag-item.selected{border-color:var(--orange); background:var(--orange-tint); transform:translateY(-2px);}
+  .drag-item.disabled{opacity:.4; pointer-events:none;}
+  .drag-item:active{cursor:grabbing; transform:scale(0.96);}
+
+  @keyframes markerBounce{
+    0%{transform:translateX(-50%) translateY(0);}
+    30%{transform:translateX(-50%) translateY(-11px) scale(1.15);}
+    60%{transform:translateX(-50%) translateY(2px);}
+    100%{transform:translateX(-50%) translateY(0);}
+  }
+  .box-marker.bounce{animation:markerBounce .6s ease;}
+
+  @keyframes confettiFall{
+    0%{transform:translate(0,0) rotate(0deg); opacity:1;}
+    100%{transform:translate(var(--tx), var(--ty)) rotate(var(--rot)); opacity:0;}
+  }
+  .confetti-piece{position:absolute; font-size:18px; pointer-events:none; z-index:6; animation:confettiFall .9s ease-out forwards;}
+
+  @keyframes glowPulse{
+    0%,100%{box-shadow:0 8px 20px rgba(242,153,74,0.28);}
+    50%{box-shadow:0 8px 30px rgba(242,153,74,0.55);}
+  }
+  .btn-glow{animation:glowPulse 1.6s ease-in-out infinite;}
+  .attempts-counter{font-size:12px; color:var(--text-muted); font-weight:600;}
+
+  .feedback{margin-top:14px; padding:14px 16px; border-radius:var(--radius-md); font-size:14px; display:flex; gap:10px; align-items:flex-start; animation:fadeUp .3s ease;}
+  .feedback.good{background:var(--green-tint); border:1px solid var(--green);}
+  .feedback.bad{background:var(--red-tint); border:1px solid var(--red);}
+  .feedback .icon{font-size:17px;}
+  .feedback p{margin:0; color:var(--text);}
+
+  .machine{background:var(--bg-top); border-radius:var(--radius-md); padding:20px; margin-top:10px;}
+  .machine .formula{font-family:'Poppins',sans-serif; font-weight:600; font-size:14px; background:#fff; border:1px solid var(--border); border-radius:10px; padding:10px 14px; margin:8px 0; text-align:center; color:var(--blue-dark);}
+  .machine input[type=range]{width:100%; accent-color:var(--orange); margin:12px 0 4px;}
+  .machine-row{display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:14px;}
+  .readout{background:#fff; border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-family:'Poppins',sans-serif; font-weight:700; font-size:15px; min-width:100px; text-align:center;}
+  .readout .label{display:block; font-family:'Inter',sans-serif; font-weight:600; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:3px;}
+
+  /* ---------- Reflection ---------- */
+  .reflect-card{margin-bottom:16px;}
+  .reflect-card .qnum{font-family:'Poppins',sans-serif; font-weight:700; color:var(--orange-dark); font-size:13px; margin-bottom:6px; display:block;}
+  .reflect-card textarea{width:100%; margin-top:8px; border:1.5px solid var(--border); border-radius:var(--radius-md); padding:12px 14px; font-family:'Inter',sans-serif; font-size:14px; resize:vertical; min-height:56px; background:var(--bg-top);}
+  .reflect-card textarea:focus{outline:none; border-color:var(--blue);}
+
+  /* ---------- Concept ---------- */
+  .concept-diagram{display:flex; align-items:center; justify-content:center; gap:18px; background:var(--bg-top); border-radius:var(--radius-md); padding:22px; margin:14px 0; flex-wrap:wrap; text-align:center;}
+  .concept-diagram .block{background:#fff; border:1.5px solid var(--border); border-radius:var(--radius-md); padding:14px 18px; min-width:140px;}
+  .concept-diagram .block.pub{border-color:var(--blue);}
+  .concept-diagram .block.priv{border-color:var(--orange);}
+  .concept-diagram .arrow{font-size:20px; color:var(--text-muted);}
+  .concept-diagram .block h5{margin:0 0 4px; font-family:'Poppins',sans-serif; font-size:13px;}
+  .concept-diagram .block p{margin:0; font-size:11.5px;}
+
+  .comparison{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;}
+  .comparison .col{background:#fff; border:1px solid var(--border); border-radius:var(--radius-md); padding:18px;}
+  .comparison .col.highlight{border:1.5px solid var(--orange); background:var(--orange-tint);}
+  .comparison .col h4{font-size:14px; display:flex; align-items:center; gap:8px;}
+  .comparison ul{margin:8px 0 0; padding-left:16px; color:var(--text-muted); font-size:13px;}
+  .comparison li{margin-bottom:4px;}
+
+  details.math-details{background:#fff; border:1px solid var(--border); border-radius:var(--radius-md); padding:16px 18px; margin-top:6px;}
+  details.math-details summary{cursor:pointer; font-family:'Poppins',sans-serif; font-weight:600; font-size:14px; color:var(--blue-dark); list-style:none;}
+  details.math-details summary::-webkit-details-marker{display:none;}
+  details.math-details summary::before{content:'▸ '; color:var(--orange);}
+  details.math-details[open] summary::before{content:'▾ ';}
+  .formula-box{background:var(--text); color:#fff; border-radius:var(--radius-md); padding:18px 20px; margin:14px 0; font-family:'Poppins',sans-serif;}
+  .formula-box .line{font-size:14px; margin-bottom:7px; display:flex; gap:10px; align-items:baseline;}
+  .formula-box .line b{color:var(--orange); min-width:110px; font-size:11.5px; font-weight:600; letter-spacing:.02em;}
+  .formula-box .line span{font-family:'Inter',sans-serif; font-weight:500;}
+  .worked-example{background:#fff; border:1px dashed var(--blue); border-radius:var(--radius-md); padding:16px; margin-top:12px; font-size:13.5px;}
+  .worked-example table{width:100%; border-collapse:collapse; margin-top:8px;}
+  .worked-example td{padding:5px 4px; font-size:13px; border-bottom:1px solid var(--border);}
+  .worked-example td:first-child{color:var(--text-muted); width:45%;}
+  .worked-example td:last-child{font-family:'Poppins',sans-serif; font-weight:600; color:var(--blue-dark);}
+
+  /* ---------- Exercises ---------- */
+  .ex-card{margin-bottom:18px;}
+  .ex-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
+  .diff-pill{font-size:11px; font-weight:700; padding:5px 12px; border-radius:var(--radius-pill); text-transform:uppercase; letter-spacing:.04em;}
+  .diff-easy{background:var(--green-tint); color:var(--green);}
+  .diff-medium{background:var(--orange-tint); color:var(--orange-dark);}
+  .diff-hard{background:var(--red-tint); color:var(--red);}
+  .ex-input-row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px;}
+  .ex-input-row input[type=text], .ex-input-row input[type=number]{flex:1; min-width:150px; padding:12px 14px; border-radius:var(--radius-md); border:1.5px solid var(--border); font-family:'Inter',sans-serif; font-size:14px;}
+  .ex-input-row input:focus{outline:none; border-color:var(--blue);}
+  .ex-mcq{display:flex; flex-direction:column; gap:10px; margin-top:10px;}
+  .option-btn{text-align:left; background:#fff; border:1.5px solid var(--border); border-radius:var(--radius-md); padding:14px 16px; cursor:pointer; font-family:'Inter',sans-serif; font-size:14px; color:var(--text); transition:.18s;}
+  .option-btn:hover{border-color:var(--blue); background:var(--blue-tint);}
+  .option-btn:disabled{cursor:default;}
+  .option-btn.correct{border-color:var(--green); background:var(--green-tint);}
+  .option-btn.incorrect{border-color:var(--red); background:var(--red-tint);}
+  .ex-result{margin-top:10px; font-size:13.5px; font-weight:600; display:none;}
+  .ex-result.show{display:block;}
+  .ex-result.ok{color:var(--green);}
+  .ex-result.no{color:var(--red);}
+  .reveal-box{margin-top:10px; background:var(--blue-tint); border-radius:var(--radius-md); padding:14px 16px; font-size:13.4px; display:none;}
+  .reveal-box.show{display:block;}
+
+  .modal-overlay{position:fixed; inset:0; background:rgba(20,35,60,0.45); display:none; align-items:center; justify-content:center; z-index:200; padding:20px; backdrop-filter:blur(2px);}
+  .modal-overlay.show{display:flex; animation:fadeUp .25s ease;}
+  .modal{background:#fff; border-radius:var(--radius-lg); max-width:440px; width:100%; padding:26px; box-shadow:var(--shadow-lg); position:relative;}
+  .modal h3{margin-bottom:12px;}
+  .modal .close-x{position:absolute; top:16px; right:16px; background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted);}
+  .glossary-item{margin-bottom:12px;}
+  .glossary-item .term{font-weight:700; font-family:'Poppins',sans-serif; font-size:13.5px; color:var(--blue-dark);}
+  .glossary-item p{margin:3px 0 0; font-size:13px;}
+  .completion-badge{text-align:center; padding:30px 10px;}
+  .completion-badge .emoji{font-size:48px; margin-bottom:8px;}
+
+  @media (max-width:720px){
+    .comparison{grid-template-columns:1fr;}
+    .prog-step .label{display:none;}
+    .scenario-visual{flex-direction:column; gap:14px;}
+    .channel{width:2px; height:36px; margin:0;}
+    .eve-watch{top:-2px; left:20px; transform:none;}
+    .card{padding:18px;}
+    .concept-diagram{flex-direction:column;}
+    .drop-target{width:150px;height:150px; font-size:40px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand-row">
+      <div class="brand"><span class="brand-badge">🔐</span> Operation Padlock</div>
+      <button class="help-btn" id="glossaryBtn" title="Quick recap">?</button>
+    </div>
+    <div class="progress-nav" id="progressNav"></div>
+  </div>
+</header>
+
+<main class="shell">
+
+  <!-- PAGE 1 : PROBLEM -->
+  <section class="page active" data-page="1">
+    <div class="page-head">
+      <span class="eyebrow">Case File · Operation Padlock</span>
+      <h1>Agent Alice must send Agent Bob a top-secret briefcase.</h1>
+      <p class="lede">The only route between them is a public network — and rival Agent Eve reads everything that crosses it.</p>
+    </div>
+
+    <div class="scenario-visual">
+      <div class="actor"><div class="avatar">🕵️‍♀️</div><div class="name">Alice</div><div class="role">Sender</div></div>
+      <div class="channel"><span class="eve-watch">🥷 Eve is watching</span></div>
+      <div class="actor"><div class="avatar">🕵️</div><div class="name">Bob</div><div class="role">Receiver</div></div>
+    </div>
+
+    <div class="card prompt-card">
+      <h4>🤔 What would you do?</h4>
+      <p style="margin:0;">Alice and Bob have never met, so they don't already share a secret code. How could Alice get the briefcase to Bob without Eve ever being able to open it?</p>
+      <textarea placeholder="Jot down your idea... (optional)"></textarea>
+    </div>
+
+    <div class="page-footer">
+      <div></div>
+      <button class="btn btn-primary" onclick="goTo(2)">Continue <span>→</span></button>
+    </div>
+  </section>
+
+  <!-- PAGE 2 : SETUP -->
+  <section class="page" data-page="2">
+    <div class="page-head">
+      <span class="eyebrow">The Setup</span>
+      <h1>Here's how the game works</h1>
+    </div>
+
+    <div class="card">
+      <ul class="rule-list">
+        <li><span class="ico">🔓</span> Everyone owns a <strong>padlock</strong> they hand out to anyone who asks.</li>
+        <li><span class="ico">🗝️</span> Everyone also owns a <strong>secret key</strong> that never leaves their pocket.</li>
+        <li><span class="ico">💼</span> A briefcase locked with someone's padlock can <strong>only</strong> be opened by that person's key — not by the padlock, not by anyone else.</li>
+        <li><span class="ico">🥷</span> Eve can see every briefcase that crosses the channel. Watching isn't the same as opening.</li>
+      </ul>
+    </div>
+
+    <div class="card tight">
+      <p style="margin:0;">You'll play Agent Alice, then Agent Eve, then watch Agent Bob reply. Drag or tap the items to make your move.</p>
+    </div>
+
+    <div class="page-footer">
+      <button class="btn btn-outline" onclick="goTo(1)">← Back</button>
+      <button class="btn btn-primary" onclick="goTo(3)">Start the Game <span>→</span></button>
+    </div>
+  </section>
+
+  <!-- PAGE 3 : INTERACTIVE ACTIVITY -->
+  <section class="page" data-page="3">
+    <div class="page-head">
+      <span class="eyebrow">The Game</span>
+      <h1>Get the message through safely</h1>
+    </div>
+
+    <div class="journey-wrap" id="journeyWrap">
+      <div class="journey-track">
+        <div class="stop"><div class="avatar">🕵️‍♀️</div><div class="stop-label">Alice</div></div>
+        <div class="stop"><div class="avatar">🥷</div><div class="stop-label">Eve</div></div>
+        <div class="stop"><div class="avatar">🕵️</div><div class="stop-label">Bob</div></div>
+        <div class="track-line"></div>
+        <div class="box-marker" id="boxMarker">💼</div>
+      </div>
+      <div class="journey-caption" id="journeyCaption">💼 waiting with Alice</div>
+    </div>
+
+    <div class="activity-meta">
+      <span class="round-pill" id="roundPill">Round 1 of 4</span>
+      <div class="round-dots" id="roundDots"></div>
+    </div>
+
+    <div class="card" id="activityStage"><!-- injected by JS --></div>
+
+    <div class="page-footer">
+      <button class="btn btn-outline" onclick="goTo(2)">← Back</button>
+      <button class="btn btn-primary" id="continueFromActivity" disabled onclick="goTo(4)">Continue <span>→</span></button>
+    </div>
+  </section>
+
+  <!-- PAGE 4 : REFLECTION -->
+  <section class="page" data-page="4">
+    <div class="page-head">
+      <span class="eyebrow">Reflection</span>
+      <h1>Before we name what you just did...</h1>
+      <p class="lede">No grading here — just think it through in your own words.</p>
+    </div>
+
+    <div class="card reflect-card">
+      <span class="qnum">Question 1</span>
+      <p style="color:var(--text)">Why was it perfectly safe for <strong>everyone</strong> — even Eve — to hold a copy of Bob's padlock?</p>
+      <textarea placeholder="Type your thoughts..."></textarea>
+    </div>
+
+    <div class="card reflect-card">
+      <span class="qnum">Question 2</span>
+      <p style="color:var(--text)">What would go wrong if a padlock could also <strong>open</strong> the box it just locked?</p>
+      <textarea placeholder="Type your thoughts..."></textarea>
+    </div>
+
+    <div class="card reflect-card">
+      <span class="qnum">Question 3</span>
+      <p style="color:var(--text)">How did Bob prove a reply really came from him, without ever handing over his secret key?</p>
+      <textarea placeholder="Type your thoughts..."></textarea>
+    </div>
+
+    <div class="card reflect-card">
+      <span class="qnum">Question 4</span>
+      <p style="color:var(--text)">Where do you already trust a "locked box" from a stranger — a website, an app, a login screen? What makes that feel safe?</p>
+      <textarea placeholder="Type your thoughts..."></textarea>
+    </div>
+
+    <div class="page-footer">
+      <button class="btn btn-outline" onclick="goTo(3)">← Back</button>
+      <button class="btn btn-primary" onclick="goTo(5)">Reveal the Concept <span>→</span></button>
+    </div>
+  </section>
+
+  <!-- PAGE 5 : CONCEPT -->
+  <section class="page" data-page="5">
+    <div class="page-head">
+      <span class="eyebrow">The Concept</span>
+      <h1>This is Public-Key Cryptography</h1>
+      <p class="lede">The padlock was a <strong>public key</strong>. The secret key was a <strong>private key</strong>.</p>
+    </div>
+
+    <div class="card">
+      <p>Only a matching private key can open what a public key locks — never the public key itself, never anyone else's key. Run it backwards and you get a <strong>digital signature</strong>: sign with your private key, and anyone can check it with your public key.</p>
+      <div class="concept-diagram">
+        <div class="block pub"><h5>🔓 Public Key</h5><p>Shared with anyone.<br>Encrypts, or verifies a signature.</p></div>
+        <div class="arrow">↔</div>
+        <div class="block priv"><h5>🗝️ Private Key</h5><p>Known only to the owner.<br>Decrypts, or creates a signature.</p></div>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="col">
+        <h4>🔑 Symmetric</h4>
+        <ul><li>One shared key, fast</li><li>Needs a safe way to exchange it first</li></ul>
+      </div>
+      <div class="col highlight">
+        <h4>🔐 Public-Key</h4>
+        <ul><li>Two linked keys, no pre-shared secret</li><li>Slower, so often used just to swap a symmetric key</li></ul>
+      </div>
+    </div>
+
+    <p style="text-align:center; font-size:13.5px;">It's what powers the padlock in your browser (HTTPS), app logins, and digital signatures.</p>
+
+    <details class="math-details">
+      <summary>See the math behind it (optional)</summary>
+      <div class="formula-box">
+        <div class="line"><b>KEY SETUP</b><span>primes p, q → n = p×q, φ(n) = (p−1)(q−1)</span></div>
+        <div class="line"><b>PUBLIC KEY</b><span>(e, n)</span></div>
+        <div class="line"><b>PRIVATE KEY</b><span>(d, n), where e×d ≡ 1 (mod φ(n))</span></div>
+        <div class="line"><b>ENCRYPT</b><span>c = mᵉ mod n</span></div>
+        <div class="line"><b>DECRYPT</b><span>m = cᵈ mod n</span></div>
+      </div>
+      <div class="worked-example">
+        <strong>Tiny example (same numbers as the Number Lock game):</strong>
+        <table>
+          <tr><td>p = 3, q = 11</td><td>n = 33, φ(n) = 20</td></tr>
+          <tr><td>Public key</td><td>(3, 33)</td></tr>
+          <tr><td>Private key</td><td>(7, 33)</td></tr>
+          <tr><td>Encrypt m = 5</td><td>5³ mod 33 = 26</td></tr>
+          <tr><td>Decrypt c = 26</td><td>26⁷ mod 33 = 5 ✓</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <div class="page-footer">
+      <button class="btn btn-outline" onclick="goTo(4)">← Back</button>
+      <button class="btn btn-primary" onclick="goTo(6)">Try the Exercises <span>→</span></button>
+    </div>
+  </section>
+
+  <!-- PAGE 6 : EXERCISES -->
+  <section class="page" data-page="6">
+    <div class="page-head">
+      <span class="eyebrow">Exercises</span>
+      <h1>Put Public-Key Cryptography to the test</h1>
+      <p class="lede">Five exercises, each a step harder than the last.</p>
+    </div>
+
+    <div class="card ex-card">
+      <div class="ex-head"><h3 style="margin:0;">1. Which key encrypts?</h3><span class="diff-pill diff-easy">Easy</span></div>
+      <p>You want to send Priya a private message. Which key should you use to encrypt it?</p>
+      <div class="ex-mcq" id="ex1-options"></div>
+      <div class="ex-result" id="ex1-result"></div>
+    </div>
+
+    <div class="card ex-card">
+      <div class="ex-head"><h3 style="margin:0;">2. Match the action to the correct key</h3><span class="diff-pill diff-easy">Easy–Medium</span></div>
+      <p>For each action, pick whose key — and which type — is used.</p>
+      <div id="ex2-list"></div>
+      <div class="ex-result" id="ex2-result"></div>
+      <button class="btn btn-outline" style="margin-top:10px;" onclick="checkEx2()">Check answers</button>
+    </div>
+
+    <div class="card ex-card">
+      <div class="ex-head"><h3 style="margin:0;">3. Compute n and φ(n)</h3><span class="diff-pill diff-medium">Medium</span></div>
+      <p>Given primes <strong>p = 5</strong> and <strong>q = 11</strong>, compute n = p×q and φ(n) = (p−1)(q−1).</p>
+      <div class="ex-input-row">
+        <input type="number" id="ex3-n" placeholder="n = ?">
+        <input type="number" id="ex3-phi" placeholder="φ(n) = ?">
+        <button class="btn btn-outline" onclick="checkEx3()">Check</button>
+      </div>
+      <div class="ex-result" id="ex3-result"></div>
+    </div>
+
+    <div class="card ex-card">
+      <div class="ex-head"><h3 style="margin:0;">4. Find the private exponent</h3><span class="diff-pill diff-medium">Medium–Hard</span></div>
+      <p>Using n = 55, φ(n) = 40, and public exponent <strong>e = 3</strong>, find <strong>d</strong> such that e×d ≡ 1 (mod φ(n)), where 1 &lt; d &lt; 40.</p>
+      <div class="ex-input-row">
+        <input type="number" id="ex4-d" placeholder="d = ?">
+        <button class="btn btn-outline" onclick="checkEx4()">Check</button>
+      </div>
+      <div class="ex-result" id="ex4-result"></div>
+      <button class="btn btn-outline" style="margin-top:8px;" onclick="toggleReveal('ex4-hint')">Show a hint</button>
+      <div class="reveal-box" id="ex4-hint">Try each candidate d from 2 upward and test whether (3 × d) mod 40 equals 1.</div>
+    </div>
+
+    <div class="card ex-card">
+      <div class="ex-head"><h3 style="margin:0;">5. Secrecy vs. proof of identity</h3><span class="diff-pill diff-hard">Hard</span></div>
+      <p>Encrypting keeps a message secret. Signing proves who sent it. Describe how you'd combine both so a message is <em>secret</em> and <em>verifiably</em> from a specific sender.</p>
+      <textarea id="ex5-answer" placeholder="Describe your approach..." style="width:100%; min-height:80px; border:1.5px solid var(--border); border-radius:var(--radius-md); padding:12px 14px; font-family:'Inter',sans-serif; font-size:14px; background:var(--bg-top);"></textarea>
+      <button class="btn btn-outline" style="margin-top:10px;" onclick="toggleReveal('ex5-model')">Compare with a model answer</button>
+      <div class="reveal-box" id="ex5-model">Sign first with your private key, then encrypt the message-plus-signature with the recipient's public key. They decrypt with their private key (secrecy) and verify the signature with your public key (authenticity).</div>
+    </div>
+
+    <div class="page-footer">
+      <button class="btn btn-outline" onclick="goTo(5)">← Back</button>
+      <button class="btn btn-secondary" onclick="showCompletion()">Finish Case Study ✓</button>
+    </div>
+  </section>
+
+</main>
+
+<div class="modal-overlay" id="glossaryModal">
+  <div class="modal">
+    <button class="close-x" onclick="closeModal('glossaryModal')">✕</button>
+    <h3>Quick recap</h3>
+    <div class="glossary-item"><div class="term">🔓 The padlock</div><p>Shared freely. Locks a briefcase but can't open it.</p></div>
+    <div class="glossary-item"><div class="term">🗝️ The secret key</div><p>Private to its one owner. Only it can open a matching padlock's briefcase.</p></div>
+    <div class="glossary-item"><div class="term">🥷 Eve</div><p>Sees every briefcase on the channel — but seeing isn't opening.</p></div>
+    <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:4px;" onclick="closeModal('glossaryModal')">Got it</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="completionModal">
+  <div class="modal">
+    <button class="close-x" onclick="closeModal('completionModal')">✕</button>
+    <div class="completion-badge">
+      <div class="emoji">🎉</div>
+      <h3>Operation Padlock: Complete</h3>
+      <p>You've explored the problem, played out the padlock puzzle, and connected it to real public-key cryptography.</p>
+      <button class="btn btn-primary" onclick="closeModal('completionModal'); goTo(1);">Restart the journey</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ================= Progress nav ================= */
+  const pageNames = ['Problem','Setup','Game','Reflection','Concept','Exercises'];
+  let currentPage = 1;
+  let maxUnlocked = 1;
+
+  function buildNav(){
+    const nav = document.getElementById('progressNav');
+    nav.innerHTML = '';
+    pageNames.forEach((name, i)=>{
+      const n = i+1;
+      const step = document.createElement('div');
+      step.className = 'prog-step';
+      step.onclick = ()=>{ if(n<=maxUnlocked) goTo(n); };
+      step.innerHTML = `<div class="dot">${n}</div><div class="label">${name}</div>`;
+      nav.appendChild(step);
+    });
+    refreshNav();
+  }
+  function refreshNav(){
+    const steps = document.querySelectorAll('.prog-step');
+    steps.forEach((step, i)=>{
+      const n = i+1;
+      step.classList.remove('done','active','locked');
+      if(n < currentPage) step.classList.add('done');
+      else if(n === currentPage) step.classList.add('active');
+      if(n > maxUnlocked) step.classList.add('locked');
+    });
+  }
+  function goTo(n){
+    currentPage = n;
+    if(n > maxUnlocked) maxUnlocked = n;
+    document.querySelectorAll('.page').forEach(p=>{
+      p.classList.toggle('active', parseInt(p.dataset.page) === n);
+    });
+    refreshNav();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  /* ================= Modals ================= */
+  function openModal(id){ document.getElementById(id).classList.add('show'); }
+  function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+  document.getElementById('glossaryBtn').addEventListener('click', ()=>openModal('glossaryModal'));
+  function showCompletion(){ openModal('completionModal'); }
+
+  /* ================= Game data ================= */
+  const rounds = [
+    {
+      task:'drag',
+      instruction:"Drag the right padlock onto the briefcase to send it safely to Agent Bob.",
+      items:[
+        {label:"🔓 Bob's Padlock", correct:true},
+        {label:"🔑 Alice's Secret Key", correct:false, fail:"Only Alice could reopen it — Bob would be locked out."},
+        {label:"🆕 A New Shared Code", correct:false, fail:"Eve is watching this channel — she'd see this code too."}
+      ],
+      successMsg:"Locked! Only Bob's secret key can open this briefcase now."
+    },
+    {
+      task:'attack',
+      instruction:"You're Agent Eve now. The briefcase just arrived. Try anything to open it.",
+      items:[
+        {label:"🔓 Your copy of Bob's padlock", fail:"Click. Click. Nothing — it only locks, never opens."},
+        {label:"🎲 A random key", fail:"Doesn't even come close to fitting."},
+        {label:"💪 Brute force", fail:"More combinations than atoms in the universe. Not happening."}
+      ],
+      insight:"No matter what Eve tries, only Bob's secret key opens this briefcase."
+    },
+    {
+      task:'drag',
+      instruction:"Bob wants to prove the reply is really from him. Drag the right key onto the stamp.",
+      items:[
+        {label:"🗝️ Bob's Secret Key", correct:true},
+        {label:"🔓 Bob's Padlock", correct:false, fail:"Everyone has a copy of this — it can't prove it's uniquely Bob."},
+        {label:"🔑 Alice's Secret Key", correct:false, fail:"That belongs to Alice, not Bob — it won't match his check."}
+      ],
+      successMsg:"Signed! Alice checks it with Bob's padlock — ✅ verified, it's really him."
+    }
+  ];
+
+  let roundIndex = 0;
+  let roundsSolved = [false,false,false];
+  let selectedItemIdx = null;
+  let attackAttempts = 0;
+
+  function setJourney(loc, caption){
+    const marker = document.getElementById('boxMarker');
+    const positions = {alice:'0%', eve:'50%', bob:'100%'};
+    marker.style.left = positions[loc];
+    document.getElementById('journeyCaption').textContent = caption;
+    setTimeout(()=>{
+      marker.classList.add('bounce');
+      setTimeout(()=>marker.classList.remove('bounce'), 650);
+    }, 1050);
+  }
+
+  function spawnConfetti(container){
+    const emojis = ['🎉','✨','💫','⭐'];
+    for(let i=0;i<14;i++){
+      const span = document.createElement('span');
+      span.className = 'confetti-piece';
+      span.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      const tx = (Math.random()*180-90)+'px';
+      const ty = (Math.random()*-140-30)+'px';
+      const rot = (Math.random()*360)+'deg';
+      span.style.setProperty('--tx', tx);
+      span.style.setProperty('--ty', ty);
+      span.style.setProperty('--rot', rot);
+      span.style.left = '50%';
+      span.style.top = '50%';
+      container.appendChild(span);
+      setTimeout(()=>span.remove(), 950);
+    }
+  }
+
+  function updateRoundMeta(){
+    document.getElementById('roundPill').textContent = `Round ${roundIndex+1} of 3`;
+    const dotsWrap = document.getElementById('roundDots');
+    dotsWrap.innerHTML = '';
+    for(let i=0;i<3;i++){
+      const d = document.createElement('span');
+      if(roundsSolved[i]) d.classList.add('on');
+      dotsWrap.appendChild(d);
+    }
+  }
+
+  function renderActivity(){
+    updateRoundMeta();
+    const stage = document.getElementById('activityStage');
+    const journeyWrap = document.getElementById('journeyWrap');
+    journeyWrap.style.display = 'block';
+    const r = rounds[roundIndex];
+    if(r.task === 'attack') renderAttackRound(r, stage);
+    else renderDragRound(r, stage);
+  }
+
+  function buildDragChip(item, idx, onPick){
+    const chip = document.createElement('div');
+    chip.className = 'drag-item';
+    chip.draggable = true;
+    chip.textContent = item.label;
+    chip.ondragstart = (e)=>{ e.dataTransfer.setData('text/plain', String(idx)); };
+    chip.onclick = ()=>onPick(idx, chip);
+    return chip;
+  }
+
+  function renderDragRound(r, stage){
+    selectedItemIdx = null;
+    if(roundIndex === 0) setJourney('alice', '💼 waiting with Alice');
+    if(roundIndex === 2) setJourney('bob', '💼 Bob is preparing his reply');
+    const startEmoji = roundIndex === 2 ? '📜' : '💼';
+    const startHint = roundIndex === 2 ? 'Drag Bob\'s key onto the stamp' : 'Drag here, or tap an item then tap the briefcase';
+    stage.innerHTML = `
+      <p class="game-instruction">${r.instruction}</p>
+      <div class="game-zone">
+        <div class="drop-target" id="dropBox">
+          <span id="boxEmoji">${startEmoji}</span>
+          <span class="hint" id="boxHint">${startHint}</span>
+        </div>
+        <div class="drag-items" id="dragItemsWrap"></div>
+      </div>
+      <div id="feedbackWrap"></div>
+    `;
+    const box = document.getElementById('dropBox');
+    box.ondragover = (e)=>{ e.preventDefault(); box.classList.add('dragover'); };
+    box.ondragleave = ()=> box.classList.remove('dragover');
+    box.ondrop = (e)=>{
+      e.preventDefault(); box.classList.remove('dragover');
+      const idx = parseInt(e.dataTransfer.getData('text/plain'));
+      attemptItem(idx);
+    };
+    box.onclick = ()=>{ if(selectedItemIdx!==null) attemptItem(selectedItemIdx); };
+
+    const wrap = document.getElementById('dragItemsWrap');
+    r.items.forEach((item, idx)=>{
+      const chip = buildDragChip(item, idx, (i, el)=>{
+        document.querySelectorAll('.drag-item').forEach(c=>c.classList.remove('selected'));
+        if(selectedItemIdx === i){ selectedItemIdx = null; }
+        else{ selectedItemIdx = i; el.classList.add('selected'); }
+      });
+      wrap.appendChild(chip);
+    });
+  }
+
+  function attemptItem(idx){
+    const r = rounds[roundIndex];
+    const item = r.items[idx];
+    const box = document.getElementById('dropBox');
+    const fb = document.getElementById('feedbackWrap');
+    if(item.correct){
+      box.classList.add('success');
+      document.getElementById('boxEmoji').textContent = roundIndex===2 ? '🖋️✅' : '🔒💼';
+      document.getElementById('boxHint').textContent = 'Locked!';
+      document.querySelectorAll('.drag-item').forEach(c=>c.classList.add('disabled'));
+      fb.innerHTML = `<div class="feedback good"><span class="icon">✅</span><p>${r.successMsg}</p></div>`;
+      if(roundIndex === 0) setJourney('bob', '💼 locked, heading to Bob');
+      if(roundIndex === 2){ setJourney('alice', '💼 delivered back to Alice'); spawnConfetti(box); }
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'btn btn-secondary btn-glow';
+      nextBtn.style.marginTop = '12px';
+      if(roundIndex < 2){
+        nextBtn.textContent = 'Next round →';
+        nextBtn.onclick = ()=>{ roundsSolved[roundIndex]=true; updateRoundMeta(); roundIndex++; renderActivity(); };
+      } else {
+        nextBtn.textContent = 'Continue →';
+        nextBtn.onclick = ()=>{
+          roundsSolved[roundIndex]=true; updateRoundMeta();
+          document.getElementById('continueFromActivity').disabled = false;
+          nextBtn.disabled = true;
+          nextBtn.textContent = 'Round complete ✓';
+          nextBtn.classList.remove('btn-glow');
+        };
+      }
+      fb.appendChild(nextBtn);
+    } else {
+      box.classList.add('fail');
+      setTimeout(()=>box.classList.remove('fail'), 400);
+      fb.innerHTML = `<div class="feedback bad"><span class="icon">⚠️</span><p>${item.fail}</p></div>`;
+      selectedItemIdx = null;
+      document.querySelectorAll('.drag-item').forEach(c=>c.classList.remove('selected'));
+    }
+  }
+
+  function renderAttackRound(r, stage){
+    attackAttempts = 0;
+    setJourney('eve', '💼 intercepted by Eve');
+    stage.innerHTML = `
+      <p class="game-instruction">${r.instruction}</p>
+      <div class="game-zone">
+        <div class="drop-target" id="dropBox">
+          <span id="boxEmoji">💼🔒</span>
+          <span class="hint">Drag here, or tap an attempt</span>
+        </div>
+        <div class="drag-items" id="dragItemsWrap"></div>
+        <div class="attempts-counter" id="attemptsCounter">Attempts: 0</div>
+      </div>
+      <div id="attackFeedback"></div>
+      <div id="attackInsight"></div>
+    `;
+    const box = document.getElementById('dropBox');
+    box.ondragover = (e)=>{ e.preventDefault(); box.classList.add('dragover'); };
+    box.ondragleave = ()=> box.classList.remove('dragover');
+    box.ondrop = (e)=>{
+      e.preventDefault(); box.classList.remove('dragover');
+      const idx = parseInt(e.dataTransfer.getData('text/plain'));
+      attemptAttack(idx);
+    };
+    const wrap = document.getElementById('dragItemsWrap');
+    r.items.forEach((item, idx)=>{
+      const chip = buildDragChip(item, idx, (i)=>attemptAttack(i));
+      wrap.appendChild(chip);
+    });
+  }
+
+  function attemptAttack(idx){
+    const r = rounds[roundIndex];
+    const item = r.items[idx];
+    attackAttempts++;
+    document.getElementById('attemptsCounter').textContent = 'Attempts: '+attackAttempts;
+    const box = document.getElementById('dropBox');
+    box.classList.add('fail');
+    setTimeout(()=>box.classList.remove('fail'), 400);
+    document.getElementById('attackFeedback').innerHTML = `<div class="feedback bad"><span class="icon">🚫</span><p>${item.fail}</p></div>`;
+
+    if(!roundsSolved[roundIndex]){
+      roundsSolved[roundIndex] = true;
+      updateRoundMeta();
+      setJourney('bob', '💼 still locked, moving on to Bob');
+      const insightWrap = document.getElementById('attackInsight');
+      insightWrap.innerHTML = `
+        <div class="feedback good" style="margin-top:10px;"><span class="icon">💡</span><p>${r.insight}</p></div>
+        <button class="btn btn-secondary btn-glow" style="margin-top:12px;" onclick="roundIndex++; renderActivity();">Next round →</button>
+      `;
+    }
+  }
+
+  function renderNumberMachine(){
+    const stage = document.getElementById('activityStage');
+    stage.innerHTML = `
+      <p class="game-instruction">Same idea, as numbers. Lock it, then unlock it.</p>
+      <div class="machine">
+        <div class="formula">lock: c = m³ mod 33 &nbsp;·&nbsp; unlock: m = c⁷ mod 33</div>
+        <label style="font-size:13px; font-weight:600; color:var(--text-muted);">Message number (m): <span id="mVal">5</span></label>
+        <input type="range" min="2" max="10" value="5" id="mSlider" oninput="onSlider(this.value)">
+        <div class="machine-row">
+          <button class="btn btn-secondary" onclick="lockNumber()">🔒 Lock</button>
+          <div class="readout"><span class="label">Locked (c)</span><span id="cVal">—</span></div>
+        </div>
+        <div class="machine-row">
+          <button class="btn btn-primary" id="unlockBtn" onclick="unlockNumber()" disabled>🗝️ Unlock</button>
+          <div class="readout"><span class="label">Recovered (m)</span><span id="mBackVal">—</span></div>
+        </div>
+        <div id="machineFeedback"></div>
+      </div>
+    `;
+  }
+
+  let currentM = 5, currentC = null;
+  function onSlider(v){
+    currentM = parseInt(v);
+    document.getElementById('mVal').textContent = currentM;
+    document.getElementById('cVal').textContent = '—';
+    document.getElementById('mBackVal').textContent = '—';
+    document.getElementById('unlockBtn').disabled = true;
+    document.getElementById('machineFeedback').innerHTML = '';
+  }
+  function lockNumber(){
+    currentC = Math.round(Math.pow(currentM,3)) % 33;
+    document.getElementById('cVal').textContent = currentC;
+    document.getElementById('unlockBtn').disabled = false;
+    document.getElementById('machineFeedback').innerHTML = `
+      <div class="feedback good"><span class="icon">📦</span><p>Anyone can see c = ${currentC} cross the channel — it doesn't reveal m without the private key.</p></div>`;
+  }
+  function unlockNumber(){
+    const recovered = Math.round(Math.pow(currentC,7)) % 33;
+    document.getElementById('mBackVal').textContent = recovered;
+    document.getElementById('machineFeedback').innerHTML = `
+      <div class="feedback good"><span class="icon">🎉</span><p>Unlocked back to <strong>${recovered}</strong> — matching the original. Real systems use the same trick with much bigger numbers.</p></div>`;
+    roundsSolved[3] = true;
+    updateRoundMeta();
+    document.getElementById('continueFromActivity').disabled = false;
+  }
+
+  renderActivity();
+
+  /* ================= Exercises ================= */
+  const ex1Options = [
+    {text:"Priya's public key", correct:true},
+    {text:"Your own private key", correct:false},
+    {text:"Priya's private key", correct:false}
+  ];
+  (function buildEx1(){
+    const wrap = document.getElementById('ex1-options');
+    ex1Options.forEach((o)=>{
+      const b = document.createElement('button');
+      b.className = 'option-btn';
+      b.textContent = o.text;
+      b.onclick = ()=>{
+        document.querySelectorAll('#ex1-options .option-btn').forEach(x=>x.disabled=true);
+        b.classList.add(o.correct?'correct':'incorrect');
+        const res = document.getElementById('ex1-result');
+        res.className = 'ex-result show ' + (o.correct?'ok':'no');
+        res.textContent = o.correct
+          ? "Correct — encrypt with the recipient's public key so only their private key can decrypt it."
+          : "Not quite — you need Priya's public key so only her private key can open the message.";
+      };
+      wrap.appendChild(b);
+    });
+  })();
+
+  const ex2Items = [
+    {action:"You want to send a confidential file to Sam.", answer:"sam-public", options:[
+      {id:"sam-public", label:"Encrypt with Sam's public key"},
+      {id:"sam-private", label:"Encrypt with Sam's private key"},
+      {id:"your-private", label:"Encrypt with your own private key"}
+    ]},
+    {action:"You just received an encrypted file addressed to you.", answer:"your-private", options:[
+      {id:"your-public", label:"Decrypt with your public key"},
+      {id:"your-private", label:"Decrypt with your own private key"},
+      {id:"sender-public", label:"Decrypt with the sender's public key"}
+    ]},
+    {action:"You want to prove a document really came from you.", answer:"your-private-sign", options:[
+      {id:"your-public-sign", label:"Sign with your own public key"},
+      {id:"your-private-sign", label:"Sign with your own private key"},
+      {id:"recipient-public-sign", label:"Sign with the recipient's public key"}
+    ]},
+    {action:"You received a signed document and want to verify it.", answer:"sender-public-verify", options:[
+      {id:"sender-public-verify", label:"Verify with the sender's public key"},
+      {id:"sender-private-verify", label:"Verify with the sender's private key"},
+      {id:"your-private-verify", label:"Verify with your own private key"}
+    ]}
+  ];
+  (function buildEx2(){
+    const wrap = document.getElementById('ex2-list');
+    ex2Items.forEach((item, idx)=>{
+      const div = document.createElement('div');
+      div.style.marginBottom = '14px';
+      div.innerHTML = `<p style="margin-bottom:6px;"><strong>${idx+1}.</strong> ${item.action}</p>`;
+      const sel = document.createElement('select');
+      sel.id = 'ex2-sel-'+idx;
+      sel.style.cssText = "width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid var(--border); font-family:'Inter',sans-serif; font-size:14px;";
+      const blank = document.createElement('option');
+      blank.textContent = 'Choose an option...'; blank.value='';
+      sel.appendChild(blank);
+      item.options.forEach(o=>{
+        const op = document.createElement('option');
+        op.value = o.id; op.textContent = o.label;
+        sel.appendChild(op);
+      });
+      div.appendChild(sel);
+      wrap.appendChild(div);
+    });
+  })();
+  function checkEx2(){
+    let allCorrect = true;
+    ex2Items.forEach((item, idx)=>{
+      const sel = document.getElementById('ex2-sel-'+idx);
+      if(sel.value !== item.answer) allCorrect = false;
+    });
+    const res = document.getElementById('ex2-result');
+    res.className = 'ex-result show ' + (allCorrect?'ok':'no');
+    res.textContent = allCorrect
+      ? "All correct — you've matched each action to the right key and purpose."
+      : "Not all matched yet. Encrypt with the recipient's public key, decrypt with your own private key, sign with your own private key, verify with the sender's public key.";
+  }
+
+  function checkEx3(){
+    const n = parseInt(document.getElementById('ex3-n').value);
+    const phi = parseInt(document.getElementById('ex3-phi').value);
+    const res = document.getElementById('ex3-result');
+    if(n===55 && phi===40){
+      res.className = 'ex-result show ok';
+      res.textContent = "Correct — n = 5×11 = 55, and φ(n) = 4×10 = 40.";
+    } else {
+      res.className = 'ex-result show no';
+      res.textContent = "Not quite. n = p×q = 5×11, and φ(n) = (p−1)×(q−1) = 4×10.";
+    }
+  }
+
+  function checkEx4(){
+    const d = parseInt(document.getElementById('ex4-d').value);
+    const res = document.getElementById('ex4-result');
+    if(!isNaN(d) && (3*d) % 40 === 1 && d>1 && d<40){
+      res.className = 'ex-result show ok';
+      res.textContent = `Correct — d = ${d}, since 3 × ${d} = ${3*d}, and ${3*d} mod 40 = 1.`;
+    } else {
+      res.className = 'ex-result show no';
+      res.textContent = "Not yet — you need d such that (3 × d) mod 40 = 1. Try the hint below.";
+    }
+  }
+
+  function toggleReveal(id){ document.getElementById(id).classList.toggle('show'); }
+
+  buildNav();
+</script>
+
+</body>
+</html>

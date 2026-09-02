@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Griddle — A Lunch Rush Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFE8D8;
+    --paper-dim:#E4DCC5;
+    --card:#FBF8F0;
+    --ink:#232E29;
+    --ink-soft:#5B6660;
+    --enamel:#2F6259;
+    --enamel-dark:#1E4842;
+    --mustard:#DCA02A;
+    --mustard-dark:#B9821A;
+    --rush:#BD4430;
+    --rush-soft:#F3DCD4;
+    --line:#C9C1AC;
+    --white:#FBF8F1;
+    --good:#3E7A57;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(35,46,41,0.05) 1px, transparent 0);
+    background-size: 22px 22px;
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .app{
+    width:100%;
+    max-width:880px;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding:20px 20px 32px;
+  }
+
+  /* ---------- Header / Rail ---------- */
+  .app-header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:16px;
+    border-bottom:3px solid var(--ink);
+    padding-bottom:14px;
+    margin-bottom:26px;
+  }
+  .brand{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .brand .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--enamel);
+    font-weight:600;
+  }
+  .brand h1{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:40px;
+    letter-spacing:1px;
+    margin:0;
+    line-height:0.95;
+    color:var(--ink);
+  }
+  .rail{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .rail-step{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .rail-dot{
+    width:30px;height:30px;
+    border-radius:50%;
+    border:2px solid var(--line);
+    background:var(--card);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink-soft);
+    transition:all .25s ease;
+  }
+  .rail-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:var(--ink-soft);
+    max-width:70px;
+    line-height:1.2;
+  }
+  .rail-step.active .rail-dot{
+    background:var(--mustard);
+    border-color:var(--mustard-dark);
+    color:var(--ink);
+    box-shadow:0 0 0 3px rgba(220,160,42,0.25);
+  }
+  .rail-step.active .rail-label{color:var(--ink); font-weight:700;}
+  .rail-step.done .rail-dot{
+    background:var(--enamel);
+    border-color:var(--enamel-dark);
+    color:var(--white);
+  }
+  .rail-step.locked .rail-dot{opacity:0.55;}
+  .rail-step.locked .rail-label{opacity:0.55;}
+  .rail-connector{
+    width:18px;height:2px;
+    background:var(--line);
+    margin-bottom:16px;
+  }
+
+  /* ---------- Stage ---------- */
+  .stage-wrap{flex:1; display:flex;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:36px 34px;
+    width:100%;
+    position:relative;
+    box-shadow:0 1px 0 rgba(35,46,41,0.04);
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;height:6px;
+    background:repeating-linear-gradient(90deg, var(--mustard) 0 16px, var(--rush) 16px 32px);
+    opacity:0.9;
+    border-radius:4px 4px 0 0;
+  }
+  .kicker{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:2px;
+    color:var(--rush);
+    font-weight:600;
+    margin:6px 0 6px;
+  }
+  h2.page-title{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:34px;
+    letter-spacing:0.5px;
+    margin:0 0 14px;
+    color:var(--ink);
+  }
+  p{line-height:1.65; color:var(--ink); font-size:15.5px;}
+  .lead{font-size:17px; color:var(--ink);}
+  .muted{color:var(--ink-soft);}
+
+  /* ---------- Intro page ---------- */
+  .scene{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:18px;
+    margin-top:18px;
+  }
+  .scene-card{
+    background:var(--paper-dim);
+    border:1px dashed var(--line);
+    border-radius:4px;
+    padding:18px 20px;
+  }
+  .scene-card h3{
+    margin:0 0 8px;
+    font-family:'Bebas Neue', sans-serif;
+    font-size:20px;
+    letter-spacing:0.5px;
+    color:var(--enamel-dark);
+  }
+  .goal-box{
+    margin-top:18px;
+    border-left:4px solid var(--mustard-dark);
+    background:#FBF3E0;
+    padding:14px 18px;
+    border-radius:2px;
+  }
+  .goal-box strong{color:var(--rush);}
+
+  /* ---------- Game page ---------- */
+  .morning-intro{
+    background:var(--paper-dim);
+    border:1px dashed var(--line);
+    border-radius:6px;
+    padding:22px;
+    text-align:center;
+  }
+  .morning-intro .btn{margin-top:10px;}
+
+  .morning-scene{
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+    margin:16px 0;
+  }
+  .customer-lane{
+    flex:1.3 1 220px;
+    min-height:150px;
+    border:1px dashed var(--line);
+    border-radius:6px;
+    padding:14px;
+    display:flex;
+    flex-wrap:wrap;
+    align-content:flex-start;
+    gap:12px;
+    background:var(--paper-dim);
+  }
+  .customer-chip{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    animation:popIn .35s ease;
+  }
+  @keyframes popIn{
+    from{opacity:0; transform:translateY(8px) scale(0.9);}
+    to{opacity:1; transform:translateY(0) scale(1);}
+  }
+  .customer-chip .face{font-size:26px; line-height:1;}
+  .customer-chip .order-bubble{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:3px 8px;
+    margin-top:5px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    white-space:nowrap;
+  }
+  .trend-board{
+    flex:1 1 220px;
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:16px;
+  }
+  .trend-board h4{
+    margin:0 0 12px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    color:var(--ink-soft);
+  }
+  .trend-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:9px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    transition:all .25s ease;
+  }
+  .trend-emoji{font-size:16px;}
+  .trend-name{width:52px; flex:0 0 auto;}
+  .trend-bar-wrap{
+    flex:1;
+    background:var(--paper-dim);
+    border-radius:3px;
+    height:10px;
+    overflow:hidden;
+  }
+  .trend-bar{
+    display:block;
+    height:100%;
+    background:var(--enamel);
+    transition:width .35s ease;
+  }
+  .trend-row.top3 .trend-bar{background:var(--mustard-dark);}
+  .trend-row.top3 .trend-name{color:var(--rush); font-weight:700;}
+  .trend-count{width:16px; text-align:right;}
+  .morning-loaded-note{
+    background:#EEF7EF;
+    border:1px solid var(--good);
+    color:var(--good);
+    border-radius:4px;
+    padding:10px 14px;
+    font-size:13.5px;
+    font-weight:600;
+    margin-bottom:14px;
+  }
+
+  .rule-line{
+    background:#FBF3E0;
+    border:1px solid var(--mustard-dark);
+    border-radius:4px;
+    padding:10px 14px;
+    font-size:13.5px;
+    margin-bottom:18px;
+  }
+  .status-line{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    padding:9px 12px;
+    border-radius:4px;
+    margin-bottom:12px;
+  }
+  .status-good{background:#EEF7EF; color:var(--good); border:1px solid var(--good);}
+  .status-warn{background:var(--rush-soft); color:var(--rush); border:1px solid var(--rush);}
+  .hud{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+  }
+  .hud-item{
+    background:var(--paper-dim);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:8px 14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width:110px;
+  }
+  .hud-item .val{font-size:19px; font-weight:600; color:var(--ink);}
+  .hud-item .lbl{font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--ink-soft);}
+
+  .history-panel{
+    margin-bottom:14px;
+  }
+  .history-panel h4{
+    margin:0 0 6px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    color:var(--ink-soft);
+  }
+  .ticket-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    overflow-x:auto;
+    padding:4px 4px 10px;
+    margin-bottom:0;
+  }
+  .mini-ticket{
+    flex:0 0 auto;
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:6px 10px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    text-align:center;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .mini-tag{font-size:12px;}
+
+  .served-note{
+    background:#EEF7EF;
+    border:1px solid var(--good);
+    color:var(--good);
+    border-radius:6px;
+    padding:16px 18px;
+    font-size:14.5px;
+    font-weight:600;
+    margin-bottom:16px;
+  }
+
+  .order-board{
+    display:flex;
+    gap:26px;
+    align-items:stretch;
+    flex-wrap:wrap;
+    margin:14px 0 22px;
+  }
+  .ticket-big{
+    flex:1 1 220px;
+    background:var(--white);
+    border:2px solid var(--ink);
+    border-radius:6px;
+    padding:20px;
+    position:relative;
+    min-height:160px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+  }
+  .ticket-big .emoji{font-size:52px; margin-bottom:8px;}
+  .ticket-big .dish-name{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:26px;
+    letter-spacing:1px;
+  }
+  .ticket-big .order-no{
+    position:absolute; top:10px; left:14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+  }
+
+  .shelf-panel{
+    flex:1 1 260px;
+    background:var(--paper-dim);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:16px;
+  }
+  .shelf-panel h4{
+    margin:0 0 10px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    color:var(--ink-soft);
+  }
+  .shelf-slots{
+    display:flex;
+    gap:10px;
+  }
+  .shelf-slot{
+    flex:1;
+    height:96px;
+    background:var(--white);
+    border:2px solid var(--line);
+    border-radius:6px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    font-size:11px;
+    color:var(--ink-soft);
+    font-family:'IBM Plex Mono', monospace;
+    position:relative;
+    transition:all .2s ease;
+  }
+  .shelf-slot .se{font-size:30px;}
+  .shelf-slot.empty{border-style:dashed;}
+  .shelf-slot.evictable{
+    border-color:var(--rush);
+    cursor:pointer;
+    background:var(--rush-soft);
+    animation:pulse 1.1s infinite;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(189,68,48,0.35);}
+    50%{box-shadow:0 0 0 6px rgba(189,68,48,0);}
+  }
+
+  .evict-banner{
+    background:var(--rush);
+    color:var(--white);
+    padding:10px 14px;
+    border-radius:4px;
+    font-size:13.5px;
+    margin-bottom:14px;
+    font-weight:600;
+  }
+
+  .fetch-bar-wrap{
+    height:8px;
+    background:var(--paper-dim);
+    border-radius:4px;
+    overflow:hidden;
+    margin:14px 0 4px;
+    display:none;
+  }
+  .fetch-bar-wrap.show{display:block;}
+  .fetch-bar{
+    height:100%;
+    width:0%;
+    background:var(--enamel);
+    transition:width 0.9s linear;
+  }
+  .fetch-caption{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    display:none;
+  }
+  .fetch-caption.show{display:block;}
+
+  .action-row{display:flex; gap:12px; margin-top:16px; align-items:center; flex-wrap:wrap;}
+
+  .game-summary{
+    background:#F1F6EF;
+    border:1px solid var(--good);
+    border-radius:6px;
+    padding:18px 20px;
+    margin-top:20px;
+  }
+  .game-summary h4{
+    margin:0 0 8px;
+    color:var(--good);
+    font-family:'Bebas Neue', sans-serif;
+    font-size:22px;
+    letter-spacing:0.5px;
+  }
+  .compare-row{display:flex; gap:22px; flex-wrap:wrap; margin-top:10px;}
+  .compare-item{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+  }
+  .compare-item .num{font-size:22px; font-weight:600; display:block; color:var(--ink);}
+
+  /* ---------- Reflection page ---------- */
+  .q-block{margin-bottom:22px;}
+  .q-block label{
+    display:block;
+    font-weight:600;
+    margin-bottom:8px;
+    font-size:15px;
+  }
+  textarea{
+    width:100%;
+    min-height:80px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:12px;
+    font-family:'Work Sans', sans-serif;
+    font-size:14.5px;
+    resize:vertical;
+    background:var(--white);
+    color:var(--ink);
+  }
+  textarea:focus{outline:2px solid var(--mustard); outline-offset:1px;}
+
+  .reveal-box{
+    margin-top:10px;
+    background:var(--paper-dim);
+    border-left:4px solid var(--enamel);
+    padding:16px 18px;
+    border-radius:2px;
+    display:none;
+  }
+  .reveal-box.show{display:block; animation:fadeIn .4s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+  .reveal-box h4{
+    margin:0 0 8px;
+    font-family:'Bebas Neue', sans-serif;
+    font-size:20px;
+    color:var(--enamel-dark);
+  }
+
+  /* ---------- Quiz page ---------- */
+  .quiz-q{
+    margin-bottom:22px;
+    padding-bottom:18px;
+    border-bottom:1px solid var(--line);
+  }
+  .quiz-q:last-of-type{border-bottom:none;}
+  .quiz-q .qnum{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--rush);
+    letter-spacing:1px;
+    text-transform:uppercase;
+  }
+  .level-badge{
+    display:inline-block;
+    background:var(--enamel);
+    color:var(--white);
+    font-size:9.5px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    padding:2px 7px;
+    border-radius:10px;
+    margin-left:6px;
+  }
+  .quiz-q p.qtext{margin:4px 0 12px; font-weight:600; font-size:15.5px;}
+  .opt{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    margin-bottom:8px;
+    cursor:pointer;
+    background:var(--white);
+    transition:all .15s ease;
+  }
+  .opt:hover{border-color:var(--enamel);}
+  .opt input{margin-top:3px;}
+  .opt.correct{border-color:var(--good); background:#EEF7EF;}
+  .opt.incorrect{border-color:var(--rush); background:var(--rush-soft);}
+  .quiz-explain{
+    display:none;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-top:6px;
+    padding-left:2px;
+  }
+  .quiz-explain.show{display:block;}
+  .score-panel{
+    margin-top:8px;
+    background:#F1F6EF;
+    border:1px solid var(--good);
+    border-radius:6px;
+    padding:18px 20px;
+  }
+  .score-panel h4{margin:0 0 6px; font-family:'Bebas Neue', sans-serif; font-size:24px; color:var(--good);}
+  .final-panel{
+    margin-top:16px;
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:6px;
+    padding:22px;
+    display:none;
+  }
+  .final-panel.show{display:block; animation:fadeIn .5s ease;}
+  .final-panel h4{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:26px;
+    margin:0 0 8px;
+    color:var(--mustard);
+  }
+  .final-panel p{
+    color:var(--paper);
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    padding:12px 22px;
+    border-radius:4px;
+    border:2px solid var(--ink);
+    background:var(--card);
+    color:var(--ink);
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .btn:hover:not(:disabled){transform:translateY(-1px); box-shadow:0 3px 0 var(--ink);}
+  .btn:active:not(:disabled){transform:translateY(0); box-shadow:none;}
+  .btn:disabled{opacity:0.4; cursor:not-allowed;}
+  .btn-primary{background:var(--mustard); border-color:var(--mustard-dark); color:var(--ink);}
+  .btn-primary:hover:not(:disabled){box-shadow:0 3px 0 var(--mustard-dark);}
+  .btn-rush{background:var(--rush); border-color:#8C3021; color:var(--white);}
+  .btn-rush:hover:not(:disabled){box-shadow:0 3px 0 #8C3021;}
+  .btn-ghost{background:transparent;}
+
+  /* ---------- Footer Nav ---------- */
+  .app-nav{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:24px;
+    padding-top:16px;
+    border-top:3px solid var(--ink);
+  }
+  .nav-status{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:1px;
+  }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(35,46,41,0.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:var(--card);
+    border-radius:6px;
+    max-width:380px;
+    width:100%;
+    padding:26px;
+    border-top:6px solid var(--rush);
+  }
+  .modal-box h4{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:24px;
+    margin:0 0 10px;
+    color:var(--rush);
+  }
+  .modal-box p{font-size:14px; margin:0 0 20px;}
+  .modal-actions{display:flex; gap:10px; justify-content:flex-end;}
+
+  @media (max-width:600px){
+    .brand h1{font-size:30px;}
+    .rail-label{display:none;}
+    .card{padding:24px 18px;}
+    h2.page-title{font-size:27px;}
+    .order-board{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="app-header">
+    <div class="brand">
+      <span class="eyebrow">Case Study</span>
+      <h1>The Griddle</h1>
+    </div>
+    <nav class="rail" id="rail"></nav>
+  </header>
+
+  <div class="stage-wrap">
+    <div class="card" id="stage"></div>
+  </div>
+
+  <footer class="app-nav">
+    <button class="btn btn-ghost" id="backBtn">← Back</button>
+    <span class="nav-status" id="navStatus"></span>
+    <button class="btn btn-primary" id="nextBtn">Next →</button>
+  </footer>
+
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <h4>Heads up</h4>
+    <p id="modalText">Going back will clear your progress on this page. You'll need to redo it to move forward again. Continue?</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modalCancel">Cancel</button>
+      <button class="btn btn-rush" id="modalConfirm">Yes, go back</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  // ---------------------------------------------------------
+  // Config
+  // ---------------------------------------------------------
+  var SHELF_SIZE = 3;
+  var PANTRY_COST = 4;
+  var SHELF_COST = 1;
+  var ORDER_QUEUE = ['Burger','Fries','Burger','Salad','Fries','Burger','Pasta','Fries'];
+  var MORNING_ORDERS = ['Fries','Burger','Soup','Fries','Burger','Soup','Fries','Salad','Burger','Fries'];
+  var DISH_EMOJI = {Burger:'🍔', Fries:'🍟', Salad:'🥗', Pasta:'🍝', Soup:'🍲'};
+  var FACES = ['🧑','👩','🧔','👨','🧕','👵','👴','🧑\u200d🦱'];
+  var BASELINE_TIME = ORDER_QUEUE.length * PANTRY_COST;
+
+  var QUIZ = [
+    {
+      level: "Create",
+      q: "Chef Wren notices the lunch rush follows the order sequence: Burger → Pizza → Pasta → Burger → Pizza → Salad → Burger → Pizza. Which strategy would likely result in the fewest pantry trips?",
+      opts: [
+        "Replace dishes randomly whenever the shelf is full.",
+        "Keep dishes that are ordered repeatedly on the warming shelf.",
+        "Empty the warming shelf after every three orders.",
+        "Always keep the newest dishes only."
+      ],
+      correct: 1,
+      explain: "Burger and Pizza keep reappearing throughout the sequence, so keeping them on the shelf avoids repeated pantry trips — a random or fixed-schedule approach ignores what's actually being ordered."
+    },
+    {
+      level: "Evaluate",
+      q: "Two chefs use different strategies. Chef A removes the oldest dish from the shelf when it is full. Chef B removes the dish that has not been used for the longest time. For customers who frequently reorder the same dishes, whose strategy is generally better?",
+      opts: [
+        "Chef A, because older dishes should always be removed.",
+        "Chef B, because frequently reused dishes are more likely to stay available.",
+        "Both strategies always perform exactly the same.",
+        "Neither strategy affects performance."
+      ],
+      correct: 1,
+      explain: "Chef B's approach protects dishes that are still being reordered, while Chef A's approach can evict something the moment it arrives — even if it's about to be ordered again."
+    },
+    {
+      level: "Analyze",
+      q: "The shelf initially contains Burger, Pizza, and Pasta. The next orders are: Pizza → Burger → Salad. Which statement is correct?",
+      opts: [
+        "All three orders require pantry trips.",
+        "Only the Salad order requires a pantry trip.",
+        "Burger and Salad require pantry trips.",
+        "Only Pizza requires a pantry trip."
+      ],
+      correct: 1,
+      explain: "Pizza and Burger are both already on the shelf, so only Salad — which isn't there — needs a trip to the pantry."
+    },
+    {
+      level: "Apply",
+      q: "The warming shelf currently contains: Soup, Rice, Curry. The next customer orders Rice. What should Chef Wren do?",
+      opts: [
+        "Go to the pantry to get Rice.",
+        "Remove Soup before serving Rice.",
+        "Serve Rice directly from the warming shelf.",
+        "Clear the shelf first."
+      ],
+      correct: 2,
+      explain: "Rice is already sitting on the shelf, so it can be served right away without a trip to the pantry or any swap."
+    },
+    {
+      level: "Understand",
+      q: "In the restaurant analogy, what does the warming shelf represent?",
+      opts: [
+        "Hard Disk",
+        "Main Memory (RAM)",
+        "Cache Memory",
+        "CPU"
+      ],
+      correct: 2,
+      explain: "The small, fast, limited-space shelf beside the grill mirrors cache memory — a small, fast layer that keeps frequently-needed items close at hand, separate from slower, larger storage."
+    }
+  ];
+
+  // ---------------------------------------------------------
+  // State
+  // ---------------------------------------------------------
+  function defaultGameData(){
+    return {
+      queue: ORDER_QUEUE.slice(),
+      index: 0,
+      shelf: [],
+      elapsed: 0,
+      phase: 'idle', // idle | awaiting-evict | served-waiting
+      pendingDish: null,
+      lastServed: null,
+      log: [],
+      done: false,
+      rushStarted: false,
+      morning: {
+        queue: MORNING_ORDERS.slice(),
+        index: 0,
+        tally: {},
+        firstSeen: [],
+        phase: 'filling' // filling | loaded
+      }
+    };
+  }
+  function defaultReflectData(){
+    return { q1:'', q2:'', revealed:false };
+  }
+  function defaultQuizData(){
+    return { answers:{}, checked:false, score:0, finished:false };
+  }
+
+  function buildInitialState(){
+    return {
+      current: 0,
+      maxUnlocked: 0,
+      pages: [
+        { id:'problem' },
+        { id:'intro' },
+        { id:'game', data: defaultGameData() },
+        { id:'reflect', data: defaultReflectData() },
+        { id:'quiz', data: defaultQuizData() }
+      ]
+    };
+  }
+
+  var state = buildInitialState();
+
+  var pageLabels = ['Introduction','The Setup','Rush Hour','Debrief','Quick Check'];
+
+  function isPageComplete(idx){
+    if(idx === 0) return true;
+    if(idx === 1) return true;
+    if(idx === 2) return state.pages[2].data.done;
+    if(idx === 3) return state.pages[3].data.revealed;
+    if(idx === 4) return true;
+    return false;
+  }
+
+  function resetPage(idx){
+    if(idx === 2) state.pages[2].data = defaultGameData();
+    if(idx === 3) state.pages[3].data = defaultReflectData();
+    if(idx === 4) state.pages[4].data = defaultQuizData();
+  }
+
+  // ---------------------------------------------------------
+  // Rail
+  // ---------------------------------------------------------
+  function renderRail(){
+    var rail = document.getElementById('rail');
+    var html = '';
+    for(var i=0;i<5;i++){
+      var cls = 'rail-step';
+      if(i === state.current) cls += ' active';
+      else if(i < state.current) cls += ' done';
+      else cls += ' locked';
+      html += '<div class="'+cls+'">';
+      html += '<div class="rail-dot">'+ (i < state.current ? '✓' : (i>state.current ? '🔒' : (i+1))) +'</div>';
+      html += '<div class="rail-label">'+pageLabels[i]+'</div>';
+      html += '</div>';
+      if(i < 4) html += '<div class="rail-connector"></div>';
+    }
+    rail.innerHTML = html;
+  }
+
+  // ---------------------------------------------------------
+  // Stage renderers
+  // ---------------------------------------------------------
+  function renderStage(){
+    var stage = document.getElementById('stage');
+    var id = state.pages[state.current].id;
+    if(id === 'problem') stage.innerHTML = problemHTML();
+    if(id === 'intro') stage.innerHTML = introHTML();
+    if(id === 'game') stage.innerHTML = gameHTML();
+    if(id === 'reflect') stage.innerHTML = reflectHTML();
+    if(id === 'quiz') stage.innerHTML = quizHTML();
+
+    if(id === 'reflect') bindReflectInputs();
+  }
+
+  function problemHTML(){
+    return ''+
+    '<span class="kicker">Step 1 of 5 — Introduction</span>'+
+    '<h2 class="page-title">Introduction</h2>'+
+    '<p class="lead">In many everyday situations, some things get used far more often than others, and reaching them quickly matters. A mechanic keeps the tools used on almost every job hanging right above the workbench, instead of walking to the storeroom each time. A shopkeeper stacks the fast-selling items near the counter, while the rest stay on the back shelves. A student keeps the two or three textbooks opened every day on the desk, and puts the rest away in a cupboard across the room.</p>'+
+    '<p class="lead">In each case, walking to a larger, slower storage area every single time is wasteful — especially when it is usually the same handful of things being asked for again and again. But that space near at hand is always limited, so not everything can be kept there.</p>'+
+    '<div class="goal-box">'+
+      '<strong>This raises a question:</strong> how do you decide what stays within easy reach, and what gets sent back to storage, as the things people ask for keep changing over time? Solving this well means finding a strategy — not just picking at random.'+
+    '</div>'+
+    '<p class="lead" style="margin-top:18px;">Here is that exact situation, playing out at a lunch counter.</p>'+
+    '<div class="goal-box">'+
+      '<strong>The setup:</strong> Chef Wren has a warming shelf with just <strong>3 sections</strong> next to the grill. Everything else sits in the pantry down the hall — and every trip there costs time. With only 3 spots close by, what should stay on the shelf, and when should something get swapped out, to keep the line moving?'+
+    '</div>'+
+    '<p class="muted" style="margin-top:18px;">Tap <strong>Next</strong> to see how it plays out.</p>';
+  }
+
+  function introHTML(){
+    return ''+
+    '<span class="kicker">Step 2 of 5 — The Setup</span>'+
+    '<h2 class="page-title">Meet Chef Wren</h2>'+
+    '<p class="lead">Chef Wren runs the counter alone during the rush — and is about to put your thinking to the test.</p>'+
+    '<div class="goal-box">'+
+      '<strong>How it works:</strong> for each order, tap <strong>Serve</strong>. If the dish is already on the shelf, it\'s quick. If not, it means a trip to the pantry — and if the shelf is full, you\'ll pick which dish to swap out first.'+
+    '</div>'+
+    '<p class="muted" style="margin-top:18px;">Tap <strong>Next</strong> to step behind the counter.</p>';
+  }
+
+  function morningSceneHTML(g){
+    var m = g.morning;
+    var html = '';
+
+    html += '<div class="morning-intro" style="text-align:left; padding:16px 18px;">';
+    html += '<p class="lead" style="margin:0;">Before the shop even opened, customers were already lining up outside placing their orders — so Chef Wren already has a good idea of what\'s about to be in demand. Bring them in one at a time and watch what starts trending.</p>';
+    html += '</div>';
+
+    html += '<div class="morning-scene">';
+
+    html += '<div class="customer-lane">';
+    if(m.index === 0){
+      html += '<p class="muted" style="font-size:12.5px; margin:0;">No one\'s in line yet.</p>';
+    }
+    for(var i=0;i<m.index;i++){
+      var dish = m.queue[i];
+      var face = FACES[i % FACES.length];
+      html += '<div class="customer-chip"><div class="face">'+face+'</div><div class="order-bubble">'+DISH_EMOJI[dish]+' '+dish+'</div></div>';
+    }
+    html += '</div>';
+
+    var dishes = Object.keys(m.tally).sort(function(a,b){
+      if(m.tally[b] !== m.tally[a]) return m.tally[b] - m.tally[a];
+      return m.firstSeen.indexOf(a) - m.firstSeen.indexOf(b);
+    });
+    var top3 = dishes.slice(0,3);
+    var maxCount = 0;
+    for(var k=0;k<dishes.length;k++){ if(m.tally[dishes[k]] > maxCount) maxCount = m.tally[dishes[k]]; }
+
+    html += '<div class="trend-board"><h4>What\'s Trending</h4>';
+    if(dishes.length === 0){
+      html += '<p class="muted" style="font-size:12.5px;">Waiting for the first order…</p>';
+    }
+    for(var d=0; d<dishes.length; d++){
+      var dn = dishes[d];
+      var isTop = (m.phase === 'loaded') && top3.indexOf(dn) !== -1;
+      var pct = maxCount ? Math.round((m.tally[dn]/maxCount)*100) : 0;
+      html += '<div class="trend-row'+(isTop?' top3':'')+'">';
+      html += '<span class="trend-emoji">'+DISH_EMOJI[dn]+'</span>';
+      html += '<span class="trend-name">'+dn+'</span>';
+      html += '<span class="trend-bar-wrap"><span class="trend-bar" style="width:'+pct+'%"></span></span>';
+      html += '<span class="trend-count">'+m.tally[dn]+'</span>';
+      html += '</div>';
+    }
+    html += '</div>';
+
+    html += '</div>'; // .morning-scene
+
+    if(m.phase === 'loaded'){
+      var shelfList = g.shelf.map(function(dd){ return DISH_EMOJI[dd]+' '+dd; }).join(', ');
+      html += '<div class="morning-loaded-note">✅ Top 3 loaded onto the shelf: '+shelfList+'</div>';
+      html += '<div class="action-row"><button class="btn btn-primary" data-action="start-rush">Start the Rush →</button></div>';
+    } else {
+      var label = m.index === 0 ? '👉 Let the First Customer In' : '👉 Next Customer';
+      html += '<div class="action-row"><button class="btn btn-primary" data-action="next-morning-customer">'+label+'</button></div>';
+    }
+
+    return html;
+  }
+
+  function gameHTML(){
+    var g = state.pages[2].data;
+    var html = '<span class="kicker">Step 3 of 5 — Rush Hour</span>';
+    html += '<h2 class="page-title">Serve the Line</h2>';
+
+    if(!g.rushStarted){
+      html += morningSceneHTML(g);
+      return html;
+    }
+
+    html += '<div class="rule-line">One rule: a dish <strong>stays on the shelf</strong> after you serve it — it only leaves if you swap it out for something else.</div>';
+
+    html += '<div class="hud">';
+    html += '<div class="hud-item"><span class="val">'+g.elapsed+'</span><span class="lbl">Time Spent</span></div>';
+    html += '<div class="hud-item"><span class="val">'+g.log.length+' / '+g.queue.length+'</span><span class="lbl">Orders Served</span></div>';
+    html += '</div>';
+
+    if(g.log.length > 0){
+      html += '<div class="history-panel"><h4>Past Orders</h4><div class="ticket-row">';
+      for(var i=0;i<g.log.length;i++){
+        var entry = g.log[i];
+        var tag = entry.source === 'shelf' ? '⚡' : '🚚';
+        html += '<div class="mini-ticket"><span class="mini-tag">'+tag+'</span>'+DISH_EMOJI[entry.dish]+' '+entry.dish+'</div>';
+      }
+      html += '</div></div>';
+    }
+
+    if(g.done){
+      html += gameSummaryHTML(g);
+      return html;
+    }
+
+    if(g.phase === 'served-waiting'){
+      html += '<div class="served-note">✅ Served '+DISH_EMOJI[g.lastServed]+' '+g.lastServed+'. That customer heads off happy.</div>';
+      html += '<div class="action-row"><button class="btn btn-primary" data-action="next-customer">👉 Next Customer</button></div>';
+      return html;
+    }
+
+    var currentDish = g.queue[g.index];
+    var onShelf = g.shelf.indexOf(currentDish) !== -1;
+
+    html += '<div class="order-board">';
+    html += '<div class="ticket-big"><span class="order-no">Order #'+(g.index+1)+' of '+g.queue.length+'</span>';
+    html += '<div class="emoji">'+DISH_EMOJI[currentDish]+'</div>';
+    html += '<div class="dish-name">'+currentDish+'</div>';
+    html += '</div>';
+
+    html += '<div class="shelf-panel"><h4>Warming Shelf — stays until swapped</h4><div class="shelf-slots">';
+    for(var s=0;s<SHELF_SIZE;s++){
+      if(g.shelf[s]){
+        var evictable = g.phase === 'awaiting-evict';
+        html += '<div class="shelf-slot'+(evictable?' evictable':'')+'" '+(evictable ? 'data-action="evict" data-dish="'+g.shelf[s]+'"' : '')+'>';
+        html += '<div class="se">'+DISH_EMOJI[g.shelf[s]]+'</div>'+g.shelf[s];
+        html += '</div>';
+      } else {
+        html += '<div class="shelf-slot empty">empty</div>';
+      }
+    }
+    html += '</div></div>';
+    html += '</div>';
+
+    html += '<div class="fetch-bar-wrap" id="fetchBarWrap"><div class="fetch-bar" id="fetchBar"></div></div>';
+    html += '<div class="fetch-caption" id="fetchCaption">Jogging to the pantry…</div>';
+
+    if(g.phase === 'awaiting-evict'){
+      html += '<div class="evict-banner">Shelf\'s full. Tap the dish above you want to remove to make room for '+DISH_EMOJI[g.pendingDish]+' '+g.pendingDish+'.</div>';
+    } else {
+      html += '<div class="status-line '+(onShelf ? 'status-good' : 'status-warn')+'">';
+      if(onShelf){
+        html += '✅ '+currentDish+' is already on the shelf — serving it will be quick.';
+      } else if(g.shelf.length < SHELF_SIZE){
+        html += '🚚 '+currentDish+' is not on the shelf yet — you\'ll need to fetch it.';
+      } else {
+        html += '🚚 '+currentDish+' is not on the shelf, and the shelf is full — you\'ll need to fetch it and clear a spot.';
+      }
+      html += '</div>';
+      html += '<div class="action-row">';
+      html += '<button class="btn btn-primary" id="serveBtn" data-action="serve">Serve This Order</button>';
+      html += '</div>';
+    }
+
+    return html;
+  }
+
+  function gameSummaryHTML(g){
+    var rating, ratingColor;
+    if(g.elapsed <= 16){ rating = "Great instincts."; }
+    else if(g.elapsed <= 22){ rating = "Solid run."; }
+    else{ rating = "You made it — but a lot of pantry trips."; }
+
+    var html = '<div class="game-summary">';
+    html += '<h4>Rush Over — Line Cleared 🎉</h4>';
+    html += '<p>'+rating+' You spent <strong>'+g.elapsed+'</strong> time units serving '+g.queue.length+' orders.</p>';
+    html += '<div class="compare-row">';
+    html += '<div class="compare-item"><span class="num">'+BASELINE_TIME+'</span>Time if every single order meant a pantry trip</div>';
+    html += '<div class="compare-item"><span class="num">'+g.elapsed+'</span>Your time</div>';
+    html += '<div class="compare-item"><span class="num">'+Math.max(0, BASELINE_TIME - g.elapsed)+'</span>Time you saved</div>';
+    html += '</div>';
+    html += '</div>';
+    return html;
+  }
+
+  function reflectHTML(){
+    var r = state.pages[3].data;
+    var html = '<span class="kicker">Step 4 of 5 — Debrief</span>';
+    html += '<h2 class="page-title">Back of House</h2>';
+    html += '<p class="lead">The rush is over. Before Chef Wren preps for dinner, jot down what you noticed.</p>';
+
+    html += '<div class="q-block">';
+    html += '<label>Which dishes did you try to keep on the shelf, and why those ones?</label>';
+    html += '<textarea id="q1" placeholder="Type your answer here…">'+r.q1+'</textarea>';
+    html += '</div>';
+
+    html += '<div class="q-block">';
+    html += '<label>What pattern helped you serve orders faster as the rush went on?</label>';
+    html += '<textarea id="q2" placeholder="Type your answer here…">'+r.q2+'</textarea>';
+    html += '</div>';
+
+    html += '<button class="btn btn-primary" id="revealBtn" data-action="reveal" '+((r.q1.trim().length<10 || r.q2.trim().length<10) ? 'disabled' : '')+'>Reveal Chef Wren\'s Notebook</button>';
+
+    html += '<div class="reveal-box'+(r.revealed?' show':'')+'" id="revealBox">';
+    html += '<h4>Chef Wren\'s Notebook</h4>';
+    html += '<p>Keeping a few frequently-reordered dishes within arm\'s reach saved the most time. The trick was never remembering everything — it was remembering the right handful, and always knowing which one had gone the longest without being touched whenever a new dish needed a spot.</p>';
+    html += '</div>';
+
+    return html;
+  }
+
+  function quizHTML(){
+    var qd = state.pages[4].data;
+    var html = '<span class="kicker">Step 5 of 5 — Quick Check</span>';
+    html += '<h2 class="page-title">Would It Work Anywhere Else?</h2>';
+    html += '<p class="lead">Same idea, different counters. Give these a try.</p>';
+
+    for(var i=0;i<QUIZ.length;i++){
+      var item = QUIZ[i];
+      var picked = qd.answers[i];
+      html += '<div class="quiz-q">';
+      html += '<span class="qnum">Question '+(i+1)+' <span class="level-badge">'+item.level+'</span></span>';
+      html += '<p class="qtext">'+item.q+'</p>';
+      for(var o=0;o<item.opts.length;o++){
+        var optCls = 'opt';
+        if(qd.checked){
+          if(o === item.correct) optCls += ' correct';
+          else if(picked === o) optCls += ' incorrect';
+        }
+        html += '<label class="'+optCls+'">';
+        html += '<input type="radio" name="q'+i+'" value="'+o+'" data-action="quiz-answer" data-q="'+i+'" '+(picked===o?'checked':'')+' '+(qd.checked?'disabled':'')+'>';
+        html += '<span>'+item.opts[o]+'</span>';
+        html += '</label>';
+      }
+      if(qd.checked){
+        html += '<div class="quiz-explain show">'+item.explain+'</div>';
+      }
+      html += '</div>';
+    }
+
+    var answeredAll = Object.keys(qd.answers).length === QUIZ.length;
+
+    if(!qd.checked){
+      html += '<button class="btn btn-primary" data-action="quiz-check" '+(answeredAll?'':'disabled')+'>Check Answers</button>';
+    } else if(!qd.finished){
+      html += '<div class="score-panel"><h4>You got '+qd.score+' / '+QUIZ.length+' right</h4><p>'+quizFeedback(qd.score)+'</p></div>';
+      html += '<button class="btn btn-primary" data-action="quiz-finish" style="margin-top:14px;">See Case Study Summary</button>';
+    } else {
+      html += '<div class="score-panel"><h4>You got '+qd.score+' / '+QUIZ.length+' right</h4><p>'+quizFeedback(qd.score)+'</p></div>';
+      html += finalPanelHTML();
+    }
+
+    return html;
+  }
+
+  function quizFeedback(score){
+    if(score === QUIZ.length) return "You're spotting the pattern everywhere now.";
+    if(score >= 3) return "You've got the core idea down.";
+    return "Worth a re-read of Chef Wren's notebook before moving on.";
+  }
+
+  function finalPanelHTML(){
+    var g = state.pages[2].data;
+    var qd = state.pages[4].data;
+    var html = '<div class="final-panel show">';
+    html += '<h4>Case Study Complete</h4>';
+    html += '<p>Rush hour time: <strong>'+g.elapsed+'</strong> units (baseline was '+BASELINE_TIME+'). Quick check score: <strong>'+qd.score+' / '+QUIZ.length+'</strong>.</p>';
+    html += '<p style="opacity:0.85;">You just built a working instinct for cache memory — a small, fast layer that sits between you and slower storage, holding on to whatever is likely to be needed again soon.</p>';
+    html += '<button class="btn btn-primary" data-action="restart-app" style="margin-top:14px;">↺ Start Over</button>';
+    html += '</div>';
+    return html;
+  }
+
+  // ---------------------------------------------------------
+  // Nav
+  // ---------------------------------------------------------
+  function renderNav(){
+    var backBtn = document.getElementById('backBtn');
+    var nextBtn = document.getElementById('nextBtn');
+    var status = document.getElementById('navStatus');
+
+    backBtn.style.visibility = state.current === 0 ? 'hidden' : 'visible';
+
+    if(state.current === 4){
+      nextBtn.style.visibility = 'hidden';
+    } else {
+      nextBtn.style.visibility = 'visible';
+      nextBtn.disabled = !isPageComplete(state.current);
+      nextBtn.textContent = isPageComplete(state.current) ? 'Next →' : 'Complete this step →';
+    }
+
+    status.textContent = 'Step ' + (state.current+1) + ' of 5';
+  }
+
+  function render(){
+    renderRail();
+    renderStage();
+    renderNav();
+  }
+
+  // ---------------------------------------------------------
+  // Modal
+  // ---------------------------------------------------------
+  function showModal(){
+    document.getElementById('modalOverlay').classList.add('show');
+  }
+  function hideModal(){
+    document.getElementById('modalOverlay').classList.remove('show');
+  }
+
+  document.getElementById('modalCancel').addEventListener('click', hideModal);
+  document.getElementById('modalConfirm').addEventListener('click', function(){
+    hideModal();
+    var leaving = state.current;
+    resetPage(leaving);
+    state.current = leaving - 1;
+    state.maxUnlocked = state.current;
+    render();
+  });
+
+  document.getElementById('backBtn').addEventListener('click', function(){
+    if(state.current === 0) return;
+    showModal();
+  });
+
+  document.getElementById('nextBtn').addEventListener('click', function(){
+    if(!isPageComplete(state.current)) return;
+    if(state.current >= 4) return;
+    state.current++;
+    state.maxUnlocked = Math.max(state.maxUnlocked, state.current);
+    render();
+  });
+
+  // ---------------------------------------------------------
+  // Game interactions
+  // ---------------------------------------------------------
+  function advanceOrder(dish, source){
+    var g = state.pages[2].data;
+    g.log.push({dish: dish, source: source});
+    g.lastServed = dish;
+    g.index++;
+    g.pendingDish = null;
+    if(g.index >= g.queue.length){
+      g.phase = 'idle';
+      g.done = true;
+    } else {
+      g.phase = 'served-waiting';
+    }
+    render();
+  }
+
+  function nextMorningCustomer(){
+    var g = state.pages[2].data;
+    var m = g.morning;
+    if(m.index >= m.queue.length) return;
+
+    var dish = m.queue[m.index];
+    if(m.tally[dish] === undefined){
+      m.tally[dish] = 0;
+      m.firstSeen.push(dish);
+    }
+    m.tally[dish]++;
+    m.index++;
+
+    if(m.index >= m.queue.length){
+      var dishes = Object.keys(m.tally).sort(function(a,b){
+        if(m.tally[b] !== m.tally[a]) return m.tally[b] - m.tally[a];
+        return m.firstSeen.indexOf(a) - m.firstSeen.indexOf(b);
+      });
+      g.shelf = dishes.slice(0,3);
+      m.phase = 'loaded';
+    }
+    render();
+  }
+
+  function handleServe(){
+    var g = state.pages[2].data;
+    var dish = g.queue[g.index];
+    var onShelf = g.shelf.indexOf(dish) !== -1;
+
+    if(onShelf){
+      g.elapsed += SHELF_COST;
+      advanceOrder(dish, 'shelf');
+      return;
+    }
+
+    if(g.shelf.length >= SHELF_SIZE){
+      g.phase = 'awaiting-evict';
+      g.pendingDish = dish;
+      render();
+      return;
+    }
+
+    runFetchAnimation(function(){
+      g.elapsed += PANTRY_COST;
+      g.shelf.push(dish);
+      advanceOrder(dish, 'pantry');
+    });
+  }
+
+  function evictAndFetch(dishToRemove){
+    var g = state.pages[2].data;
+    var idx = g.shelf.indexOf(dishToRemove);
+    if(idx === -1) return;
+    var incoming = g.pendingDish;
+
+    runFetchAnimation(function(){
+      g.shelf.splice(idx,1);
+      g.elapsed += PANTRY_COST;
+      g.shelf.push(incoming);
+      advanceOrder(incoming, 'pantry');
+    });
+  }
+
+  function runFetchAnimation(done){
+    var wrap = document.getElementById('fetchBarWrap');
+    var bar = document.getElementById('fetchBar');
+    var caption = document.getElementById('fetchCaption');
+    var btn = document.getElementById('serveBtn');
+    if(btn) btn.disabled = true;
+    if(wrap) wrap.classList.add('show');
+    if(caption) caption.classList.add('show');
+    if(bar){
+      bar.style.width = '0%';
+      requestAnimationFrame(function(){
+        setTimeout(function(){ bar.style.width = '100%'; }, 20);
+      });
+    }
+    setTimeout(done, 900);
+  }
+
+  // ---------------------------------------------------------
+  // Reflection interactions
+  // ---------------------------------------------------------
+  function bindReflectInputs(){
+    var q1 = document.getElementById('q1');
+    var q2 = document.getElementById('q2');
+    var revealBtn = document.getElementById('revealBtn');
+    if(!q1) return;
+
+    function syncBtn(){
+      var r = state.pages[3].data;
+      revealBtn.disabled = (r.q1.trim().length < 10 || r.q2.trim().length < 10);
+    }
+
+    q1.addEventListener('input', function(){
+      state.pages[3].data.q1 = q1.value;
+      syncBtn();
+    });
+    q2.addEventListener('input', function(){
+      state.pages[3].data.q2 = q2.value;
+      syncBtn();
+    });
+  }
+
+  // ---------------------------------------------------------
+  // Quiz interactions
+  // ---------------------------------------------------------
+  function checkQuiz(){
+    var qd = state.pages[4].data;
+    var score = 0;
+    for(var i=0;i<QUIZ.length;i++){
+      if(qd.answers[i] === QUIZ[i].correct) score++;
+    }
+    qd.score = score;
+    qd.checked = true;
+    render();
+  }
+
+  // ---------------------------------------------------------
+  // Delegated click / input handling on stage
+  // ---------------------------------------------------------
+  document.getElementById('stage').addEventListener('click', function(e){
+    var target = e.target.closest('[data-action]');
+    if(!target) return;
+    var action = target.getAttribute('data-action');
+
+    if(action === 'serve') handleServe();
+    if(action === 'evict') evictAndFetch(target.getAttribute('data-dish'));
+    if(action === 'next-morning-customer') nextMorningCustomer();
+    if(action === 'next-customer'){
+      state.pages[2].data.phase = 'idle';
+      render();
+    }
+    if(action === 'start-rush'){
+      state.pages[2].data.rushStarted = true;
+      render();
+    }
+    if(action === 'reveal'){
+      state.pages[3].data.revealed = true;
+      render();
+    }
+    if(action === 'quiz-check') checkQuiz();
+    if(action === 'quiz-finish'){
+      state.pages[4].data.finished = true;
+      render();
+    }
+    if(action === 'restart-app'){
+      state = buildInitialState();
+      render();
+    }
+  });
+
+  document.getElementById('stage').addEventListener('change', function(e){
+    var target = e.target.closest('[data-action="quiz-answer"]');
+    if(!target) return;
+    var qIdx = parseInt(target.getAttribute('data-q'),10);
+    var opt = parseInt(target.value,10);
+    state.pages[4].data.answers[qIdx] = opt;
+    render();
+  });
+
+  // ---------------------------------------------------------
+  // Init
+  // ---------------------------------------------------------
+  render();
+
+})();
+</script>
+</body>
+</html>
