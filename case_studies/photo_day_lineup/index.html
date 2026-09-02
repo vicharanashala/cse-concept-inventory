@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photo Day Line-Up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-page:#EDF3FA; --bg-peach:#FDF1E9;
+  --primary:#4A9BD1; --primary-dark:#2B6FA3; --primary-light:#8FCBEF; --primary-deep:#2B6FA3;
+  --accent:#EA8C36; --accent-dark:#C96F1F; --accent-light:#F3A65C;
+  --green:#4B7A4A; --red:#D9714F;
+  --ink:#1F2E37; --muted:#54666D; --faint:#93A5AB;
+  --card:#FFFFFF; --border:#D9E5F2;
+  --success-bg:#DCEAD8; --success-text:#274B26; --success-border:#4B7A4A;
+  --error-bg:#FBE1DC; --error-text:#8A3420; --error-border:#D9714F;
+  --footer-bg:#22496B;
+  --glass:#FFFFFF; --glass-border:#D9E5F2;
+  --shadow:0 10px 26px -14px rgba(23,50,77,0.12);
+  --radius:22px;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;font-family:'Inter',sans-serif;font-weight:400;color:var(--ink);
+  background:linear-gradient(180deg, var(--bg-peach) 0%, var(--bg-page) 22%, var(--bg-page) 100%);
+  background-attachment:fixed;
+  min-height:100vh;
+}
+h1,h2,.display{font-family:'Poppins',sans-serif;font-weight:700;letter-spacing:-0.01em;}
+p{line-height:1.6;color:var(--muted);}
+button{font-family:'Poppins',sans-serif;font-weight:600;cursor:pointer;}
+.wrap{max-width:900px;margin:0 auto;padding:96px 20px 70px;}
+
+/* ---- hero / story ---- */
+.hero{text-align:center;margin-bottom:26px;}
+.hero h1{font-size:clamp(30px,5vw,44px);color:var(--primary-deep);margin:0 0 10px;}
+.hero p{max-width:600px;margin:0 auto 6px;font-size:16px;}
+.game-links{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:0 0 8px;}
+.game-link-btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
+.game-links-hint{text-align:center;font-size:13px;color:var(--muted);margin:0 auto 22px;max-width:520px;}
+.rule-chip{
+  display:inline-flex;align-items:center;gap:8px;margin-top:14px;
+  background:rgba(234,140,54,0.14);color:var(--accent-dark);font-weight:700;font-size:13.5px;
+  padding:8px 16px;border-radius:999px;
+}
+.context-box{
+  text-align:left;max-width:640px;margin:20px auto 0;padding:18px 20px;border-radius:16px;
+  background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);
+}
+.context-box h3{margin:0 0 8px;font-size:14.5px;color:var(--primary-deep);font-family:'Poppins',sans-serif;}
+.context-box p{margin:0 0 8px;font-size:14px;}
+.context-box p:last-child{margin-bottom:0;}
+.problem-desc-box{
+  text-align:left;max-width:680px;margin:0 auto 26px;padding:22px 24px;border-radius:18px;
+  background:var(--card);
+  border:1px solid var(--border);border-left:4px solid var(--accent);box-shadow:var(--shadow);
+}
+.problem-desc-box h2{margin:0 0 10px;font-size:19px;color:var(--primary-deep);font-family:'Poppins',sans-serif;text-align:center;}
+.problem-desc-box h4{margin:14px 0 6px;font-size:13.5px;color:var(--primary-dark);text-transform:uppercase;letter-spacing:.04em;}
+.problem-desc-box p{margin:0 0 4px;font-size:14.5px;color:var(--ink);}
+.problem-desc-box .story-transition{margin-top:16px;text-align:center;font-size:13.5px;font-weight:700;color:var(--primary-dark);font-style:italic;}
+
+.tax-tag{
+  display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--accent-dark);background:rgba(234,140,54,0.12);border:1px solid rgba(234,140,54,0.3);
+  border-radius:999px;padding:2px 9px;margin-bottom:6px;
+}
+
+
+.scene{
+  position:relative;border-radius:24px;overflow:hidden;margin:22px 0;
+  background:linear-gradient(180deg,#8FCBEF 0%,#EAF6FF 55%,#DCEAD8 56%,#C4E3BE 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.6);
+}
+.sun{position:absolute;top:16px;right:26px;width:44px;height:44px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#FBE3C5,var(--accent-light));
+  box-shadow:0 0 30px 8px rgba(234,140,54,0.4);}
+.line-track{
+  position:relative;display:flex;align-items:flex-end;justify-content:center;
+  gap:clamp(6px,2.4vw,20px);min-height:200px;padding:36px 10px 10px;flex-wrap:wrap;
+}
+
+/* ---- student figure ---- */
+.student{position:relative;display:flex;flex-direction:column;align-items:center;
+  transition:transform .5s cubic-bezier(.4,1.6,.4,1), filter .3s;user-select:none;}
+.student .namecap{font-size:11.5px;font-weight:700;color:var(--primary-deep);white-space:nowrap;}
+.student .heightcap{font-size:10px;color:var(--muted);margin-bottom:4px;font-weight:600;}
+.student .head{width:22px;height:22px;border-radius:50%;background:#ffe0c2;border:2px solid rgba(23,50,77,.08);margin-bottom:-4px;z-index:2;}
+.student .body{width:34px;border-radius:10px 10px 4px 4px;box-shadow:inset 0 -6px 10px rgba(23,50,77,.08);transition:height .3s;}
+.student.compare .body{outline:3px solid var(--accent);outline-offset:2px;animation:wiggle .4s;}
+.student.swap .body{outline:3px solid var(--error-border);outline-offset:2px;}
+.student.sorted .body{outline:3px solid var(--success-border);outline-offset:2px;}
+.student.glow .body{box-shadow:0 0 0 4px rgba(75,122,74,.3),0 0 22px rgba(75,122,74,.5);}
+@keyframes wiggle{0%,100%{transform:rotate(0);}25%{transform:rotate(-3deg);}75%{transform:rotate(3deg);}}
+.bubble-pop{position:absolute;top:-8px;left:50%;translate:-50% 0;width:9px;height:9px;border-radius:50%;
+  background:rgba(74,155,209,.7);pointer-events:none;animation:pop .6s ease-out forwards;}
+@keyframes pop{0%{opacity:.9;transform:translate(-50%,0) scale(.4);}100%{opacity:0;transform:translate(-50%,-34px) scale(1.6);}}
+
+/* ---- card / controls ---- */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:26px;}
+.center{text-align:center;}
+.status-line{font-size:14.5px;font-weight:600;color:var(--primary-deep);min-height:20px;margin:12px 0 0;text-align:center;}
+
+.autoplay-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:16px;margin-top:18px;}
+.btn{border:none;border-radius:999px;padding:13px 22px;font-weight:600;font-size:15px;color:#fff;
+  background:linear-gradient(135deg,var(--primary-light),var(--primary-dark));
+  box-shadow:0 12px 24px -10px rgba(43,111,163,.3);transition:transform .15s,box-shadow .15s;}
+.btn:hover{transform:translateY(-1px);box-shadow:0 14px 28px -10px rgba(43,111,163,.4);}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn.big{font-size:17px;padding:16px 30px;}
+.btn.secondary{background:transparent;color:var(--primary-dark);border:1.5px solid var(--primary);box-shadow:none;}
+.btn.ghost{background:transparent;color:var(--primary-dark);box-shadow:none;border:1.5px solid transparent;padding:10px 14px;}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--border);background:#fff;color:var(--primary-dark);
+  font-size:17px;display:flex;align-items:center;justify-content:center;transition:.15s;}
+.icon-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+.icon-btn:disabled{opacity:.4;}
+.step-group{display:flex;align-items:center;gap:8px;}
+.step-btn{border-radius:999px;border:1.5px solid var(--border);background:#fff;color:var(--primary-dark);
+  font-size:14px;font-weight:700;padding:11px 16px;display:inline-flex;align-items:center;gap:6px;transition:.15s;}
+.step-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+.step-btn:disabled{opacity:.4;}
+
+.speed-wrap{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:var(--primary-deep);}
+.speed-wrap input{accent-color:var(--primary);}
+
+.hint-line{font-size:13.5px;color:var(--muted);text-align:center;margin-top:8px;}
+
+.counters{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:20px 0 6px;}
+.counter-pill{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:9px 16px;font-size:12.5px;font-weight:700;color:var(--primary-deep);text-align:center;min-width:84px;
+  box-shadow:0 10px 26px -18px rgba(23,50,77,0.12);}
+.counter-pill span{display:block;font-size:19px;color:var(--ink);}
+
+.pass-chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.pass-chip{font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;
+  background:#EDF3FA;color:var(--faint);border:1px solid var(--border);transition:.2s;}
+.pass-chip.done{background:var(--success-bg);color:var(--success-text);border-color:var(--success-border);}
+.pass-chip.current{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* ---- reveal ---- */
+.reveal{display:none;margin-top:22px;text-align:center;padding:26px;border-radius:18px;
+  background:linear-gradient(135deg,rgba(74,155,209,.12),rgba(234,140,54,.12));border:1px solid var(--border);}
+.reveal.show{display:block;animation:fadein .4s;}
+@keyframes fadein{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.reveal h2{margin:4px 0 8px;font-size:clamp(24px,3.6vw,34px);font-family:'Poppins',sans-serif;
+  background:linear-gradient(135deg,var(--primary-dark),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent;}
+
+/* ---- pass question ---- */
+.pass-question{display:none;margin-top:22px;text-align:center;padding:24px;border-radius:18px;
+  background:linear-gradient(135deg,rgba(234,140,54,.14),rgba(74,155,209,.1));border:1px solid var(--border);}
+.pass-question.show{display:block;animation:fadein .35s;}
+.pass-question h3{margin:0 0 10px;font-size:19px;color:var(--primary-deep);}
+.yn-row{display:flex;gap:14px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.yn-btn{border:none;border-radius:999px;padding:12px 28px;font-weight:700;font-size:15px;
+  background:#fff;border:1.5px solid var(--border);color:var(--primary-dark);transition:.15s;}
+.yn-btn:hover{transform:translateY(-1px);}
+.yn-btn.correct{background:var(--success-bg);border-color:var(--success-border);color:var(--success-text);}
+.yn-btn.wrong{background:var(--error-bg);border-color:var(--error-border);color:var(--error-text);}
+.pq-feedback{margin-top:14px;font-size:14px;font-weight:600;color:var(--ink);display:none;}
+.pq-feedback.show{display:block;animation:fadein .3s;}
+
+#confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:900;}
+
+/* ---- section framing (paginated, one section visible at a time) ---- */
+.section{margin:0 0 24px;scroll-margin-top:86px;display:none;}
+.section.active{display:block;animation:fadein .35s;}
+.section:last-of-type{margin-bottom:0;}
+
+/* ---- bottom back/continue nav ---- */
+.bottom-nav{
+  position:sticky;bottom:14px;z-index:80;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--border);border-radius:16px;padding:12px 16px;margin-top:36px;
+  box-shadow:0 10px 26px -16px rgba(23,50,77,0.25);
+}
+.bottom-nav .nav-progress{font-size:12.5px;font-weight:700;color:var(--muted);text-align:center;flex:1;}
+.bottom-nav .btn{padding:11px 20px;font-size:14px;white-space:nowrap;}
+@media(max-width:480px){ .bottom-nav{flex-wrap:wrap;} .bottom-nav .nav-progress{order:3;flex-basis:100%;} }
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;font-family:'Inter',sans-serif;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);
+  background:rgba(234,140,54,0.12);padding:6px 14px;border-radius:999px;margin-bottom:10px;
+}
+.section-title{font-size:clamp(22px,3.4vw,30px);color:var(--primary-deep);margin:0 0 6px;text-align:center;font-family:'Poppins',sans-serif;}
+.section-sub{max-width:600px;margin:0 auto 18px;text-align:center;font-size:14.5px;}
+
+/* ---- chapter progress bar (bottom nav shows "Chapter X of Y · Name") ---- */
+.bottom-nav .nav-progress{line-height:1.3;}
+.bottom-nav .nav-lock-hint{display:block;font-size:11px;font-weight:600;color:var(--accent);margin-top:2px;}
+
+/* ---- algorithm explanation ---- */
+.algo-card h3{margin:0 0 10px;font-size:19px;color:var(--primary-deep);text-align:center;font-family:'Poppins',sans-serif;}
+.algo-card h4{margin:22px 0 8px;font-size:14px;color:var(--primary-dark);text-transform:uppercase;letter-spacing:.04em;}
+.algo-card p{font-size:14.5px;color:var(--ink);}
+.algo-steps{margin:0;padding-left:22px;color:var(--ink);font-size:14.5px;line-height:1.7;}
+.algo-steps li{margin-bottom:6px;}
+.algo-pseudocode{
+  background:var(--footer-bg);color:#EAF6FF;border-radius:12px;padding:16px 18px;font-size:13px;line-height:1.6;
+  overflow-x:auto;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+}
+.algo-pseudocode .pc-line{padding:2px 8px;border-radius:6px;transition:background .25s,color .25s;white-space:pre;}
+.algo-pseudocode .pc-line.active{background:rgba(234,140,54,0.35);color:#fff;font-weight:700;}
+.algo-pseudocode .pc-line.active-swap{background:rgba(217,113,79,0.4);color:#fff;font-weight:700;}
+
+/* ---- interactive mini demo (Meet the Algorithm) ---- */
+.algo-demo{margin-top:6px;border-radius:16px;padding:18px 18px 20px;
+  background:linear-gradient(160deg,rgba(74,155,209,0.08),rgba(234,140,54,0.06));
+  border:1px solid var(--border);}
+.algo-demo-label{font-size:12.5px;font-weight:700;color:var(--primary-dark);text-transform:uppercase;
+  letter-spacing:.05em;margin:0 0 12px;text-align:center;}
+.algo-bars{display:flex;align-items:flex-end;justify-content:center;gap:10px;min-height:120px;padding:10px 4px 0;}
+.algo-bar{display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .45s cubic-bezier(.4,1.6,.4,1);}
+.algo-bar .ab-val{font-size:12px;font-weight:700;color:var(--primary-deep);}
+.algo-bar .ab-block{width:32px;border-radius:8px 8px 4px 4px;background:linear-gradient(180deg,var(--primary-light),var(--primary));
+  box-shadow:inset 0 -6px 10px rgba(23,50,77,.12);transition:height .3s,outline .2s,box-shadow .2s;}
+.algo-bar.compare .ab-block{outline:3px solid var(--accent);outline-offset:2px;}
+.algo-bar.swap .ab-block{outline:3px solid var(--error-border);outline-offset:2px;}
+.algo-bar.sorted .ab-block{outline:3px solid var(--success-border);outline-offset:2px;box-shadow:0 0 0 3px rgba(75,122,74,.2);}
+.algo-demo-status{text-align:center;font-size:13.5px;font-weight:700;color:var(--primary-deep);min-height:20px;margin:14px 0 0;}
+.algo-demo-controls{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;margin-top:14px;}
+.algo-demo-controls .icon-btn{width:38px;height:38px;font-size:15px;}
+.algo-demo-controls .btn{padding:10px 18px;font-size:13.5px;}
+.algo-demo-progress{display:flex;justify-content:center;gap:6px;margin-top:12px;}
+.algo-demo-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:.2s;}
+.algo-demo-dot.done{background:var(--success-border);}
+.algo-demo-dot.current{background:var(--accent);transform:scale(1.4);}
+
+/* ---- big-idea accordion cards ---- */
+.algo-idea-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:2px;}
+.algo-idea{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:2px 16px;transition:.2s;}
+.algo-idea[open]{border-color:var(--primary);box-shadow:0 8px 20px -12px rgba(43,111,163,.4);}
+.algo-idea summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:13px 0;
+  font-weight:700;color:var(--primary-deep);font-size:14px;}
+.algo-idea summary::-webkit-details-marker{display:none;}
+.algo-idea summary .idea-icon{font-size:19px;}
+.algo-idea summary .idea-chevron{margin-left:auto;transition:transform .2s;color:var(--muted);}
+.algo-idea[open] summary .idea-chevron{transform:rotate(180deg);}
+.algo-idea p{margin:0 0 14px;font-size:13.5px;}
+
+/* ---- question cards (Behind the Lens / Contact Sheet) ---- */
+.question-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;
+}
+.question-card{
+  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  box-shadow:var(--shadow);
+  padding:28px 26px 30px;display:flex;flex-direction:column;gap:14px;transition:transform .15s,box-shadow .15s;
+  min-height:150px;justify-content:center;
+}
+.question-card:hover{transform:translateY(-3px);}
+.question-card .q-num{
+  display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary-light),var(--primary-dark));color:#fff;font-weight:700;font-size:15px;
+  flex-shrink:0;
+}
+.question-card .q-text{font-weight:600;font-size:16.5px;line-height:1.5;color:var(--ink);margin:0;}
+
+@media(max-width:600px){
+  .question-grid{grid-template-columns:1fr;}
+}
+
+@media(max-width:600px){ .wrap{padding:74px 14px 50px;} }
+
+/* ---- top brand bar: institution logos ---- */
+.brand-bar{
+  position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;
+  padding:12px 22px;z-index:500;pointer-events:none;
+}
+.brand-badge{
+  pointer-events:auto;display:flex;align-items:center;gap:8px;
+  background:transparent;border:none;border-radius:0;padding:0;box-shadow:none;
+}
+.brand-badge img{height:100px;width:auto;display:block;}
+@media(max-width:640px){
+  .brand-bar{padding:8px 10px;}
+  .brand-badge img{height:55px;}
+}
+</style>
+</head>
+<body>
+<canvas id="confetti-canvas"></canvas>
+
+<div class="brand-bar">
+  <div class="brand-badge">
+    <img src="../../assets/iitropar.png" alt="IIT Ropar">
+  </div>
+  <div class="brand-badge">
+    <img src="../../assets/vicharanashala.png" alt="Vicharanashala LAB">
+  </div>
+</div>
+
+
+<div class="wrap">
+
+  <!-- ================= SECTION 1: THE PROBLEM (generic) ================= -->
+  <section class="section" id="sec-problem">
+    <div class="hero">
+      <span class="eyebrow">📸 Picture This</span>
+
+      <div class="problem-desc-box">
+        <h2>🧩 Just Think About It</h2>
+        <p>In many real-life situations, people need to arrange a collection of items according to a particular order. For example, organizing products by price, arranging students by height, ordering files by name, or arranging scores from highest to lowest. When the items are not in the desired order, they need to be rearranged through a series of changes.</p>
+        <p>This raises an important question: <strong>How can we systematically rearrange the items into the desired order while making the necessary changes as efficiently as possible? </strong> Solving this problem requires a systematic approach for deciding which items to compare, when to change their positions, and when the desired order has been achieved.</p>
+        <p class="story-transition">Let's see exactly what that looks like 👇</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 2: INTRODUCTION (the story) ================= -->
+  <section class="section" id="sec-intro">
+    <div class="hero">
+      <span class="eyebrow">🎬 Chapter 1 · Picture Day</span>
+      <h1>📸 Photo Day Line-Up</h1>
+      <p>Seven students must line up shortest to tallest before the photographer loses patience. The playground is packed, so a student may only swap places with the neighbour right beside them.</p>
+      <div class="rule-chip">🚧 Rule: only neighbouring students can swap</div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 2: THE GAME ================= -->
+  <section class="section" id="sec-game">
+    <div style="text-align:center;margin-bottom:8px;">
+      <span class="tax-tag" style="font-size:12px;padding:4px 14px;">📌 Case Study</span>
+    </div>
+    <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">🎮 Chapter 2 · Line It Up</span>
+    <h2 class="section-title">Sort the Line-Up</h2>
+
+   
+    <div style="
+  background: #FDF1E9;
+  border: 1px solid #D9E5F2;
+  border-left: 4px solid #EA8C36;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin: 14px 0;
+  color: #1F2E37;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+  box-shadow: 0 10px 26px -18px rgba(23,50,77,0.12);
+">
+  💡 <b style="color: #1F2E37;">NOTE:</b>
+  <b style="color: #54666D;">Use the Forward button to step through one comparison at a time, or hit Auto Play and watch the line sort itself, pass by pass.</b>
+  <br>
+  <b><span style="color: #2B6FA3;">Try Auto Play first!</b></span>
+</div>
+
+    
+
+  <div class="card">
+    <div class="scene">
+      <div class="sun"></div>
+      <div class="line-track" id="line"></div>
+    </div>
+
+    <p class="status-line" id="status"></p>
+
+    <div class="pass-chips" id="pass-chips"></div>
+
+    <div class="counters">
+      <div class="counter-pill">Passes<span id="c-pass">0</span></div>
+      <div class="counter-pill">Comparisons<span id="c-cmp">0</span></div>
+      <div class="counter-pill">Swaps<span id="c-swp">0</span></div>
+    </div>
+
+    <div class="autoplay-row" style="flex-direction:column;gap:16px;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap;">
+        <button class="btn big" id="play-btn">▶ Auto Play</button>
+        <div class="speed-wrap">🐢 Speed
+          <input type="range" id="speed" min="120" max="1400" value="650">
+          🐇
+        </div>
+      </div>
+      <div class="step-group">
+        <button class="step-btn" id="prev-btn" title="One step back">⏮ Back-Step</button>
+        <button class="step-btn" id="next-btn" title="One step forward">Forward-Step ⏭</button>
+      </div>
+      <button class="btn ghost" id="reset-btn"> New line-up</button>
+    </div>
+   
+
+    <div class="reveal" id="reveal">
+      <div style="font-size:40px;">🎉🫧🎉</div>
+      <h2>Sorted in <span id="reveal-passes">0</span> passes!</h2>
+      <p style="max-width:520px;margin:0 auto;">Notice how the tallest student ended up at the end after each round of comparisons? By repeatedly checking neighbouring students and swapping only when needed, the line gradually became completely sorted without moving everyone at once.</p>
+      <p style="max-width:520px;margin:6px auto 0;font-size:13.5px;"><span id="reveal-summary"></span></p>
+    </div>
+    
+    <div class="pass-question" id="pass-question">
+      <h3 id="pq-text">🤔 Do you think we still need more passes / swaps to finish sorting?</h3>
+      <div class="yn-row">
+        <button class="yn-btn" id="pq-yes">Yes</button>
+        <button class="yn-btn" id="pq-no">No</button>
+      </div>
+      <p class="pq-feedback" id="pq-feedback"></p>
+      <div style="margin-top:14px;display:flex;justify-content:center;">
+        <button class="btn secondary" id="pq-continue" style="display:none;">Continue →</button>
+      </div>
+    </div>
+  </div>
+  </section>
+
+  <!-- ================= SECTION 3: BEHIND THE LENS (reflection) ================= -->
+  <section class="section" id="sec-reflect">
+    <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">💭 Chapter 3 · Behind the Lens</span>
+    <h2 class="section-title">What did you notice?</h2>
+    <p class="section-sub">Before the photographer moves on, a few things worth thinking about. No need to write anything down.</p>
+    <div class="question-grid" id="reflect-grid"></div>
+  </section>
+
+  <!-- ================= SECTION 4: ALGORITHM EXPLANATION ================= -->
+  <section class="section" id="sec-algorithm">
+    <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">📚 Chapter 4 · The Photographer's Method</span>
+    <h2 class="section-title">So... What Were We Actually Doing?</h2>
+    <p class="section-sub">Everything you just did in the game has a name. Here's the algorithm behind it.</p>
+    <div class="card algo-card">
+      <h3>🫧 It's called Bubble Sort</h3>
+      <p>It's called <b>Bubble Sort</b> because, pass after pass, the largest remaining value keeps "bubbling up" toward the end of the line, one comparison and one possible swap at a time, just like a bubble rising to the surface of water.</p>
+
+      <h4>Try it yourself: step through the logic</h4>
+      <p style="margin-bottom:14px;">This is the exact same idea as the game, shrunk down to five numbers. Use the Forward button to step through it or hit play and watch the pseudocode light up in sync with what's happening below.</p>
+
+      <div class="algo-demo">
+        <p class="algo-demo-label" id="algo-pass-label">Pass 1</p>
+        <div class="algo-bars" id="algo-bars"></div>
+        <p class="algo-demo-status" id="algo-status"></p>
+        <div class="algo-demo-controls">
+          <button class="btn secondary" id="algo-play">▶ Play</button>
+          <div class="step-group">
+            <button class="step-btn" id="algo-prev" title="One step back">⏮ Back</button>
+            <button class="step-btn" id="algo-next" title="One step forward">Forward ⏭</button>
+          </div>
+          <button class="btn ghost" id="algo-restart">↺ Restart</button>
+        </div>
+        <div class="algo-demo-progress" id="algo-progress"></div>
+        <div class="algo-pseudocode" id="algo-pseudocode"></div>
+      </div>
+
+      <h4>The 4 big ideas</h4>
+      <div class="algo-idea-grid">
+        <details class="algo-idea" open>
+          <summary><span class="idea-icon">🔍</span> Compare neighbours <span class="idea-chevron">▾</span></summary>
+          <p>Only two students standing right next to each other are ever compared, never elements that are far apart in the line.</p>
+        </details>
+        <details class="algo-idea">
+          <summary><span class="idea-icon">🔄</span> Swap only when needed <span class="idea-chevron">▾</span></summary>
+          <p>If the left one is taller than the right one, they swap places. If they're already in order, nothing happens and we move on.</p>
+        </details>
+        <details class="algo-idea">
+          <summary><span class="idea-icon">🫧</span> One pass, one bubble <span class="idea-chevron">▾</span></summary>
+          <p>By the time a full pass finishes, the largest remaining value has "bubbled" all the way to its correct spot at the end.</p>
+        </details>
+        <details class="algo-idea">
+          <summary><span class="idea-icon">✅</span> Stop when nothing changes <span class="idea-chevron">▾</span></summary>
+          <p>If an entire pass goes by with zero swaps, every element must already be in order, so the algorithm can stop early.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 5: CONTACT SHEET (exercises) ================= -->
+  <section class="section" id="sec-workbook">
+    <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">📝 Chapter 5 · Contact Sheet</span>
+    <h2 class="section-title">Go Deeper</h2>
+    <p class="section-sub">A proof sheet of harder questions to think through. Open-ended, no single right answer.</p>
+    <div class="question-grid" id="wb-questions"></div>
+  </section>
+
+  <div class="bottom-nav" id="bottom-nav">
+    <button class="btn secondary" id="nav-back-btn">← Back</button>
+    <span class="nav-progress" id="nav-progress-text">Chapter 1 of 6<span class="nav-lock-hint" id="nav-lock-hint"></span></span>
+    <button class="btn" id="nav-continue-btn">Continue →</button>
+  </div>
+
+</div>
+
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- section pagination state (declared early: render() below references it) ---------------- */
+const SECTION_ORDER = ["sec-problem","sec-intro","sec-game","sec-reflect","sec-algorithm","sec-workbook"];
+const SECTION_NAMES = ["Picture This","Picture Day","Line It Up","Behind the Lens","The Photographer's Method","Contact Sheet"];
+let currentSection = 0;
+
+/* ---------------- data ---------------- */
+const NAMES = ["Ram","Shyam","Priya","Kavya","Arjun","Meera","Isha"];
+const COLORS = ["#ff9f5a","#5ac8ff","#7ee08a","#c792ff","#ff8fb2","#ffd76b","#7ad3c0"];
+function freshStudents(){
+  let pool = [];
+  for(let i=0;i<NAMES.length;i++) pool.push(132 + Math.round(i*(50/(NAMES.length-1))) + (Math.random()*6-3));
+  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  return NAMES.map((n,i)=>({name:n, height:Math.round(pool[i]), color:COLORS[i]}));
+}
+
+/* ---------------- bubble sort engine ---------------- */
+function buildSteps(arr){
+  const a = arr.map(s=>({...s}));
+  const n = a.length;
+  const steps = [];
+  const states = [a.map(s=>({...s}))];
+  for(let p=0;p<n-1;p++){
+    let swappedAny = false;
+    for(let j=0;j<n-1-p;j++){
+      steps.push({type:"compare", i:j, j:j+1, pass:p});
+      states.push(a.map(s=>({...s})));
+      if(a[j].height > a[j+1].height){
+        const tmp=a[j]; a[j]=a[j+1]; a[j+1]=tmp; swappedAny=true;
+        steps.push({type:"swap", i:j, j:j+1, pass:p});
+        states.push(a.map(s=>({...s})));
+      } else {
+        steps.push({type:"keep", i:j, j:j+1, pass:p});
+        states.push(a.map(s=>({...s})));
+      }
+    }
+    steps.push({type:"passend", pass:p, boundary:n-1-p});
+    states.push(a.map(s=>({...s})));
+    if(!swappedAny){ steps.push({type:"earlystop", pass:p}); states.push(a.map(s=>({...s}))); break; }
+  }
+  steps.push({type:"done"});
+  states.push(a.map(s=>({...s})));
+  return {steps, states};
+}
+function totalPasses(steps){
+  let n=0;
+  steps.forEach(s=>{ if(s.type==="passend"||s.type==="earlystop") n = s.pass+1; });
+  return n;
+}
+function maxPossiblePasses(len){ return len-1; }
+
+/* ---------------- render helpers ---------------- */
+function heightToPx(h){ const c=Math.max(125,Math.min(190,h)); return 55+(c-125)*1.5; }
+function renderLine(container, arr, opts={}){
+  opts = Object.assign({compareIdx:null, swapIdx:null, sortedBoundary:arr.length, glowIdx:null}, opts);
+  container.innerHTML = "";
+  arr.forEach((s, idx)=>{
+    const el = document.createElement("div");
+    el.className = "student";
+    if(opts.compareIdx && (idx===opts.compareIdx[0]||idx===opts.compareIdx[1])) el.classList.add("compare");
+    if(opts.swapIdx && (idx===opts.swapIdx[0]||idx===opts.swapIdx[1])) el.classList.add("swap");
+    if(idx>=opts.sortedBoundary) el.classList.add("sorted");
+    if(opts.glowIdx===idx) el.classList.add("glow");
+    el.innerHTML = `<div class="namecap">${s.name}</div><div class="heightcap">${s.height}cm</div>
+      <div class="head"></div><div class="body" style="height:${heightToPx(s.height)}px;background:${s.color};"></div>`;
+    container.appendChild(el);
+  });
+}
+function popBubble(container, idx){
+  const kids = container.children;
+  if(!kids[idx]) return;
+  const b = document.createElement("div"); b.className="bubble-pop";
+  kids[idx].appendChild(b); setTimeout(()=>b.remove(),650);
+}
+
+/* ---------------- confetti ---------------- */
+const cvs = document.getElementById("confetti-canvas");
+const ctx = cvs.getContext("2d");
+function resizeCvs(){ cvs.width=innerWidth; cvs.height=innerHeight; }
+resizeCvs(); window.addEventListener("resize", resizeCvs);
+function fireConfetti(){
+  const pieces=[];
+  for(let i=0;i<130;i++) pieces.push({x:Math.random()*cvs.width,y:-20-Math.random()*200,
+    vx:(Math.random()-.5)*3, vy:2+Math.random()*3, size:5+Math.random()*6,
+    color:COLORS[i%COLORS.length], rot:Math.random()*360, vr:(Math.random()-.5)*10});
+  let frame=0;
+  function tick(){
+    ctx.clearRect(0,0,cvs.width,cvs.height); frame++; let alive=false;
+    pieces.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; if(p.y<cvs.height+20) alive=true;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle=p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6); ctx.restore(); });
+    if(alive && frame<260) requestAnimationFrame(tick); else ctx.clearRect(0,0,cvs.width,cvs.height);
+  }
+  tick();
+}
+
+/* ---------------- game state ---------------- */
+let base = freshStudents();
+let data = buildSteps(base);
+let idx = -1;            // current step pointer (-1 = initial)
+let playing = false;
+let timer = null;
+let sortedOnce = false;
+let questionAsked = false;
+let randomQuestionStepIdx = null;
+let pendingQuestion = false;   // true while a pass-question is on screen
+let wasPlayingWhenAsked = false;
+let pqCorrectNeedsSwap = true;
+
+// Pick a specific COMPARISON step (not the very first one, so there's already
+// some context on screen) to pause on and ask about that exact pair by name,
+// e.g. "Do we need to swap Ram and Shyam?", instead of a vague progress check.
+// Returns null when there simply aren't enough comparisons to pick from.
+function pickRandomQuestionStep(steps){
+  const compareIdxs = [];
+  steps.forEach((s,i)=>{ if(s.type==="compare") compareIdxs.push(i); });
+  if(compareIdxs.length <= 1) return null;
+  const eligible = compareIdxs.slice(1); // skip the very first comparison
+  return eligible[Math.floor(Math.random()*eligible.length)];
+}
+function initRound(){
+  randomQuestionStepIdx = pickRandomQuestionStep(data.steps);
+  questionAsked = false;
+}
+initRound();
+function isSorted(arr){ for(let i=0;i<arr.length-1;i++) if(arr[i].height>arr[i+1].height) return false; return true; }
+
+const lineEl = document.getElementById("line");
+const statusEl = document.getElementById("status");
+const chipsEl = document.getElementById("pass-chips");
+
+function buildChips(){
+  chipsEl.innerHTML = "";
+  const n = maxPossiblePasses(base.length);
+  for(let p=0;p<n;p++){
+    const c = document.createElement("span");
+    c.className = "pass-chip"; c.id = "chip-"+p;
+    c.textContent = "Pass "+(p+1);
+    chipsEl.appendChild(c);
+  }
+}
+function sortedBoundaryAt(i){
+  let boundary = base.length;
+  for(let k=0;k<=i;k++){
+    const st = data.steps[k];
+    if(st.type==="passend") boundary = Math.min(boundary, st.boundary);
+    if(st.type==="done") boundary = 0;
+  }
+  return boundary;
+}
+function countsAt(i){
+  let cmp=0, swp=0, pass=0;
+  for(let k=0;k<=i;k++){
+    const st = data.steps[k];
+    if(st.type==="compare") cmp++;
+    if(st.type==="swap") swp++;
+    if(st.type==="passend"||st.type==="earlystop") pass = st.pass+1;
+  }
+  return {cmp,swp,pass};
+}
+function updateChips(currentPass, finished){
+  const n = maxPossiblePasses(base.length);
+  for(let p=0;p<n;p++){
+    const chip = document.getElementById("chip-"+p);
+    if(!chip) continue;
+    chip.classList.remove("done","current");
+    if(finished || p < currentPass) chip.classList.add("done");
+    else if(p === currentPass) chip.classList.add("current");
+  }
+}
+function render(){
+  const state = data.states[idx+1];
+  const st = idx>=0 ? data.steps[idx] : null;
+  const boundary = sortedBoundaryAt(idx);
+  let compareIdx=null, swapIdx=null;
+  if(st && st.type==="compare") compareIdx=[st.i,st.j];
+  if(st && st.type==="swap") swapIdx=[st.i,st.j];
+  renderLine(lineEl, state, {
+    compareIdx, swapIdx,
+    sortedBoundary: st && st.type==="done" ? 0 : boundary
+  });
+  if(swapIdx){ popBubble(lineEl, swapIdx[0]); popBubble(lineEl, swapIdx[1]); }
+
+  const c = countsAt(idx);
+  document.getElementById("c-pass").textContent = c.pass;
+  document.getElementById("c-cmp").textContent = c.cmp;
+  document.getElementById("c-swp").textContent = c.swp;
+
+  const finished = st && st.type==="done";
+  updateChips(st ? st.pass!==undefined ? st.pass : c.pass : 0, finished);
+
+  if(!st) statusEl.textContent = "";
+  else if(st.type==="compare") statusEl.textContent = `Comparing ${state[st.i].name} and ${state[st.j].name}…`;
+  else if(st.type==="swap") statusEl.textContent = `${state[st.j].name} was taller, swapping with ${state[st.i].name}!`;
+  else if(st.type==="keep") statusEl.textContent = `${state[st.i].name} and ${state[st.j].name} are already in order.`;
+  else if(st.type==="passend") statusEl.textContent = `Pass ${st.pass+1} done, ${state[st.boundary] ? state[st.boundary].name : ""} reached its spot! 🎉`;
+  else if(st.type==="earlystop") statusEl.textContent = `No swaps needed this pass, everyone's in order! ✅`;
+  else if(st.type==="done") statusEl.textContent = `All done! Every student is lined up correctly. 🎉`;
+
+  // Randomly pause at one specific comparison and ask about that exact pair.
+  if(
+    st &&
+    st.type==="compare" &&
+    !pendingQuestion &&
+    !questionAsked &&
+    idx === randomQuestionStepIdx
+  ){
+    questionAsked = true;
+    triggerPassQuestion(state, st);
+  }
+
+  document.getElementById("prev-btn").disabled = idx < 0 || playing || pendingQuestion;
+  document.getElementById("next-btn").disabled = idx >= data.steps.length-1 || playing || pendingQuestion;
+  document.getElementById("play-btn").disabled = pendingQuestion;
+
+  if(finished && !sortedOnce){
+    sortedOnce = true;
+    stopPlay();
+    const passes = totalPasses(data.steps);
+    document.getElementById("reveal-passes").textContent = passes;
+    document.getElementById("reveal-summary").textContent = `${c.cmp} comparisons and ${c.swp} swaps across ${passes} pass${passes===1?"":"es"}.`;
+    document.getElementById("reveal").classList.add("show");
+    setTimeout(fireConfetti, 200);
+  }
+  if(typeof updateNavUI === "function") updateNavUI();
+}
+
+/* ---------------- Behind the Lens (reflection) ---------------- */
+// Each prompt is tagged with the Bloom's Taxonomy tier it targets:
+// Remember, Understand, Analyze, and Evaluate, which is the taxonomy that
+// best fits a hands-on "watch it, then reason about it" story like this
+// one. These are shown as read-only prompt cards: we are not collecting
+// student answers, so there is nothing to type or submit here.
+const REFLECT_CONFIG = [
+  { question:"What did you do when two neighbouring elements were not in the order you wanted?" },
+  { question:"After moving through all the elements once, what change did you notice? Was any element now in its correct position?" },
+  { question:"Why did you need to repeat the same process several times?" },
+  { question:"How did the number of comparisons change as you repeated the process? Why?" },
+  { question:"Suppose you completed one full round without making any changes. What could you conclude about the elements?" }
+];
+
+function buildQuestionCards(containerId, config){
+  const wrapEl = document.getElementById(containerId);
+  wrapEl.innerHTML = "";
+  config.forEach((cfg,i)=>{
+    const card = document.createElement("div");
+    card.className = "question-card";
+    card.innerHTML = `<span class="q-num">${i+1}</span><p class="q-text">${cfg.question}</p>`;
+    wrapEl.appendChild(card);
+  });
+}
+buildQuestionCards("reflect-grid", REFLECT_CONFIG);
+
+/* ---------------- Contact Sheet (exercises) ---------------- */
+// Open-ended, go-deeper questions shown as a proof-sheet style grid of
+// cards. Same as Behind the Lens: no answers are collected, so these are
+// prompt cards only, not input fields.
+const WORKBOOK_CONFIG = [
+  { question:"Seven students are standing in a line in random order of height. You may compare only two students standing next to each other and swap their positions. Design a procedure to arrange them from shortest to tallest. Explain why it works." },
+  { question:"Sort the following array using Bubble Sort in ascending order: [42, 17, 35, 8, 29, 14] Show the array after each pass and explain what happens in each pass as if you were teaching a beginner." },
+  { question:"What would happen if Bubble Sort compared elements from right to left instead of left to right? Would it still sort the array correctly? Explain your answer." },
+  { question:"You have 100 numbers, but you do not need to sort them. You only need to find the largest number. Can the central idea behind one pass of Bubble Sort solve this? Explain." },
+  { question:"A system needs to sort 100,000 values repeatedly. Would Bubble Sort be a suitable choice? Explain your decision based on how Bubble Sort works and what you would expect to happen when handling such a large collection." },
+  { question:"If you could improve one part of Bubble Sort without changing its basic idea, what would you change? Explain why." },
+  { question:"After one pass of Bubble Sort, the array becomes: [12, 25, 8, 17, 31, 42] What will the array look like after the next complete pass? Explain your answer." },
+  { question:"Consider 10, 20, 30, 50, 40, 60, 70. Without performing the complete algorithm, predict how Bubble Sort will behave on this input. How could you avoid unnecessary work?" },
+  { question:"You learned Bubble Sort for ascending order. Without looking up another version, explain what you would change to sort 12, 5, 19, 8, 3 in descending order." }
+];
+
+function triggerPassQuestion(state, st){
+  pendingQuestion = true;
+  wasPlayingWhenAsked = playing;
+  if(playing) stopPlay();
+  const nameA = state[st.i].name, nameB = state[st.j].name;
+  pqCorrectNeedsSwap = state[st.i].height > state[st.j].height;
+  document.getElementById("pq-text").textContent =
+    `🤔 Take a look: do we need to swap ${nameA} and ${nameB}?`;
+  document.getElementById("pass-question").classList.add("show");
+  setTimeout(()=> document.getElementById("pass-question").scrollIntoView({behavior:"smooth", block:"center"}), 50);
+}
+function answerPassQuestion(userSaidYes){
+  const yesBtn = document.getElementById("pq-yes"), noBtn = document.getElementById("pq-no");
+  if(yesBtn.disabled) return;
+  yesBtn.disabled = true; noBtn.disabled = true;
+  const correct = pqCorrectNeedsSwap;
+  const userCorrect = (userSaidYes === correct);
+  (userSaidYes ? yesBtn : noBtn).classList.add(userCorrect ? "correct" : "wrong");
+  if(!userCorrect) (correct ? yesBtn : noBtn).classList.add("correct");
+  const st = data.steps[idx];
+  const state = data.states[idx+1];
+  const nameA = state[st.i].name, nameB = state[st.j].name;
+  const fb = document.getElementById("pq-feedback");
+  fb.textContent = correct
+    ? (userCorrect
+        ? `✅ Correct! ${nameA} is taller than ${nameB}, so they need to swap places.`
+        : `Not quite. ${nameA} is actually taller than ${nameB} here, so they do need to swap.`)
+    : (userCorrect
+        ? `✅ Correct! ${nameA} isn't taller than ${nameB}, so no swap is needed here.`
+        : `Not quite. ${nameA} isn't taller than ${nameB} here, so no swap is needed.`);
+  fb.classList.add("show");
+  document.getElementById("pq-continue").style.display = "inline-flex";
+}
+function closePassQuestion(){
+  pendingQuestion = false;
+  document.getElementById("pass-question").classList.remove("show");
+  const yesBtn = document.getElementById("pq-yes"), noBtn = document.getElementById("pq-no");
+  yesBtn.disabled=false; noBtn.disabled=false;
+  yesBtn.classList.remove("correct","wrong"); noBtn.classList.remove("correct","wrong");
+  document.getElementById("pq-feedback").classList.remove("show");
+  document.getElementById("pq-continue").style.display = "none";
+  render();
+  if(wasPlayingWhenAsked && idx < data.steps.length-1) startPlay();
+}
+
+function goto(i){ idx = Math.max(-1, Math.min(data.steps.length-1, i)); render(); }
+
+function stopPlay(){
+  playing = false; clearInterval(timer);
+  document.getElementById("play-btn").textContent = "▶ Auto Play";
+  render();
+}
+function startPlay() {
+  if (idx >= data.steps.length - 1) {
+    resetGame(false);
+  }
+
+  playing = true;
+  document.getElementById("play-btn").textContent = "⏸ Pause";
+
+  clearInterval(timer);
+
+  // Reverse the slider so:
+  // Left = Slow, Right = Fast
+  const speed = 1520 - Number(document.getElementById("speed").value);
+
+  timer = setInterval(() => {
+    if (idx >= data.steps.length - 1) {
+      stopPlay();
+      return;
+    }
+
+    goto(idx + 1);
+  }, speed);
+
+  render();
+}
+
+function resetGame(reshuffle=true){
+  stopPlay();
+  if(reshuffle) base = freshStudents();
+  data = buildSteps(base);
+  initRound();
+  idx = -1; sortedOnce = false;
+  pendingQuestion = false; wasPlayingWhenAsked = false;
+  document.getElementById("reveal").classList.remove("show");
+  document.getElementById("pass-question").classList.remove("show");
+  buildChips();
+  render();
+}
+
+document.getElementById("play-btn").addEventListener("click", ()=>{ if(pendingQuestion) return; playing ? stopPlay() : startPlay(); });
+document.getElementById("next-btn").addEventListener("click", ()=>{ if(!playing && !pendingQuestion) goto(idx+1); });
+document.getElementById("prev-btn").addEventListener("click", ()=>{
+  if(playing || pendingQuestion) return;
+  sortedOnce = false;
+  document.getElementById("reveal").classList.remove("show");
+  goto(idx-1);
+});
+document.getElementById("reset-btn").addEventListener("click", ()=> resetGame(true));
+document.getElementById("speed").addEventListener("input", ()=>{ if(playing) startPlay(); });
+document.getElementById("pq-yes").addEventListener("click", ()=>answerPassQuestion(true));
+document.getElementById("pq-no").addEventListener("click", ()=>answerPassQuestion(false));
+document.getElementById("pq-continue").addEventListener("click", closePassQuestion);
+
+buildChips();
+render();
+buildQuestionCards("wb-questions", WORKBOOK_CONFIG);
+
+/* ---------------- Meet the Algorithm: mini interactive bubble-sort demo ---------------- */
+(function(){
+  const DEMO_VALUES = [8, 3, 6, 1, 4];
+  const PCODE = [
+    {id:"header", text:"BubbleSort(A)"},
+    {id:"outer",  text:"    for i ← 0 to n − 2 do"},
+    {id:"inner",  text:"        for j ← 0 to n − 2 − i do"},
+    {id:"if",     text:"            if A[j+1] &lt; A[j] then"},
+    {id:"swap",   text:"                swap(A[j], A[j+1])"}
+  ];
+
+  function demoBuildSteps(values){
+    const a = values.slice();
+    const n = a.length;
+    const steps = [];
+    const states = [a.slice()];
+    for(let i=0;i<=n-2;i++){
+      for(let j=0;j<=n-2-i;j++){
+        steps.push({type:"compare", i:j, j:j+1, pass:i});
+        states.push(a.slice());
+        if(a[j+1] < a[j]){
+          const t=a[j]; a[j]=a[j+1]; a[j+1]=t;
+          steps.push({type:"swap", i:j, j:j+1, pass:i});
+        } else {
+          steps.push({type:"keep", i:j, j:j+1, pass:i});
+        }
+        states.push(a.slice());
+      }
+      steps.push({type:"passend", pass:i, boundary:n-1-i});
+      states.push(a.slice());
+    }
+    steps.push({type:"done"});
+    states.push(a.slice());
+    return {steps, states};
+  }
+  function demoBoundaryAt(steps, i){
+    let boundary = DEMO_VALUES.length;
+    for(let k=0;k<=i;k++){
+      const st = steps[k];
+      if(st.type==="passend") boundary = Math.min(boundary, st.boundary);
+      if(st.type==="done") boundary = 0;
+    }
+    return boundary;
+  }
+
+  let ddata = demoBuildSteps(DEMO_VALUES);
+  let didx = -1;
+  let dplaying = false;
+  let dtimer = null;
+
+  const barsEl = document.getElementById("algo-bars");
+  const statusEl = document.getElementById("algo-status");
+  const passLabelEl = document.getElementById("algo-pass-label");
+  const pcodeEl = document.getElementById("algo-pseudocode");
+  const progressEl = document.getElementById("algo-progress");
+  const playBtn = document.getElementById("algo-play");
+  const prevBtn = document.getElementById("algo-prev");
+  const nextBtn = document.getElementById("algo-next");
+  const restartBtn = document.getElementById("algo-restart");
+  if(!barsEl) return; // section not present, skip wiring
+
+  function heightPx(v){ return 30 + v*10; }
+
+  pcodeEl.innerHTML = PCODE.map(l=>`<div class="pc-line" id="pc-${l.id}">${l.text}</div>`).join("");
+  function highlightLine(id, cls){
+    PCODE.forEach(l=>{
+      const el = document.getElementById("pc-"+l.id);
+      if(el) el.classList.remove("active","active-swap");
+    });
+    if(id){ const el = document.getElementById("pc-"+id); if(el) el.classList.add(cls||"active"); }
+  }
+
+  function drender(){
+    const state = ddata.states[didx+1];
+    const st = didx>=0 ? ddata.steps[didx] : null;
+    const boundary = demoBoundaryAt(ddata.steps, didx);
+    barsEl.innerHTML = "";
+    state.forEach((v, i)=>{
+      const el = document.createElement("div");
+      el.className = "algo-bar";
+      if(st && st.type==="compare" && (i===st.i||i===st.j)) el.classList.add("compare");
+      if(st && st.type==="swap" && (i===st.i||i===st.j)) el.classList.add("swap");
+      if(st && st.type==="done") el.classList.add("sorted");
+      else if(i>=boundary) el.classList.add("sorted");
+      el.innerHTML = `<span class="ab-val">${v}</span><div class="ab-block" style="height:${heightPx(v)}px;"></div>`;
+      barsEl.appendChild(el);
+    });
+
+    const passNum = st && st.pass!==undefined ? st.pass+1 : (st && st.type==="done" ? "-" : 1);
+    passLabelEl.textContent = st && st.type==="done" ? "Sorted! 🎉" : `Pass ${passNum}`;
+
+    if(!st){ statusEl.textContent = "Ready. Press ▶ or step forward to begin."; highlightLine("outer"); }
+    else if(st.type==="compare"){ statusEl.textContent = `Comparing A[${st.j}]=${state[st.j]} and A[${st.i}]=${state[st.i]}…`; highlightLine("if"); }
+    else if(st.type==="swap"){ statusEl.textContent = `${state[st.j]} > ${state[st.i]}, swapping!`; highlightLine("swap","active-swap"); }
+    else if(st.type==="keep"){ statusEl.textContent = `Already in order, no swap, move on.`; highlightLine("inner"); }
+    else if(st.type==="passend"){ statusEl.textContent = `Pass ${st.pass+1} done, next value locked in place.`; highlightLine("outer"); }
+    else if(st.type==="done"){ statusEl.textContent = `All sorted, smallest to largest! 🎉`; highlightLine(null); }
+
+    progressEl.innerHTML = "";
+    const totalSteps = ddata.steps.length;
+    for(let k=0;k<totalSteps;k++){
+      const dot = document.createElement("span");
+      dot.className = "algo-demo-dot";
+      if(k < didx+1) dot.classList.add("done");
+      else if(k === didx+1) dot.classList.add("current");
+      progressEl.appendChild(dot);
+    }
+
+    prevBtn.disabled = didx < 0 || dplaying;
+    nextBtn.disabled = didx >= ddata.steps.length-1 || dplaying;
+  }
+
+  function dgoto(i){ didx = Math.max(-1, Math.min(ddata.steps.length-1, i)); drender(); }
+  function dstopPlay(){ dplaying=false; clearInterval(dtimer); playBtn.textContent="▶ Play"; drender(); }
+  function dstartPlay(){
+    if(didx >= ddata.steps.length-1) dgoto(-1);
+    dplaying = true; playBtn.textContent = "⏸ Pause";
+    clearInterval(dtimer);
+    dtimer = setInterval(()=>{
+      if(didx >= ddata.steps.length-1){ dstopPlay(); return; }
+      dgoto(didx+1);
+    }, 750);
+    drender();
+  }
+  function drestart(){ dstopPlay(); ddata = demoBuildSteps(DEMO_VALUES); didx=-1; drender(); }
+
+  playBtn.addEventListener("click", ()=> dplaying ? dstopPlay() : dstartPlay());
+  prevBtn.addEventListener("click", ()=>{ if(!dplaying) dgoto(didx-1); });
+  nextBtn.addEventListener("click", ()=>{ if(!dplaying) dgoto(didx+1); });
+  restartBtn.addEventListener("click", drestart);
+
+  drender();
+})();
+
+/* ---------------- section pagination (Back / Continue only, no jumping) ---------------- */
+// A section is "done" before you're allowed to continue past it. Only the
+// Game requires an actual completed action (finishing the sort); Behind the
+// Lens and the Contact Sheet are read-only prompt cards with no answers to
+// collect, so the user can move through them freely.
+function isCurrentSectionComplete(){
+  switch(SECTION_ORDER[currentSection]){
+    case "sec-game": return sortedOnce;
+    default: return true;
+  }
+}
+function lockHintFor(){
+  return "";
+}
+
+// Refreshes button/label state for the current section WITHOUT scrolling.
+// call this any time completion status may have changed (typing an answer,
+// finishing a sort, etc.) while the user stays on the same section.
+function updateNavUI(){
+  const backBtn = document.getElementById("nav-back-btn");
+  const contBtn = document.getElementById("nav-continue-btn");
+  const hintEl = document.getElementById("nav-lock-hint");
+  backBtn.disabled = currentSection===0;
+
+  const isLast = currentSection===SECTION_ORDER.length-1;
+  const complete = isCurrentSectionComplete();
+
+  if(isLast){
+    contBtn.textContent = "Finish ✓";
+    contBtn.disabled = !complete;
+    hintEl.textContent = complete ? "" : lockHintFor();
+  }else{
+    contBtn.textContent = complete ? `Continue to ${SECTION_NAMES[currentSection+1]} →` : "Continue →";
+    contBtn.disabled = !complete;
+    hintEl.textContent = complete ? "" : lockHintFor();
+  }
+
+  document.getElementById("nav-progress-text").firstChild.textContent =
+    `Chapter ${currentSection+1} of ${SECTION_ORDER.length} · ${SECTION_NAMES[currentSection]}`;
+}
+
+function showSection(i){
+  currentSection = Math.max(0, Math.min(SECTION_ORDER.length-1, i));
+  SECTION_ORDER.forEach((id, idx)=>{
+    document.getElementById(id).classList.toggle("active", idx===currentSection);
+  });
+  updateNavUI();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+document.getElementById("nav-back-btn").addEventListener("click", ()=> showSection(currentSection-1));
+document.getElementById("nav-continue-btn").addEventListener("click", ()=>{
+  if(!isCurrentSectionComplete()) return; // extra guard, button is disabled anyway
+  if(currentSection===SECTION_ORDER.length-1){
+    showSection(0);
+    return;
+  }
+  showSection(currentSection+1);
+});
+showSection(0);
+
+})();
+</script>
+</body>
+</html>

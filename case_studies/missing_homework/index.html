@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Missing Homework: A Search Adventure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================
+   THEME: soft blue & orange, white cards, pill buttons.
+   ========================================================== */
+:root{
+  --bg-1:#FDF1E9; --bg-2:#EDF3FA; --bg-3:#E4EEFA; --bg-4:#D9E5F2;
+  --primary:#4A9BD1; --primary-dark:#2B6FA3; --primary-deep:#1B4A66;
+  --amber:#EA8C36; --amber-dark:#C96F1F;
+  --danger:#D9714F; --success:#4B7A4A; --violet:#EA8C36;
+  --ink:#1F2E37; --muted:#54666D; --faint:#93A5AB;
+  --card-bg:#FFFFFF;
+  --footer-bg:#22496B;
+  --glass-border:#D9E5F2;
+  --shadow-card:rgba(23,50,77,0.12); --shadow-btn:rgba(43,111,163,0.28);
+  --success-bg:#DCEAD8; --success-text:#274B26; --success-border:#4B7A4A;
+  --error-bg:#FBE1DC; --error-text:#8A3420; --error-border:#D9714F;
+  --radius-lg:18px; --radius-md:12px; --radius-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;min-height:100vh;font-family:'Inter', sans-serif;font-weight:400;color:var(--ink);
+  background:linear-gradient(180deg,var(--bg-1) 0%, var(--bg-2) 40%, var(--bg-2) 100%);
+  background-attachment:fixed;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:'Poppins', sans-serif;font-weight:700;letter-spacing:-0.01em;margin:0;}
+p{line-height:1.65;color:var(--muted);margin:0;}
+button{font-family:'Poppins', sans-serif;cursor:pointer;}
+button:focus-visible{outline:3px solid var(--primary);outline-offset:2px;}
+.wrap{max-width:960px;margin:0 auto;padding:96px 20px 70px;}
+
+/* ---- top brand bar: institution logos ---- */
+.brand-bar{
+  position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;
+  padding:12px 22px;z-index:500;pointer-events:none;
+}
+.brand-badge{pointer-events:auto;display:flex;align-items:center;gap:8px;background:transparent;border:none;padding:0;}
+.brand-badge img{height:90px;width:auto;display:block;}
+@media(max-width:640px){
+  .brand-bar{padding:8px 10px;}
+  .brand-badge img{height:44px;}
+}
+
+/* ---- stepper ---- */
+.stepper{max-width:700px;margin:0 auto 30px;display:flex;align-items:center;justify-content:center;padding:0 12px;}
+.step-item{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative;}
+.step-circle{
+  width:32px;height:32px;border-radius:50%;background:var(--bg-3);color:var(--primary-deep);font-weight:700;font-size:13px;
+  display:flex;align-items:center;justify-content:center;border:2px solid var(--glass-border);transition:.25s;z-index:2;
+  font-family:'Poppins', sans-serif;
+}
+.step-label{font-size:10px;font-weight:700;color:var(--muted);text-align:center;letter-spacing:.03em;font-family:'Poppins', sans-serif;}
+.step-line{position:absolute;top:16px;left:-50%;width:100%;height:2px;background:var(--glass-border);z-index:1;}
+.step-item:first-child .step-line{display:none;}
+.step-item.done .step-circle{background:var(--primary-dark);border-color:var(--primary-dark);color:#fff;}
+.step-item.done .step-line{background:var(--primary-dark);}
+.step-item.active .step-circle{background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-color:var(--primary-dark);color:#fff;box-shadow:0 0 0 4px rgba(74,155,209,.25);}
+.step-item.active .step-label{color:var(--primary-dark);}
+
+/* ---- section framing ---- */
+.section{display:none;}
+.section.active-view{display:block;animation:sectionFade .35s ease;}
+@keyframes sectionFade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--amber-dark);
+  background:#FBE9DA;padding:6px 14px;border-radius:999px;margin-bottom:12px;font-family:'Poppins', sans-serif;
+}
+.section-title{font-size:clamp(24px,4vw,36px);color:var(--ink);margin:0 0 8px;text-align:center;}
+.section-sub{max-width:640px;margin:0 auto 18px;text-align:center;font-size:14.5px;color:var(--muted);}
+.hero{text-align:center;}
+.hero h1{font-size:clamp(26px,4.4vw,40px);color:var(--ink);margin:0 0 12px;}
+
+.card{background:transparent;border:none;border-radius:0;box-shadow:none;padding:6px 0 0;}
+.btn{
+  border:none;border-radius:999px;padding:13px 24px;font-weight:600;font-size:15px;color:#fff;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  box-shadow:0 12px 24px -10px var(--shadow-btn);transition:transform .15s,box-shadow .15s;
+}
+.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 14px 28px -8px var(--shadow-btn);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn.secondary{background:#fff;color:var(--primary-dark);border:1.5px solid var(--primary);box-shadow:none;text-align:left;}
+.btn.secondary.selected{border-color:var(--amber);background:#FBE9DA;color:var(--amber-dark);}
+.btn.secondary:disabled{opacity:.55;}
+.btn.ghost{background:transparent;color:var(--primary-dark);box-shadow:none;border:1.5px solid var(--primary);padding:10px 16px;}
+.btn.small{padding:9px 18px;font-size:13px;}
+.section-nav{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:26px;}
+
+
+/* ---- Chapter 1: the case ---- */
+.problem-card{text-align:left;max-width:680px;margin:20px auto 0;}
+.problem-card p{margin:0 0 14px;font-size:15.5px;}
+.problem-card p:last-child{margin-bottom:0;}
+.problem-card b{color:var(--primary-deep);}
+.story-lines{
+  text-align:left;max-width:680px;margin:26px auto 0;background:transparent;
+  border:none;border-radius:0;padding:0;
+  display:flex;flex-direction:column;gap:10px;
+}
+.story-lines p{font-size:15px;}
+.story-lines .highlight{color:var(--amber-dark);font-weight:700;}
+.rules-list{list-style:none;margin:20px auto 0;padding:0;max-width:560px;display:flex;flex-direction:column;gap:8px;}
+.rules-list li{font-size:14px;color:var(--muted);display:flex;gap:10px;align-items:flex-start;line-height:1.5;}
+.rules-list li::before{content:"\2715";color:var(--danger);font-weight:700;flex-shrink:0;}
+.rules-list li.ok::before{content:"\2022";color:var(--primary);}
+
+/* ---- game shell ---- */
+.game-shell{width:100%;max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
+.topbar{
+  display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;
+  background:transparent;border:none;padding:4px 0;
+}
+.status-cluster{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;}
+.game-note{
+  max-width:640px;margin:0 auto 14px;text-align:center;font-size:13.5px;color:var(--primary-deep);
+  background:rgba(74,155,209,0.08);border:1px dashed var(--glass-border);border-radius:var(--radius-md);
+  padding:10px 16px;
+}
+.status-pill{font-size:13px;display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#fff;border:1px solid var(--glass-border);}
+.status-pill.score{color:var(--amber-dark);font-weight:700;}
+
+.game-main{display:grid;grid-template-columns:1fr 220px;gap:14px;}
+@media(max-width:760px){.game-main{grid-template-columns:1fr;}.trail-panel{order:3;border-left:none;padding-left:0;border-top:1px dashed var(--glass-border);padding-top:14px;}}
+
+.explorer-panel{
+  background:transparent;border:none;border-radius:0;
+  padding:0;min-height:360px;display:flex;flex-direction:column;gap:16px;position:relative;
+}
+.dialogue-box{
+  display:flex;gap:12px;align-items:flex-start;background:var(--card-bg);
+  border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:12px 14px;
+}
+.dialogue-avatar{width:38px;height:38px;flex-shrink:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--violet),#C96F1F);display:flex;align-items:center;justify-content:center;font-size:18px;}
+.dialogue-text{font-size:14px;color:var(--ink);line-height:1.5;}
+.dialogue-text .speaker{font-size:11px;color:var(--violet);display:block;margin-bottom:2px;letter-spacing:.05em;font-weight:700;}
+
+.current-folder-heading{display:flex;align-items:center;gap:10px;}
+.current-folder-heading .folder-icon-lg{font-size:26px;}
+.current-folder-heading h2{font-size:20px;}
+
+.folder-grid{display:flex;flex-wrap:wrap;gap:8px 24px;}
+.folder-card{
+  background:none;border:none;border-bottom:1.5px solid transparent;border-radius:0;
+  padding:4px 2px;display:inline-flex;flex-direction:row;align-items:center;gap:9px;text-align:left;
+  transition:border-color .15s,transform .15s;animation:cardPop .35s ease both;
+}
+@keyframes cardPop{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+.folder-card:hover{border-bottom-color:var(--amber);transform:translateY(-1px);}
+.folder-card .ficon{font-size:20px;transition:transform .2s ease;}
+.folder-card:hover .ficon{transform:scale(1.1) rotate(-2deg);}
+.folder-card .fname{font-size:14px;color:var(--ink);font-weight:700;word-break:break-word;}
+.folder-card .fvisited{font-size:10px;color:var(--muted);}
+.folder-card.auto-target{box-shadow:0 0 0 2px var(--violet);border-radius:8px;}
+
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:30px 10px;color:var(--muted);text-align:center;}
+.empty-state .eicon{font-size:44px;opacity:.7;}
+.empty-state p{font-size:14px;}
+
+.explorer-footer{display:flex;justify-content:flex-start;gap:10px;flex-wrap:wrap;}
+
+.flip-in{animation:flipIn .4s ease both;}
+@keyframes flipIn{from{opacity:0;transform:perspective(600px) rotateX(-8deg) translateY(6px);}to{opacity:1;transform:perspective(600px) rotateX(0) translateY(0);}}
+
+.trail-panel{
+  background:transparent;border:none;border-left:1px dashed var(--glass-border);border-radius:0;
+  padding:0 0 0 16px;display:flex;flex-direction:column;gap:10px;max-height:520px;
+}
+.trail-panel .trail-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;text-align:center;font-weight:700;}
+.tree-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding-right:2px;}
+.tree-root,.tree-children{list-style:none;margin:0;padding-left:14px;}
+.tree-root{padding-left:0;}
+.tree-children{border-left:1px dashed var(--glass-border);margin-left:5px;}
+.tree-node{position:relative;padding:4px 0 4px 14px;font-size:12px;color:var(--muted);animation:treePop .3s ease both;}
+.tree-node::before{content:"";position:absolute;left:0;top:15px;width:9px;height:1px;background:var(--glass-border);}
+.tree-row{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;}
+@keyframes treePop{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:translateX(0);}}
+.tree-node.opened{color:var(--primary-dark);}
+.tree-node.on-path{color:var(--amber-dark);font-weight:700;}
+.tree-node.found-file{color:var(--success);font-weight:700;}
+.tree-icon{font-size:12px;flex-shrink:0;}
+.tree-name{overflow:hidden;text-overflow:ellipsis;}
+
+/* ---- control bar ---- */
+.control-bar{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;
+  background:transparent;border:none;border-top:1px dashed var(--glass-border);padding:16px 0 0;
+}
+.control-group{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.control-btn{
+  border:1.5px solid var(--primary);background:#fff;color:var(--primary-dark);border-radius:999px;padding:9px 18px;
+  font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:7px;font-family:inherit;
+  transition:transform .12s,background .15s,border-color .15s,opacity .15s;
+}
+.control-btn:hover:not(:disabled){transform:translateY(-1px);border-color:var(--amber);}
+.control-btn:disabled{opacity:.35;cursor:not-allowed;}
+.control-btn.play{background:var(--primary-dark);color:#fff;border-color:transparent;}
+.control-btn.pause{background:var(--amber);color:#fff;border-color:transparent;}
+.control-btn.auto{background:var(--amber);color:#fff;border-color:transparent;}
+.control-btn.auto.active{box-shadow:0 0 0 3px rgba(234,140,54,.35);}
+/* reset button: gentle attention-grabbing pulse */
+.control-btn.reset{
+  position:relative;background:transparent;color:var(--danger);border-color:var(--danger);
+  animation:resetGlow 2.2s ease-in-out infinite;
+}
+@keyframes resetGlow{0%,100%{box-shadow:0 0 0 0 rgba(217,113,79,.4);}50%{box-shadow:0 0 0 8px rgba(217,113,79,0);}}
+.control-btn.reset .r-spin{display:inline-block;transition:transform .4s;}
+.control-btn.reset:hover .r-spin{transform:rotate(180deg);}
+
+.speed-control{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);background:#fff;border:1px solid var(--glass-border);border-radius:10px;padding:6px 10px;}
+.speed-control button{width:24px;height:24px;border-radius:50%;border:1px solid var(--glass-border);background:var(--bg-3);color:var(--primary-dark);font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.speed-control button:hover:not(:disabled){border-color:var(--amber);}
+.speed-control button:disabled{opacity:.3;cursor:not-allowed;}
+.speed-value{min-width:34px;text-align:center;color:var(--amber-dark);font-weight:700;}
+
+/* ---- overlays: pause / time-up (no answer collection) ---- */
+.overlay{position:fixed;inset:0;background:rgba(31,46,55,0.45);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
+.overlay.active{display:flex;animation:sectionFade .3s ease both;}
+.overlay-card{background:#fdfffe;border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:30px;max-width:460px;width:100%;text-align:center;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 50px -20px rgba(23,50,77,.4);}
+.overlay-card h2{font-size:24px;}
+.overlay-card p{color:var(--muted);font-size:14.5px;line-height:1.55;}
+
+.achv-toast{
+  position:fixed;top:-90px;left:50%;transform:translateX(-50%);background:#fff;border:1px solid var(--amber);
+  border-radius:999px;padding:12px 22px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;
+  box-shadow:0 20px 50px -20px rgba(23,50,77,.4);z-index:80;transition:top .4s cubic-bezier(.2,.9,.3,1.3);
+}
+.achv-toast.show{top:20px;}
+
+/* ---- completion ---- */
+.result-card{max-width:560px;width:100%;margin:0 auto;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;}
+.result-icon{font-size:56px;}
+.stat-row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;width:100%;}
+.stat-chip{background:var(--card-bg);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:12px 18px;min-width:110px;}
+.stat-chip .num{font-size:20px;color:var(--amber-dark);font-weight:800;}
+.stat-chip .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+
+/* ---- open question cards: reflection + exercise ---- */
+.qgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:8px;}
+.qcard{
+  background:var(--card-bg);border:1px solid var(--glass-border);border-radius:18px;
+  padding:22px 20px 20px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  box-shadow:0 14px 30px -18px rgba(23,50,77,.3);min-height:190px;display:flex;flex-direction:column;gap:10px;
+  transition:transform .18s,box-shadow .18s;
+}
+.qcard:hover{transform:translateY(-3px);box-shadow:0 18px 34px -16px rgba(23,50,77,.38);}
+.qcard .q-num{font-weight:800;font-size:13px;color:var(--primary);letter-spacing:.03em;}
+.qcard .q-text{font-size:14.5px;color:var(--ink);line-height:1.6;font-weight:600;}
+@media(max-width:900px){.qgrid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:640px){.qgrid{grid-template-columns:1fr;}.qcard{min-height:auto;padding:18px 18px 16px;}}
+.qcard.qcard-wide{grid-column:1 / -1;min-height:auto;}
+.maze-layout{display:flex;gap:22px;align-items:center;flex-wrap:wrap;}
+.maze-svg{width:100%;max-width:260px;flex-shrink:0;}
+.maze-wall{stroke:var(--ink);stroke-width:4;stroke-linecap:round;opacity:.75;}
+.maze-start{fill:var(--success);}
+.maze-exit{fill:var(--amber-dark);}
+.maze-label{font-size:11px;fill:var(--muted);font-weight:700;}
+.maze-questions{flex:1;min-width:220px;display:flex;flex-direction:column;gap:10px;}
+
+/* ---- Chapter: the method (concept + stack), one continuous flow, no boxed sub-panels ---- */
+.learning-flow{max-width:640px;margin:0 auto;text-align:left;}
+.learning-flow > * + *{margin-top:22px;padding-top:22px;border-top:1px dashed var(--glass-border);}
+.dfs-diagram-wrap{width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;}
+#dfs-svg{width:100%;max-width:420px;height:auto;}
+.df-edge{stroke:var(--glass-border);stroke-width:3;opacity:.5;transition:stroke .3s ease,opacity .3s ease;}
+.df-edge.active{stroke:var(--amber);opacity:1;}
+.df-node circle{fill:#fff;stroke:var(--glass-border);stroke-width:2;transition:fill .3s ease,stroke .3s ease,transform .3s ease;transform-origin:center;transform-box:fill-box;}
+.df-node text{font-size:14px;text-anchor:middle;pointer-events:none;user-select:none;}
+.df-node.active circle{fill:var(--amber);stroke:var(--amber-dark);transform:scale(1.18);}
+.df-node.root.active circle{fill:var(--success);stroke:var(--success);}
+.dfs-summary{text-align:left;}
+.dfs-summary-lead{font-size:14.5px;color:var(--ink);line-height:1.6;margin-bottom:8px;}
+.dfs-summary ul{margin:0 0 10px;padding-left:20px;display:flex;flex-direction:column;gap:6px;}
+.dfs-summary li{font-size:13.5px;color:var(--muted);line-height:1.55;}
+.dfs-summary strong{color:var(--amber-dark);}
+
+.stack-wrap h3{font-size:16px;color:var(--primary-deep);text-align:center;margin-bottom:10px;}
+.stack-wrap p{font-size:14px;margin-bottom:10px;}
+.stack-visual{display:flex;flex-direction:column-reverse;gap:6px;max-width:220px;margin:14px auto;min-height:44px;}
+.stack-slot{background:#fff;border:1.5px solid var(--primary);border-radius:10px;padding:8px 12px;text-align:center;font-weight:700;font-size:13px;color:var(--primary-dark);animation:stackPop .3s ease both;}
+@keyframes stackPop{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.stack-slot.top{border-color:var(--amber);color:var(--amber-dark);}
+.stack-slot.found{border-color:var(--success);color:var(--success);background:rgba(75,122,74,0.08);}
+.stack-slot.placeholder{border-style:dashed;font-weight:400;color:var(--muted);opacity:.7;}
+.stack-controls{display:flex;justify-content:center;gap:10px;margin-top:6px;flex-wrap:wrap;}
+
+.key-learnings h3{font-size:16px;margin-bottom:12px;color:var(--primary-deep);text-align:center;}
+.kl-grid{display:flex;flex-direction:column;gap:14px;}
+.kl-item{display:flex;gap:12px;align-items:flex-start;text-align:left;}
+.kl-item + .kl-item{padding-top:14px;border-top:1px dotted var(--glass-border);}
+.kl-icon{font-size:20px;flex-shrink:0;line-height:1.3;}
+.kl-item b{display:block;font-size:13.5px;color:var(--primary-deep);margin-bottom:3px;}
+.kl-item p{font-size:12.5px;color:var(--muted);line-height:1.5;}
+
+.hidden{display:none!important;}
+
+@media(max-width:640px){
+  .wrap{padding:96px 14px 50px;}
+  .folder-card{min-width:78px;padding:10px 6px;}
+}
+</style>
+</head>
+<body>
+
+<div class="brand-bar">
+  <div class="brand-badge"><img src="../../assets/iitropar.png" alt="IIT Ropar logo"></div>
+  <div class="brand-badge"><img src="../../assets/vicharanashala.png" alt="Vicharanshala logo"></div>
+</div>
+
+<div class="wrap">
+
+  <div class="stepper" id="stepper">
+    <div class="step-item active" id="step-1"><span class="step-line"></span><span class="step-circle">1</span><span class="step-label">The Puzzle</span></div>
+    <div class="step-item" id="step-2"><span class="step-line"></span><span class="step-circle">2</span><span class="step-label">The Briefing</span></div>
+    <div class="step-item" id="step-3"><span class="step-line"></span><span class="step-circle">3</span><span class="step-label">The Search</span></div>
+    <div class="step-item" id="step-4"><span class="step-line"></span><span class="step-circle">4</span><span class="step-label">Case Notes</span></div>
+    <div class="step-item" id="step-5"><span class="step-line"></span><span class="step-circle">5</span><span class="step-label">The Method</span></div>
+    <div class="step-item" id="step-6"><span class="step-line"></span><span class="step-circle">6</span><span class="step-label">New Cases</span></div>
+  </div>
+
+  <!-- ================= CHAPTER 1: THE PUZZLE ================= -->
+  <section class="section active-view" id="sec-puzzle">
+    <div class="hero">
+      <span class="eyebrow">Chapter 1 &middot; The Puzzle</span>
+      <h1>🕵️ Exploring the Unknown</h1>
+    </div>
+    <div class="problem-card">
+      <p>Imagine you need to find something in a large environment where you cannot see everything at once. From your current position, there may be several different paths leading to new and unexplored places.</p>
+      <p>As you move forward, each new place may reveal more possibilities. Without a clear approach, it can become difficult to keep track of where you have already been and which path you should explore next.</p>
+      <p>Let's play a game where you'll explore a set of connected directories to find a missing file. Follow each path carefully and keep track of the folders you have already explored.</p>
+      <p>Let's see what this looks like through a story 👇</p>
+    </div>
+    <div class="section-nav">
+      <button class="btn" id="btn-puzzle-continue">Continue to the Briefing ➜</button>
+    </div>
+  </section>
+
+  <!-- ================= CHAPTER 2: THE BRIEFING (A Search Adventure + Mission Briefing merged) ================= -->
+  <section class="section" id="sec-briefing">
+    <div class="hero">
+      <span class="eyebrow">Chapter 2 &middot; A Search Adventure</span>
+      <h1>The Missing Homework</h1>
+    </div>
+
+    <div class="story-lines" id="intro-story-lines"><!-- filled by JS --></div>
+
+    <ul class="rules-list">
+      <li>Search Bar is broken.</li>
+      <li>Recent Files is unavailable.</li>
+      <li>File Explorer search is disabled.</li>
+      <li class="ok">You can only open one folder at a time.</li>
+      <li class="ok">Every folder may contain more folders, you'll only know once you open it.</li>
+      <li class="ok">Some folders are empty. That's fine, just come back out.</li>
+    </ul>
+
+    <div class="section-nav">
+      <button class="btn ghost" id="btn-briefing-back">⬅ Back to the Puzzle</button>
+      <button class="btn" id="btn-briefing-start">Begin the Search ▶</button>
+    </div>
+  </section>
+
+  <!-- ================= CHAPTER 3: THE SEARCH (game) ================= -->
+  <section class="section" id="sec-search">
+    <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">Chapter 3 &middot; The Search</span>
+    <h2 class="section-title">Find the Missing Homework</h2>
+
+    <div class="section-nav" style="margin-top:0;margin-bottom:14px;">
+      <button class="btn ghost small" id="btn-case-back">⬅ Back to the Briefing</button>
+    </div>
+
+    <div class="game-shell">
+
+      <p class="game-note">💡 Click any folder to open it and explore by hand. Or click <b>Auto</b> at any time to sit back and watch the search play out on its own. Use <b>Pause</b> whenever you want to take a break.</p>
+
+      <div class="topbar">
+        <div class="status-cluster">
+          <div class="status-pill score">★ <span id="score-value">0</span></div>
+          <div class="status-pill" id="pill-opened">📂 <span id="opened-value">0</span> opened</div>
+        </div>
+      </div>
+
+      <div class="game-main">
+        <div class="explorer-panel">
+          <div class="dialogue-box">
+            <div class="dialogue-avatar">🤔</div>
+            <div class="dialogue-text">
+              <span class="speaker">YOU</span>
+              <span id="dialogue-text">Alright... where did I put that file?</span>
+            </div>
+          </div>
+
+          <div class="current-folder-heading">
+            <span class="folder-icon-lg" id="current-folder-icon">💻</span>
+            <h2 id="current-folder-name">Desktop</h2>
+          </div>
+
+          <div id="explorer-content"><div class="folder-grid" id="folder-grid"></div></div>
+
+          <div class="explorer-footer">
+            <button class="btn ghost small" id="btn-go-back">⬅ Go Back</button>
+          </div>
+        </div>
+
+        <aside class="trail-panel" id="trail-panel">
+          <span class="trail-label">🗂️ Folder Map</span>
+          <div class="tree-scroll"><div id="tree-container"></div></div>
+        </aside>
+      </div>
+
+      <div class="control-bar">
+        <div class="control-group">
+          <button class="control-btn pause" id="btn-pause">⏸ Pause</button>
+          <button class="control-btn play" id="btn-resume" disabled>▶ Resume</button>
+          <button class="control-btn reset" id="btn-reset"><span class="r-spin">⟲</span> Reset</button>
+          <button class="control-btn auto" id="btn-auto">⚡ Auto</button>
+        </div>
+        <div class="control-group">
+          <div class="speed-control">
+            <span>Speed</span>
+            <button id="speed-down" aria-label="Slower">−</button>
+            <span class="speed-value" id="speed-value">1×</span>
+            <button id="speed-up" aria-label="Faster">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CHAPTER 2b: MISSION COMPLETE ================= -->
+  <section class="section" id="sec-complete">
+    <div class="result-card">
+      <div class="result-icon">🎉</div>
+      <h2>Yay, hurray, you found the homework!</h2>
+      <div class="stat-row">
+        <div class="stat-chip"><div class="num" id="complete-score">0</div><div class="lbl">Score</div></div>
+        <div class="stat-chip"><div class="num" id="complete-opened">0</div><div class="lbl">Folders Opened</div></div>
+      </div>
+      <div class="section-nav">
+        <button class="btn ghost" id="btn-complete-replay">⟲ Play Again</button>
+        <button class="btn" id="btn-complete-continue">Continue to Case Notes ➜</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CHAPTER 4: CASE NOTES (reflection) ================= -->
+  <section class="section" id="sec-notes">
+    <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">Chapter 4 &middot; Case Notes</span>
+    <h2 class="section-title">What did you notice?</h2>
+    <p class="section-sub">Sit with these for a moment, there's no single correct wording, just think them through in your own words.</p>
+    <div class="card">
+      <div class="qgrid">
+        <div class="qcard"><span class="q-num">1 &middot; Exploring the Directories</span><span class="q-text">What strategies did you use to explore the directories?</span></div>
+        <div class="qcard"><span class="q-num">2 &middot; Handling a Dead End</span><span class="q-text">What told you it was time to stop going forward and return to the previous folder?</span></div>
+        <div class="qcard"><span class="q-num">3 &middot; Choosing What to Do Next</span><span class="q-text">After reaching a dead end, would you prefer to go back to the previous folder and try another option, or restart the search from the beginning? Why?</span></div>
+        <div class="qcard"><span class="q-num">4 &middot; Tracking What You Already Checked</span><span class="q-text">How did knowing which folders you had already opened help you avoid repeating the same search? What would you do if the folder numbers became very large and you had to keep track of many visited folders?</span></div>
+        <div class="qcard"><span class="q-num">5 &middot; Reconstructing the Strategy</span><span class="q-text">Imagine someone else must find the file using the strategy you used in the game. What step-by-step instructions would you give them?</span></div>
+      </div>
+      <div class="section-nav">
+        <button class="btn ghost" id="btn-notes-back">⬅ Back to the Search</button>
+        <button class="btn" id="btn-notes-continue">Continue to the Method ➜</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CHAPTER 5: THE METHOD (concept + stack, one continuous flow) ================= -->
+  <section class="section" id="sec-method">
+    <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">Chapter 5 &middot; The Method</span>
+    <h2 class="section-title">How the search really worked</h2>
+    <p class="section-sub">Here's the strategy you were using the whole time, with a name and a shape.</p>
+
+    <div class="hero" style="margin-bottom:6px;">
+      <div class="result-icon">🌳</div>
+      <h2>You Discovered: Depth-First Search (DFS)!</h2>
+    </div>
+
+    <div class="learning-flow">
+      <div class="dfs-diagram-wrap">
+        <svg id="dfs-svg" viewBox="0 0 400 210" xmlns="http://www.w3.org/2000/svg">
+          <line id="edge-ab" class="df-edge" x1="200" y1="34" x2="100" y2="96"></line>
+          <line id="edge-ae" class="df-edge" x1="200" y1="34" x2="300" y2="96"></line>
+          <line id="edge-bc" class="df-edge" x1="100" y1="104" x2="60" y2="166"></line>
+          <line id="edge-bd" class="df-edge" x1="100" y1="104" x2="140" y2="166"></line>
+          <line id="edge-ef" class="df-edge" x1="300" y1="104" x2="260" y2="166"></line>
+          <line id="edge-eg" class="df-edge" x1="300" y1="104" x2="340" y2="166"></line>
+          <g id="node-a" class="df-node root"><circle cx="200" cy="26" r="16"></circle><text x="200" y="31">💻</text></g>
+          <g id="node-b" class="df-node"><circle cx="100" cy="100" r="14"></circle><text x="100" y="105">📁</text></g>
+          <g id="node-e" class="df-node"><circle cx="300" cy="100" r="14"></circle><text x="300" y="105">📁</text></g>
+          <g id="node-c" class="df-node"><circle cx="60" cy="180" r="13"></circle><text x="60" y="185">📁</text></g>
+          <g id="node-d" class="df-node"><circle cx="140" cy="180" r="13"></circle><text x="140" y="185">📄</text></g>
+          <g id="node-f" class="df-node"><circle cx="260" cy="180" r="13"></circle><text x="260" y="185">📁</text></g>
+          <g id="node-g" class="df-node"><circle cx="340" cy="180" r="13"></circle><text x="340" y="185">📁</text></g>
+        </svg>
+        <button class="btn ghost small" id="btn-replay-dfs">↻ Replay Animation</button>
+      </div>
+
+      <div class="dfs-summary">
+        <p class="dfs-summary-lead">That's exactly the habit you built by hand while hunting for Homework.pdf:</p>
+        <ul>
+          <li>Step into a folder, then immediately step into the next one <em>inside it</em>, as deep as you can go.</li>
+          <li>Hit a dead end (an empty folder)? Back out exactly one step.</li>
+          <li>From there, try the next unopened folder, going deep again before drifting sideways.</li>
+          <li>Repeat until you find what you're looking for, or there's nowhere left to check.</li>
+        </ul>
+        <p class="dfs-summary-lead">That strategy has a name: <strong>Depth-First Search</strong>. It always commits to one path fully before backtracking to try another.</p>
+      </div>
+
+      <div class="stack-wrap">
+        <h3>📚 Why a Stack?</h3>
+        <p>DFS remembers where to go next using a <b>stack</b>, a pile where you can only add or remove from the top. Every time you open a folder, it gets placed on top of the stack. When you hit a dead end, you pop the top folder off and land back on the one below it, exactly the folder you'd expect to return to.</p>
+        <p>Try it yourself: each push opens the next folder on the real path to Homework.pdf, then pop it to back out, exactly like the search you just ran.</p>
+        <div class="stack-visual" id="stack-visual"></div>
+        <div class="stack-controls">
+          <button class="btn secondary small" id="btn-stack-push">Push (open a folder)</button>
+          <button class="btn ghost small" id="btn-stack-pop">Pop (go back)</button>
+          <button class="btn ghost small" id="btn-stack-clear">Clear</button>
+        </div>
+      </div>
+
+      <div class="key-learnings">
+        <h3>🔑 Key Learnings</h3>
+        <div class="kl-grid">
+          <div class="kl-item"><span class="kl-icon">🧭</span><div><b>The Strategy</b><p>Go as deep as possible down one path before trying another, commit fully, and only backtrack once you truly hit a dead end.</p></div></div>
+          <div class="kl-item"><span class="kl-icon">📚</span><div><b>The Stack</b><p>The last folder you opened is the first one you return to. That "last in, first out" order is exactly what a stack gives you.</p></div></div>
+          <div class="kl-item"><span class="kl-icon">✅</span><div><b>Why It Works</b><p>Backing out exactly one step (instead of starting over) means you never skip a folder and never waste time re-checking one.</p></div></div>
+          <div class="kl-item"><span class="kl-icon">🌍</span><div><b>Where You'll See It</b><p>File explorers, maze-solving, puzzle games, web crawlers, and countless programming problems all lean on this exact idea.</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-nav">
+      <button class="btn ghost" id="btn-method-back">⬅ Back to Case Notes</button>
+      <button class="btn" id="btn-method-continue">Continue to New Cases ➜</button>
+    </div>
+  </section>
+
+  <!-- ================= CHAPTER 6: NEW CASES (exercise) ================= -->
+  <section class="section" id="sec-cases">
+    <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">Chapter 6 &middot; New Cases</span>
+    <h2 class="section-title">Put the idea to the test</h2>
+    <p class="section-sub">New situations to think through using what you just discovered.</p>
+    <div class="card">
+      <div class="qgrid">
+        <div class="qcard"><span class="q-num">1 &middot; Compare Efficiency</span><span class="q-text">Two algorithms explore the same graph. One follows a path deeply before backtracking, while the other explores all nearby vertices first. What factors would you examine to decide which approach is more suitable for the problem?</span></div>
+        <div class="qcard"><span class="q-num">2 &middot; Recognize the Pattern</span><span class="q-text">A problem requires exploring every possible path from a starting point, including paths that may lead several steps deeper before another option is considered. What features would make a depth-first approach suitable?</span></div>
+        <div class="qcard"><span class="q-num">3 &middot; Spot the Misconception</span><span class="q-text">Someone says, "DFS is better for finding the nearest target because it reaches a target as quickly as possible by going deep." What is wrong with this reasoning?</span></div>
+        <div class="qcard"><span class="q-num">4 &middot; Change the Constraints</span><span class="q-text">A DFS is exploring a very large graph, but the search can only keep a limited number of locations in memory. How might this constraint affect your choice of search strategy?</span></div>
+        <div class="qcard"><span class="q-num">5 &middot; Unfamiliar Application</span><span class="q-text">A software project contains many files, and some files depend on others. You want to explore all dependencies starting from one file, following each dependency as deeply as possible before returning to another dependency. How could this approach help, and what could cause the search to revisit the same file?</span></div>
+        <div class="qcard qcard-wide">
+          <span class="q-num">6 &middot; Maze to Graph</span>
+          <div class="maze-layout">
+            <svg class="maze-svg" viewBox="0 0 260 200" xmlns="http://www.w3.org/2000/svg">
+              <rect x="10" y="10" width="240" height="180" rx="8" class="maze-wall" fill="none"></rect>
+              <line x1="10" y1="55" x2="100" y2="55" class="maze-wall"></line>
+              <line x1="100" y1="10" x2="100" y2="100" class="maze-wall"></line>
+              <line x1="60" y1="100" x2="60" y2="190" class="maze-wall"></line>
+              <line x1="100" y1="100" x2="190" y2="100" class="maze-wall"></line>
+              <line x1="150" y1="55" x2="150" y2="145" class="maze-wall"></line>
+              <line x1="150" y1="145" x2="250" y2="145" class="maze-wall"></line>
+              <line x1="190" y1="55" x2="190" y2="100" class="maze-wall"></line>
+              <circle cx="25" cy="25" r="6" class="maze-start"></circle>
+              <text x="36" y="30" class="maze-label">Start</text>
+              <circle cx="235" cy="175" r="6" class="maze-exit"></circle>
+              <text x="176" y="180" class="maze-label">Exit</text>
+            </svg>
+            <div class="maze-questions">
+              <span class="q-text">Look at the maze provided above. If you wanted to represent this maze as a graph, what would the rooms or positions represent, and what would the connections between them represent?</span>
+              <span class="q-text">Once represented as a graph, how could you explore it by following one path as deeply as possible before going back and trying another path?</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section-nav">
+        <button class="btn ghost" id="btn-cases-back">⬅ Back to the Method</button>
+        <button class="btn" id="btn-cases-finish">🏁 Finish ➜</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ================= OVERLAYS: pause / time-up ================= -->
+<div class="overlay" id="overlay-pause">
+  <div class="overlay-card">
+    <h2>⏸ Paused</h2>
+    <p>Take a breath. The clock is frozen, the folders aren't going anywhere.</p>
+    <div class="section-nav">
+      <button class="btn" id="btn-overlay-resume">▶ Resume</button>
+      <button class="btn ghost" id="btn-overlay-quit">Quit to the Briefing</button>
+    </div>
+  </div>
+</div>
+
+<div class="achv-toast" id="achv-toast">
+  <span class="achv-icon">🏆</span>
+  <span id="achv-text">Achievement unlocked</span>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   NAVIGATION: 5-chapter stepper wrapping the game screens
+   ============================================================ */
+const STEP_FOR_SECTION = {
+  'sec-puzzle':1, 'sec-briefing':2, 'sec-search':3, 'sec-complete':3, 'sec-notes':4, 'sec-method':5, 'sec-cases':6
+};
+function setStep(n){
+  for (let i = 1; i <= 6; i++){
+    const el = document.getElementById('step-' + i);
+    el.classList.remove('active','done');
+    if (i < n) el.classList.add('done');
+    if (i === n) el.classList.add('active');
+  }
+}
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active-view'));
+  document.getElementById(id).classList.add('active-view');
+  setStep(STEP_FOR_SECTION[id] || 1);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* =========================================================================
+   STORY DATA
+   ========================================================================= */
+let _idCounter = 0;
+function node(name, children = [], hasFile = false){
+  return { id: 'n' + (_idCounter++), name, children, hasFile, opened: false };
+}
+function buildLevel(){
+  _idCounter = 0;
+  return node('Desktop', [
+    node('Downloads', [
+      node('Installers', []),
+      node('Random PDF Dump', [
+        node('Receipt.pdf', []),
+        node('Manual.pdf', []),
+      ]),
+    ]),
+    node('Pictures', [ node('Screenshots', []) ]),
+    node('School', [
+      node('Math', []),
+      node('English', [
+        node('Notes', []),
+        node('Drafts', [
+          node('Old Version.docx', []),
+          node('Homework.pdf', [], true),
+        ]),
+      ]),
+    ]),
+    node('Music', []),
+  ]);
+}
+const LEVEL = { build: buildLevel };
+
+const INTRO_LINES = [
+  'Tomorrow morning is your final submission.',
+  'Last night you saved <span class="highlight">Homework.pdf</span> somewhere on this computer.',
+  'Now you can\'t remember where.',
+  'The school bell rings in only a few minutes.',
+];
+
+const DIALOGUE = {
+  openHasChildren: ["Okay, there's more in here. Let's keep going.", "More folders inside. Alright, deeper we go.", "Not empty, there's something in this one."],
+  openEmpty: ["Nothing here. Guess I should head back out.", "Empty. That's a dead end, back I go.", "Nope, nothing in this one."],
+  goBack: ["Okay, let's back out and try somewhere else.", "Stepping back out of this folder.", "Alright, backing up."],
+  found: ["There it is! Homework.pdf!", "Finally, found it!", "YES. That's the one."],
+  revisit: ["I've already been in here.", "Already checked this one."],
+  start: "Alright... where did I put that file?",
+};
+function say(list){ return Array.isArray(list) ? list[Math.floor(Math.random() * list.length)] : list; }
+
+/* =========================================================================
+   GAME STATE
+   ========================================================================= */
+const state = {
+  root: null, path: [], score: 0, foldersOpened: 0, backCount: 0,
+  status: 'idle', isAuto: false, autoId: null, autoSpeedIndex: 1,
+  achievements: new Set(),
+};
+const SPEED_STEPS = [
+  { label: '0.5×', ms: 1800 }, { label: '1×', ms: 1100 }, { label: '1.5×', ms: 750 }, { label: '2×', ms: 450 },
+];
+
+/* =========================================================================
+   RENDERING
+   ========================================================================= */
+function renderCaseStory(){
+  document.getElementById('intro-story-lines').innerHTML = INTRO_LINES.map(l => `<p>${l}</p>`).join('');
+}
+function buildTreeNodeMarkup(n){
+  const onPath = state.path.includes(n);
+  const icon = n.hasFile ? '📄' : (n.opened ? '📂' : '📁');
+  let cls = 'tree-node';
+  if (n.opened) cls += ' opened';
+  if (onPath) cls += ' on-path';
+  if (n.hasFile && n.opened) cls += ' found-file';
+  let childrenHtml = '';
+  if (n.opened && n.children && n.children.length){
+    childrenHtml = `<ul class="tree-children">${n.children.map(buildTreeNodeMarkup).join('')}</ul>`;
+  }
+  return `<li class="${cls}" data-id="${n.id}"><span class="tree-row"><span class="tree-icon">${icon}</span><span class="tree-name">${n.name}</span></span>${childrenHtml}</li>`;
+}
+function renderTreeHierarchy(){
+  const container = document.getElementById('tree-container');
+  if (!container || !state.root) return;
+  container.innerHTML = `<ul class="tree-root">${buildTreeNodeMarkup(state.root)}</ul>`;
+  const current = currentNode();
+  if (current){
+    const activeEl = container.querySelector(`.tree-node[data-id="${current.id}"]`);
+    if (activeEl) activeEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
+function currentNode(){ return state.path[state.path.length - 1]; }
+function renderExplorer(){
+  const nd = currentNode();
+  document.getElementById('current-folder-icon').textContent = state.path.length === 1 ? '💻' : '📂';
+  document.getElementById('current-folder-name').textContent = nd.name;
+  document.getElementById('btn-go-back').disabled = state.path.length <= 1;
+
+  const content = document.getElementById('explorer-content');
+  content.classList.remove('flip-in');
+  void content.offsetWidth;
+  content.classList.add('flip-in');
+
+  if (nd.children.length === 0){
+    content.innerHTML = `<div class="empty-state"><span class="eicon">🗂️</span><p>Nothing in here. Try going back and checking a different folder.</p></div>`;
+  } else {
+    content.innerHTML = `<div class="folder-grid" id="folder-grid"></div>`;
+    const grid = document.getElementById('folder-grid');
+    nd.children.forEach(child => {
+      const card = document.createElement('button');
+      card.className = 'folder-card';
+      card.dataset.id = child.id;
+      card.innerHTML = `<span class="ficon">${child.opened ? '📂' : '📁'}</span><span class="fname">${child.name}</span><span class="fvisited">${child.opened ? 'opened' : 'unopened'}</span>`;
+      card.addEventListener('click', () => openFolder(child));
+      grid.appendChild(card);
+    });
+  }
+  renderTreeHierarchy();
+}
+function renderHUD(){
+  document.getElementById('score-value').textContent = state.score;
+  document.getElementById('opened-value').textContent = state.foldersOpened;
+}
+function renderDialogue(text){ document.getElementById('dialogue-text').textContent = text; }
+function renderControls(){
+  const s = state.status;
+  document.getElementById('btn-pause').disabled = !(s === 'playing');
+  document.getElementById('btn-resume').disabled = !(s === 'paused');
+  document.getElementById('btn-auto').disabled = !(s === 'playing' || s === 'paused');
+  document.getElementById('btn-auto').classList.toggle('active', state.isAuto);
+  document.getElementById('btn-auto').textContent = state.isAuto ? '⏹ Stop Auto' : '⚡ Auto';
+  document.getElementById('speed-value').textContent = SPEED_STEPS[state.autoSpeedIndex].label;
+  document.getElementById('speed-down').disabled = state.autoSpeedIndex === 0;
+  document.getElementById('speed-up').disabled = state.autoSpeedIndex === SPEED_STEPS.length - 1;
+}
+
+/* =========================================================================
+   NAVIGATION / MISSION FLOW
+   ========================================================================= */
+function initLevel(){
+  state.root = LEVEL.build();
+  state.root.opened = true;
+  state.path = [state.root];
+  state.score = 0; state.foldersOpened = 0; state.backCount = 0;
+  state.status = 'playing'; state.isAuto = false;
+  stopAuto();
+  showSection('sec-search');
+  renderExplorer(); renderHUD();
+  renderDialogue(say(DIALOGUE.start));
+  renderControls();
+}
+function pauseMission(){
+  if (state.status !== 'playing') return;
+  state.status = 'paused'; stopAuto(true);
+  document.getElementById('overlay-pause').classList.add('active');
+  renderControls();
+}
+function resumeMission(){
+  if (state.status !== 'paused') return;
+  state.status = 'playing';
+  if (state.isAuto) startAutoInterval();
+  document.getElementById('overlay-pause').classList.remove('active');
+  renderControls();
+}
+function resetMission(){ stopAuto(); initLevel(); }
+function quitToBriefing(){
+  stopAuto();
+  document.getElementById('overlay-pause').classList.remove('active');
+  showSection('sec-briefing');
+}
+function openFolder(child){
+  if (state.status !== 'playing') return;
+  const wasOpened = child.opened;
+  if (!wasOpened){
+    child.opened = true; state.foldersOpened++; state.score += 10;
+    maybeUnlockAchievement(child);
+  }
+  state.path.push(child);
+  renderExplorer(); renderHUD();
+  if (child.hasFile){ renderDialogue(say(DIALOGUE.found)); return foundHomework(); }
+  if (wasOpened) renderDialogue(say(DIALOGUE.revisit));
+  else if (child.children.length === 0) renderDialogue(say(DIALOGUE.openEmpty));
+  else renderDialogue(say(DIALOGUE.openHasChildren));
+}
+function goBack(){
+  if (state.status !== 'playing') return;
+  if (state.path.length <= 1) return;
+  state.path.pop(); state.backCount++;
+  renderExplorer(); renderDialogue(say(DIALOGUE.goBack));
+  maybeAchievementPersistent();
+}
+function jumpToPathIndex(index){
+  if (state.status !== 'playing') return;
+  if (index >= state.path.length - 1) return;
+  state.path = state.path.slice(0, index + 1);
+  state.backCount++;
+  renderExplorer(); renderDialogue(say(DIALOGUE.goBack));
+}
+function foundHomework(){
+  state.status = 'complete'; stopAuto();
+  unlockAchievement('detective', 'Detective, you found the homework!');
+  document.getElementById('complete-score').textContent = state.score;
+  document.getElementById('complete-opened').textContent = state.foldersOpened;
+  setTimeout(() => showSection('sec-complete'), 550);
+}
+
+/* =========================================================================
+   AUTO MODE
+   ========================================================================= */
+function toggleAuto(){
+  if (state.status !== 'playing' && state.status !== 'paused') return;
+  state.isAuto = !state.isAuto;
+  if (state.isAuto){ if (state.status === 'playing') startAutoInterval(); } else { stopAuto(); }
+  renderControls();
+}
+function startAutoInterval(){ stopAutoIntervalOnly(); state.autoId = setInterval(autoStep, SPEED_STEPS[state.autoSpeedIndex].ms); }
+function stopAutoIntervalOnly(){ if (state.autoId){ clearInterval(state.autoId); state.autoId = null; } }
+function stopAuto(keepFlag){ stopAutoIntervalOnly(); if (!keepFlag) state.isAuto = false; }
+function autoStep(){
+  if (state.status !== 'playing' || !state.isAuto) return;
+  const nd = currentNode();
+  const nextChild = nd.children.find(c => !c.opened);
+  if (nextChild){ openFolder(nextChild); }
+  else if (state.path.length > 1){ goBack(); }
+  else { stopAuto(); renderDialogue('Checked everything here. Nothing left to try automatically.'); renderControls(); }
+}
+function changeSpeed(delta){
+  const next = state.autoSpeedIndex + delta;
+  if (next < 0 || next >= SPEED_STEPS.length) return;
+  state.autoSpeedIndex = next;
+  if (state.isAuto && state.status === 'playing') startAutoInterval();
+  renderControls();
+}
+
+/* =========================================================================
+   ACHIEVEMENTS
+   ========================================================================= */
+function unlockAchievement(key, label){
+  if (state.achievements.has(key)) return;
+  state.achievements.add(key);
+  const toast = document.getElementById('achv-toast');
+  document.getElementById('achv-text').textContent = label;
+  toast.classList.add('show');
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+}
+function maybeUnlockAchievement(child){
+  if (state.foldersOpened === 1) unlockAchievement('first-steps', 'First Steps, first folder opened!');
+  if (state.path.length >= 4) unlockAchievement('deep-diver', 'Deep Diver, four folders deep!');
+}
+function maybeAchievementPersistent(){
+  if (state.backCount >= 3) unlockAchievement('persistent', 'Persistent, still searching after backing out!');
+}
+
+/* =========================================================================
+   CHAPTER 4: DFS reveal animation (illustrative tree, replayable)
+   ========================================================================= */
+const DFS_STEPS = [
+  { node: 'a', edge: null }, { node: 'b', edge: 'ab' }, { node: 'c', edge: 'bc' },
+  { node: 'd', edge: 'bd' }, { node: 'e', edge: 'ae' }, { node: 'f', edge: 'ef' }, { node: 'g', edge: 'eg' },
+];
+function playDfsAnimation(){
+  document.querySelectorAll('#dfs-svg .df-node, #dfs-svg .df-edge').forEach(el => el.classList.remove('active'));
+  DFS_STEPS.forEach((step, i) => {
+    setTimeout(() => {
+      if (step.edge) document.getElementById('edge-' + step.edge).classList.add('active');
+      document.getElementById('node-' + step.node).classList.add('active');
+    }, i * 550);
+  });
+}
+
+/* =========================================================================
+   CHAPTER 4: Stack visual, mirrors the live search path, plus a
+   free-standing push/pop demo the learner can control by hand. Follows the
+   real path to Homework.pdf, one unique folder per push, so there is never
+   any confusion from repeated names.
+   ========================================================================= */
+const STACK_DEMO_SEQUENCE = ['Desktop', 'School', 'English', 'Drafts', 'Homework.pdf'];
+let stackIndex = 0;
+function renderStackVisual(){
+  const wrap = document.getElementById('stack-visual');
+  if (!wrap) return;
+  if (stackIndex === 0){
+    wrap.innerHTML = '<div class="stack-slot placeholder">stack is empty, press Push</div>';
+  } else {
+    const items = STACK_DEMO_SEQUENCE.slice(0, stackIndex);
+    wrap.innerHTML = items.map((label, i) => {
+      const isTop = i === items.length - 1;
+      const isFound = isTop && label === 'Homework.pdf';
+      return `<div class="stack-slot ${isTop ? 'top' : ''} ${isFound ? 'found' : ''}">${isFound ? '📄 ' : '📁 '}${label}</div>`;
+    }).join('');
+  }
+  updateStackButtons();
+}
+function updateStackButtons(){
+  const pushBtn = document.getElementById('btn-stack-push');
+  const popBtn = document.getElementById('btn-stack-pop');
+  if (!pushBtn || !popBtn) return;
+  pushBtn.disabled = stackIndex >= STACK_DEMO_SEQUENCE.length;
+  pushBtn.textContent = pushBtn.disabled ? 'Push (nothing left to open)' : 'Push (open a folder)';
+  popBtn.disabled = stackIndex === 0;
+}
+function stackPush(){
+  if (stackIndex >= STACK_DEMO_SEQUENCE.length) return;
+  stackIndex++;
+  renderStackVisual();
+}
+function stackPop(){
+  if (stackIndex === 0) return;
+  stackIndex--;
+  renderStackVisual();
+}
+function stackClear(){
+  stackIndex = 0;
+  renderStackVisual();
+}
+
+/* ============================================================
+   EVENT WIRING
+   ============================================================ */
+document.getElementById('btn-puzzle-continue').addEventListener('click', () => showSection('sec-briefing'));
+document.getElementById('btn-briefing-back').addEventListener('click', () => showSection('sec-puzzle'));
+document.getElementById('btn-briefing-start').addEventListener('click', initLevel);
+document.getElementById('btn-case-back').addEventListener('click', quitToBriefing);
+
+document.getElementById('btn-go-back').addEventListener('click', goBack);
+document.getElementById('btn-pause').addEventListener('click', pauseMission);
+document.getElementById('btn-resume').addEventListener('click', resumeMission);
+document.getElementById('btn-reset').addEventListener('click', resetMission);
+document.getElementById('btn-auto').addEventListener('click', toggleAuto);
+document.getElementById('speed-down').addEventListener('click', () => changeSpeed(-1));
+document.getElementById('speed-up').addEventListener('click', () => changeSpeed(1));
+
+document.getElementById('btn-overlay-resume').addEventListener('click', resumeMission);
+document.getElementById('btn-overlay-quit').addEventListener('click', quitToBriefing);
+
+document.getElementById('btn-complete-replay').addEventListener('click', initLevel);
+document.getElementById('btn-complete-continue').addEventListener('click', () => {
+  showSection('sec-notes');
+});
+
+document.getElementById('btn-notes-back').addEventListener('click', () => showSection('sec-complete'));
+document.getElementById('btn-notes-continue').addEventListener('click', () => {
+  showSection('sec-method');
+  playDfsAnimation();
+  renderStackVisual();
+});
+
+document.getElementById('btn-method-back').addEventListener('click', () => showSection('sec-notes'));
+document.getElementById('btn-method-continue').addEventListener('click', () => showSection('sec-cases'));
+document.getElementById('btn-replay-dfs').addEventListener('click', playDfsAnimation);
+document.getElementById('btn-stack-push').addEventListener('click', stackPush);
+document.getElementById('btn-stack-pop').addEventListener('click', stackPop);
+document.getElementById('btn-stack-clear').addEventListener('click', stackClear);
+
+document.getElementById('btn-cases-back').addEventListener('click', () => showSection('sec-method'));
+document.getElementById('btn-cases-finish').addEventListener('click', () => {
+  stopAuto();
+  showSection('sec-puzzle');
+});
+
+/* ---------------- initial paint ---------------- */
+renderCaseStory();
+renderStackVisual();
+
+})();
+</script>
+</body>
+</html>
