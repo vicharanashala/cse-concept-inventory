@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Last Mile — A Dijkstra's Algorithm Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EDF3FA;
+    --panel: #FFFFFF;
+    --panel-border: #D9E5F2;
+    --text: #1F2E37;
+    --text-dim: #54666D;
+    --text-faint: #93A5AB;
+    --blue: #4A9BD1;
+    --blue-dark: #2B6FA3;
+    --blue-light: #8FCBEF;
+    --orange: #A85D1A;
+    --orange-base: #EA8C36;
+    --banner-bg: #22496B;
+    --success-bg: #DCEAD8; --success-text: #274B26; --success-border: #4B7A4A;
+    --error-bg: #FBE1DC; --error-text: #8A3420; --error-border: #D9714F;
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    min-height:100vh;
+    background: linear-gradient(to bottom, #FDF1E9 0px, var(--bg) 400px);
+    font-family:'Inter', sans-serif;
+    color: var(--text);
+    font-weight:400;
+    line-height:1.6;
+  }
+  h1,h2,h3{ font-family:'Poppins', sans-serif; font-weight:700; margin:0; color:var(--text); }
+  p{ margin:0; }
+  button{ font-family:inherit; }
+  :focus-visible{ outline:3px solid var(--blue-dark); outline-offset:2px; border-radius:4px; }
+
+  .app{ min-height:100vh; display:flex; flex-direction:column; }
+
+  /* ---------- topbar / progress ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:40;
+    display:flex; align-items:center; gap:20px;
+    padding:10px 20px;
+    background: rgba(237,243,250,0.9);
+    backdrop-filter: blur(8px);
+    border-bottom:1px solid var(--panel-border);
+  }
+  .back-btn{ flex:0 0 auto; }
+  .back-btn.hidden-btn{ visibility:hidden; pointer-events:none; }
+  .brand-label{
+    flex:0 0 auto; font-family:'Poppins',sans-serif; font-weight:700; font-size:14px;
+    color:var(--blue-dark); letter-spacing:.02em; white-space:nowrap;
+  }
+  @media (max-width:760px){ .brand-label{ display:none; } }
+  .progress{
+    flex:1; overflow-x:auto; padding:2px 0;
+  }
+  .progress-track{
+    display:flex; align-items:flex-start; gap:0;
+    width:max-content; margin:0 auto;
+  }
+  .progress-step{ display:flex; flex-direction:column; align-items:center; gap:6px; min-width:58px; }
+  .progress-step .circle{
+    width:32px; height:32px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Poppins',sans-serif; font-weight:700; font-size:13px;
+    border:2px solid var(--panel-border); color:var(--text-faint);
+    background:#fff; transition: background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .progress-step .label{
+    font-family:'Inter',sans-serif; font-weight:600; font-size:10px;
+    letter-spacing:.11em; text-transform:uppercase; color:var(--text-faint);
+    text-align:center; transition:color .2s ease;
+  }
+  .progress-step.active .circle{
+    background:linear-gradient(135deg, var(--blue), var(--blue-dark));
+    color:#fff; border-color:transparent;
+    box-shadow:0 4px 10px rgba(43,111,163,.35);
+  }
+  .progress-step.active .label{ color:var(--orange); }
+  .progress-step.done .circle{ background:var(--blue-dark); color:#fff; border-color:transparent; }
+  .progress-step.done .label{ color:var(--text-dim); }
+  .progress-line{ width:22px; height:2px; background:var(--panel-border); margin-top:15px; }
+  .progress-line.done{ background:var(--blue-dark); }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    font-family:'Poppins',sans-serif; font-weight:600; font-size:14.5px;
+    padding:13px 28px; border-radius:999px; border:none; cursor:pointer;
+    display:inline-flex; align-items:center; gap:8px; white-space:nowrap;
+    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg, var(--blue), var(--blue-dark));
+    color:#fff; box-shadow:0 8px 20px rgba(43,111,163,0.28);
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 12px 26px rgba(43,111,163,0.36); }
+  .btn-secondary{
+    background:transparent; color:var(--blue-dark); border:2px solid var(--blue);
+    padding:11px 26px;
+  }
+  .btn-secondary:hover{ background:rgba(74,155,209,0.08); }
+  .btn-destructive{
+    background:linear-gradient(135deg, var(--orange-base), var(--orange));
+    color:#fff; box-shadow:0 8px 20px rgba(168,93,26,0.3);
+  }
+  .btn-destructive:hover{ transform:translateY(-2px); box-shadow:0 12px 26px rgba(168,93,26,0.38); }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; transform:none; box-shadow:none; }
+  .btn-small{ padding:9px 18px; font-size:13px; }
+
+  /* ---------- shared layout ---------- */
+  .screen{ display:none; }
+  .screen.active{ display:flex; }
+  .screen{
+    width:100%; max-width:1080px; margin:0 auto;
+    padding:44px 22px 90px; flex-direction:column; gap:28px; align-items:stretch;
+  }
+
+  .kicker{
+    font-family:'Poppins',sans-serif; font-weight:700; font-size:11.5px;
+    letter-spacing:.13em; text-transform:uppercase; color:var(--orange);
+    display:block; margin-bottom:8px;
+  }
+
+  .card{
+    background:var(--panel); border-radius:16px;
+    box-shadow:0 10px 28px rgba(23,50,77,0.11);
+    padding:32px;
+  }
+  .callout{
+    background:var(--panel); border-left:5px solid var(--orange);
+    border-radius:14px; padding:26px 30px;
+    box-shadow:0 10px 24px rgba(23,50,77,0.10);
+  }
+
+  /* ---------- page 1 ---------- */
+  #page1{ align-items:center; }
+  .problem-card{ max-width:600px; width:100%; text-align:left; display:flex; flex-direction:column; gap:20px; }
+  .problem-card h1{ font-size:clamp(26px,3.6vw,32px); }
+  .problem-card .kicker{ margin-bottom:-8px; }
+  .problem-card p.problem-tagline{ font-family:'Poppins',sans-serif; font-weight:600; font-size:17px; color:var(--text); margin-top:-8px; }
+  .problem-card p{ font-size:16.5px; color:var(--text-dim); }
+  .problem-card .btn{ align-self:flex-start; margin-top:6px; }
+
+  /* ---------- page 2 ---------- */
+  .setup-wrap{ max-width:680px; width:100%; margin:0 auto; display:flex; flex-direction:column; gap:22px; }
+  .setup-wrap h2{ font-size:26px; }
+  .rules-list{ list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:14px; }
+  .rules-list li{ display:flex; gap:12px; font-size:15px; color:var(--text-dim); align-items:flex-start; }
+  .rules-list li::before{
+    content:"→"; color:var(--blue-dark); font-weight:700; flex:0 0 auto;
+  }
+  .rules-list li .rule-text{ flex:1 1 auto; min-width:0; }
+  .setup-wrap .btn{ align-self:flex-start; }
+
+  /* ---------- page 3 ---------- */
+  #page3{ max-width:1360px; padding-top:20px; gap:12px; }
+  .demo-heading{ display:flex; flex-direction:column; gap:4px; }
+  .demo-heading h2{ font-size:22px; }
+  .demo-heading p{ color:var(--text-dim); font-size:14px; line-height:1.45; max-width:640px; }
+
+  .tab-bar{ display:flex; gap:10px; flex-wrap:wrap; }
+  .tab-btn{
+    font-family:'Poppins',sans-serif; font-weight:600; font-size:13.5px;
+    padding:8px 18px; border-radius:999px; cursor:pointer;
+    background:transparent; border:2px solid var(--blue); color:var(--blue-dark);
+    transition: background .15s ease, color .15s ease, opacity .15s ease;
+  }
+  .tab-btn.active{
+    background:linear-gradient(135deg, var(--blue), var(--blue-dark));
+    color:#fff; border-color:transparent;
+  }
+  .tab-btn.locked{
+    opacity:.5; cursor:not-allowed; border-color:var(--panel-border); color:var(--text-faint);
+  }
+
+  .banner{
+    background:var(--banner-bg); color:#fff; border-radius:14px;
+    padding:10px 22px; font-size:14.5px; display:flex; align-items:center; gap:12px;
+  }
+  .banner strong{ font-family:'Poppins',sans-serif; }
+
+  .demo-layout{ display:grid; grid-template-columns:1.9fr 1fr; gap:26px; align-items:start; width:100%; }
+  .demo-layout > *{ min-width:0; }
+  .demo-main{ display:flex; flex-direction:column; gap:12px; min-width:0; }
+  @media (max-width: 980px){ .demo-layout{ grid-template-columns:1fr; } }
+
+  .graph-card{ padding:18px; }
+  svg#graph{ width:100%; height:auto; display:block; min-width:0; }
+  .node-circle{
+    fill:#fff; stroke:var(--blue-dark); stroke-width:3;
+    transition: fill .25s ease, stroke .25s ease;
+  }
+  .node-circle.visited{ fill:var(--blue-dark); }
+  .node-group{ outline:none; }
+  .node-group:focus-visible{ outline:3px solid var(--orange); outline-offset:4px; border-radius:50%; }
+  .node-group.clickable{ cursor:pointer; }
+  .node-group.clickable .node-circle:hover{ stroke:var(--orange); stroke-width:4; }
+  .node-group.flash .node-circle{ animation: pulseFlash .7s ease; }
+  .node-group.flash-wrong .node-circle{ animation: pulseFlashWrong .7s ease; }
+  @media (prefers-reduced-motion:no-preference){
+    @keyframes pulseFlash{
+      0%{ filter:drop-shadow(0 0 0px rgba(74,155,209,.95)); }
+      60%{ filter:drop-shadow(0 0 18px rgba(74,155,209,.55)); }
+      100%{ filter:drop-shadow(0 0 0px rgba(74,155,209,0)); }
+    }
+    @keyframes pulseFlashWrong{
+      0%{ filter:drop-shadow(0 0 0px rgba(217,113,79,.95)); }
+      60%{ filter:drop-shadow(0 0 18px rgba(217,113,79,.6)); }
+      100%{ filter:drop-shadow(0 0 0px rgba(217,113,79,0)); }
+    }
+  }
+  .node-id{ font-family:'Poppins',sans-serif; font-weight:700; font-size:18px; pointer-events:none; }
+  .node-id.on-node{ fill:#fff; }
+  .node-id.off-node{ fill:var(--blue-dark); }
+  .node-name{ font-family:'Inter',sans-serif; font-weight:600; font-size:13.5px; fill:var(--text-dim); pointer-events:none; }
+  .node-dist{ font-family:'Poppins',sans-serif; font-weight:700; font-size:16px; fill:var(--blue-dark); pointer-events:none; }
+  .edge-line{ stroke:var(--panel-border); stroke-width:3.5; transition:stroke .3s ease, stroke-width .3s ease; }
+  .edge-line.path-edge{ stroke:var(--blue-dark); stroke-width:6.5; }
+  .edge-line.draw-in{ animation: edgeDrawIn .7s ease; }
+  .edge-line.wrong-flash{ stroke:var(--error-border) !important; stroke-width:7; animation: edgeWrongFlash .9s ease; }
+  @media (prefers-reduced-motion:no-preference){
+    @keyframes edgeDrawIn{
+      0%{ stroke-width:3.5; opacity:.35; }
+      45%{ stroke-width:8; opacity:1; }
+      100%{ stroke-width:6.5; opacity:1; }
+    }
+    @keyframes edgeWrongFlash{
+      0%{ stroke-width:3.5; opacity:.4; }
+      30%{ stroke-width:8; opacity:1; }
+      100%{ stroke-width:3.5; opacity:.4; }
+    }
+  }
+  .edge-weight-bg{ fill:var(--bg); }
+  .edge-weight{ font-family:'Inter',sans-serif; font-weight:600; font-size:14px; fill:var(--text-dim); }
+
+  .side-panel{ display:flex; flex-direction:column; gap:16px; }
+  .status-card{ padding:20px 22px; }
+  .status-card h3{ font-size:14px; margin-bottom:12px; }
+  table.dist-table{ width:100%; border-collapse:collapse; font-size:13px; }
+  table.dist-table th{
+    text-align:left; color:var(--text-faint); font-weight:600; font-size:10.5px;
+    letter-spacing:.08em; text-transform:uppercase; padding-bottom:8px;
+    border-bottom:1px solid var(--panel-border);
+  }
+  table.dist-table td{ padding:9px 4px; border-bottom:1px solid var(--panel-border); color:var(--text); }
+  table.dist-table tr:last-child td{ border-bottom:none; }
+  .status-visited{ color:var(--success-text); font-weight:600; }
+  .status-pending{ color:var(--text-faint); }
+
+  .stats-row{ display:flex; gap:16px; flex-wrap:wrap; font-size:13px; color:var(--text-dim); }
+  .stats-row b{ color:var(--text); }
+
+  .narrator-card{ padding:16px 18px; display:flex; flex-direction:column; gap:10px; }
+  .narrator-card h3{ font-size:14px; }
+  .log-panel{ display:flex; flex-direction:column; gap:8px; max-height:200px; overflow-y:auto; }
+  .log-panel:not(.visible-log){ display:none; }
+  .log-entry{ font-size:13px; line-height:1.5; padding:9px 11px; border-radius:9px; background:var(--bg); color:var(--text-dim); }
+  .log-entry.success{ background:var(--success-bg); color:var(--success-text); }
+  .log-entry.error{ background:var(--error-bg); color:var(--error-text); }
+  .log-entry.info{ background:rgba(74,155,209,0.12); color:var(--blue-dark); }
+  .log-empty{ font-size:13px; color:var(--text-faint); font-style:italic; }
+
+  .phase-controls{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+
+  .route-found-box{
+    position:relative; overflow:visible;
+    background:var(--panel); border-radius:16px;
+    box-shadow:0 10px 28px rgba(23,50,77,0.13);
+    padding:26px 28px; border:1px solid var(--panel-border);
+    animation: routeBoxIn .4s ease;
+  }
+  .route-found-box h3{ font-size:19px; margin-bottom:8px; }
+  .route-found-box p{ font-size:14.5px; color:var(--text-dim); }
+  @media (prefers-reduced-motion:no-preference){
+    @keyframes routeBoxIn{
+      0%{ opacity:0; transform:translateY(10px); }
+      100%{ opacity:1; transform:translateY(0); }
+    }
+  }
+  .confetti-layer{
+    position:absolute; left:0; right:0; top:0; height:0;
+    overflow:visible; pointer-events:none; z-index:5;
+  }
+  .confetti-piece{
+    position:absolute; top:0; left:50%; border-radius:2px;
+    opacity:1; will-change:transform, opacity;
+    animation: confettiBurst 1.15s cubic-bezier(.2,.7,.3,1) forwards;
+  }
+  @media (prefers-reduced-motion:no-preference){
+    @keyframes confettiBurst{
+      0%{ transform:translate(-50%, 0) rotate(0deg); opacity:1; }
+      75%{ opacity:1; }
+      100%{ transform:translate(calc(-50% + var(--tx)), var(--ty)) rotate(var(--rot)); opacity:0; }
+    }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .confetti-piece{ display:none; }
+  }
+  .hint-text{ font-size:13px; color:var(--text-faint); }
+
+  .page3-footer{
+    display:flex; justify-content:space-between; align-items:center;
+    width:100%; gap:16px; flex-wrap:wrap; padding-top:8px; border-top:1px solid var(--panel-border);
+  }
+
+  /* ---------- reflect / exercise grid ---------- */
+  .grid-heading h2{ font-size:26px; margin-bottom:8px; }
+  .grid-heading p{ color:var(--text-dim); font-size:15px; }
+  .card-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; width:100%; }
+  @media (max-width:900px){ .card-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:600px){ .card-grid{ grid-template-columns:1fr; } }
+
+  .grid-card{
+    background:var(--panel); border-radius:16px;
+    box-shadow:0 8px 20px rgba(23,50,77,.10);
+    padding:26px 22px; display:flex; flex-direction:column; gap:16px;
+    min-height:230px; transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .grid-card:hover{ transform:translateY(-4px); box-shadow:0 16px 30px rgba(74,155,209,.28); }
+  .grid-badge{
+    width:34px; height:34px; border-radius:50%; flex:0 0 auto;
+    background:linear-gradient(135deg, var(--blue), var(--blue-dark)); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Poppins',sans-serif; font-weight:700; font-size:14px;
+  }
+  .grid-question{ font-size:15px; color:var(--text); line-height:1.6; }
+  .exercise-kicker{ margin-bottom:0; }
+
+  .grid-footer{ display:flex; justify-content:flex-end; width:100%; }
+  .grid-footer.left{ justify-content:flex-start; }
+
+  /* ---------- page 5 ---------- */
+  .concept-wrap{ display:flex; flex-direction:column; gap:24px; width:100%; }
+  .concept-wrap h2{ font-size:26px; }
+  .concept-callout p{ font-size:15.5px; color:var(--text-dim); }
+  .formula-card{
+    background:linear-gradient(180deg, rgba(143,203,239,0.30), rgba(143,203,239,0.10));
+    border:1px solid var(--panel-border); border-radius:16px; padding:34px; text-align:center;
+  }
+  .formula-text{
+    font-family:'Poppins',sans-serif; font-weight:700; color:var(--blue-dark);
+    font-size:clamp(17px,3vw,24px);
+  }
+  .formula-note{ margin-top:12px; font-size:13.5px; color:var(--text-dim); }
+
+  .visual-card{ padding:26px; }
+  .visual-card h3{ font-size:14px; margin-bottom:16px; color:var(--text-dim); font-weight:600; font-family:'Inter',sans-serif; }
+  .path-diagram{ width:100%; height:auto; }
+
+  .compare-row{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media (max-width:700px){ .compare-row{ grid-template-columns:1fr; } }
+  .compare-card{ border-radius:16px; padding:26px; display:flex; flex-direction:column; gap:8px; }
+  .compare-card.naive{ background:var(--error-bg); border:1px solid var(--error-border); }
+  .compare-card.naive .compare-stat{ color:var(--error-text); }
+  .compare-card.smart{ background:rgba(143,203,239,0.24); border:1px solid var(--blue-light); }
+  .compare-card.smart .compare-stat{ color:var(--blue-dark); }
+  .compare-icon{ font-size:24px; }
+  .compare-stat{ font-family:'Poppins',sans-serif; font-weight:700; font-size:32px; }
+  .compare-label{ font-family:'Poppins',sans-serif; font-weight:600; font-size:14px; }
+  .compare-caption{ font-size:13.5px; color:var(--text-dim); }
+
+  /* ---------- modals ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(31,46,55,0.46);
+    display:none; align-items:center; justify-content:center; z-index:100; padding:20px;
+  }
+  .modal-overlay.active{ display:flex; }
+  .modal-box{
+    background:var(--panel); border-radius:18px; padding:34px;
+    max-width:440px; width:100%; box-shadow:0 24px 54px rgba(23,50,77,0.28);
+  }
+  .modal-box h3{ font-size:20px; margin-bottom:12px; }
+  .modal-box p{ font-size:14.5px; color:var(--text-dim); }
+  .modal-stats{ display:flex; flex-direction:column; gap:6px; margin:18px 0; padding:16px 18px; background:var(--bg); border-radius:12px; font-size:13.5px; }
+  .modal-actions{ display:flex; gap:12px; margin-top:8px; flex-wrap:wrap; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; }
+    html{ scroll-behavior:auto; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <button class="btn btn-destructive back-btn hidden-btn" id="backBtn" type="button">← Back</button>
+    <nav class="progress" aria-label="Progress">
+      <div class="progress-track" id="progressTrack"></div>
+    </nav>
+    <div class="brand-label" aria-hidden="true">The Last Mile</div>
+  </div>
+
+  <!-- PAGE 1 -->
+  <section class="screen" id="page1" data-page="0">
+    <div class="problem-card">
+      <span class="kicker">Interactive Case Study</span>
+      <h1>The Last Mile</h1>
+      <p class="problem-tagline">The hardest part of any delivery is the very last stretch.</p>
+      <p>You're helping a small delivery courier get across town as fast as possible. The city map between the depot and the customer's street has close to twenty different roads, and every single one has its own drive time depending on traffic, stoplights, and distance.</p>
+      <p>Some routes look short on the map but are slow in real life. Others loop around but save whole minutes at a light. With this many roads branching off each other, there's no way to just eyeball the fastest path — and guessing wrong costs the courier real time on every single delivery.</p>
+      <p>You need a way to know, for certain, exactly which sequence of roads gets there quickest — before the van even leaves the depot.</p>
+      <button class="btn btn-primary" id="toPage2Btn" type="button">Continue</button>
+    </div>
+  </section>
+
+  <!-- PAGE 2 -->
+  <section class="screen" id="page2" data-page="1">
+    <div class="setup-wrap">
+      <h2>How this works</h2>
+      <p style="color:var(--text-dim); font-size:15px;">Next, you'll work with a small map of the courier's city — eight locations connected by roads, each labeled with its drive time in minutes.</p>
+      <div class="callout">
+        <span class="kicker">Before you start</span>
+        <ul class="rules-list">
+          <li><span class="rule-text">You'll first watch a guided walkthrough. Click <strong>Next Step</strong> and watch the map find its way, one location at a time — always moving to whichever unvisited location is currently fastest to reach.</span></li>
+          <li><span class="rule-text">After that, you'll drive it yourself. Click the location you think should be visited next, based on the running distance table.</span></li>
+          <li><span class="rule-text">Pick correctly and the route updates in real time. Pick the wrong location and you'll get a hint pointing you back to the table — no penalty, just try again.</span></li>
+          <li><span class="rule-text">Watch the side panel as you go — it keeps a running tally of the shortest known time to reach every location on the map, updated live as new roads are discovered.</span></li>
+        </ul>
+      </div>
+      <button class="btn btn-primary" id="toPage3Btn" type="button">Begin</button>
+    </div>
+  </section>
+
+  <!-- PAGE 3 -->
+  <section class="screen" id="page3" data-page="2">
+    <div class="demo-heading">
+      <h2>Find the fastest route</h2>
+      <p>This is the courier's map: the depot on the left, the customer's street (Market) on the right, and six streets in between. Every road is labeled with its drive time in minutes.</p>
+    </div>
+
+    <div class="tab-bar" role="tablist" aria-label="Demo mode">
+      <button class="tab-btn active" id="tabPhase1" type="button" role="tab" aria-selected="true">Guided Walkthrough</button>
+      <button class="tab-btn locked" id="tabPhase2" type="button" role="tab" aria-selected="false" aria-disabled="true">Try It Yourself 🔒</button>
+    </div>
+
+    <div class="banner" id="demoBanner">
+      <span id="bannerText"><strong>Guided Walkthrough:</strong>&nbsp; Click "Next Step" to watch the map find the fastest route, one location at a time.</span>
+    </div>
+
+    <div class="demo-layout">
+      <div class="demo-main">
+        <div class="graph-card card">
+          <svg id="graph" viewBox="0 0 1000 350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Map of eight locations connected by roads with drive times">
+            <!-- edges (drawn first, under nodes) -->
+            <g id="edgesGroup"></g>
+            <!-- nodes -->
+            <g id="nodesGroup"></g>
+          </svg>
+        </div>
+
+        <div class="phase-controls" id="phase1Controls">
+          <button class="btn btn-primary" id="nextStepBtn" type="button">Next Step →</button>
+          <button class="btn btn-secondary" id="replayPhase1Btn" type="button" style="display:none;">Replay Guided Demo</button>
+          <span class="hint-text" id="phase1Hint"></span>
+        </div>
+        <div class="phase-controls" id="phase2Controls" style="display:none;">
+          <span class="hint-text">Click a location on the map that you think Dijkstra should visit next.</span>
+        </div>
+
+        <div class="route-found-box" id="routeFoundBox" style="display:none;">
+          <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+          <h3>Route found! 🎉</h3>
+          <p id="routeFoundText">You made it to Market.</p>
+          <div class="modal-stats" id="routeFoundStats"></div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" id="playAgainBtn" type="button">Play Again</button>
+            <button class="btn btn-primary" id="modalNextBtn" type="button">Next: What You Learned →</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="side-panel">
+        <div class="status-card card">
+          <h3>Shortest time known so far</h3>
+          <table class="dist-table">
+            <thead>
+              <tr><th>Location</th><th>Time</th><th>Via</th><th>Status</th></tr>
+            </thead>
+            <tbody id="distTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="narrator-card card">
+          <h3>What's happening</h3>
+          <div class="log-panel visible-log" id="logPhase1"><p class="log-empty">Click "Next Step" below to begin.</p></div>
+          <div class="log-panel" id="logPhase2"><p class="log-empty">Click a location on the map to make your first move.</p></div>
+        </div>
+
+        <div class="stats-row" id="statsRow" style="display:none;">
+          <span>Correct picks: <b id="statCorrect">0</b></span>
+          <span>Wrong tries: <b id="statWrong">0</b></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page3-footer">
+      <span class="hint-text">You can move on whenever you're ready — you don't need to finish the demo first.</span>
+      <button class="btn btn-primary" id="toPage4Btn" type="button">Next →</button>
+    </div>
+  </section>
+
+  <!-- PAGE 4 -->
+  <section class="screen" id="page4" data-page="3">
+    <div class="grid-heading">
+      <h2>Reflect</h2>
+      <p>Before we name what you just did, sit with what you noticed.</p>
+    </div>
+    <div class="card-grid">
+      <div class="grid-card"><div class="grid-badge">1</div><p class="grid-question">When the map moved to a new location, was it always the one physically nearest to the depot — or the one with the shortest known travel time?</p></div>
+      <div class="grid-card"><div class="grid-badge">2</div><p class="grid-question">Why did Pine St's time get updated after Oak St was visited, even though Pine St was already reachable straight from the depot?</p></div>
+      <div class="grid-card"><div class="grid-badge">3</div><p class="grid-question">Once a location was marked visited, its shortest time never changed again after that. Why do you think that held true?</p></div>
+      <div class="grid-card"><div class="grid-badge">4</div><p class="grid-question">If one road's drive time had been much longer, would the final route have changed? Which part of it, and why?</p></div>
+      <div class="grid-card"><div class="grid-badge">5</div><p class="grid-question">What would go wrong if you only ever checked the roads leading out of the depot, instead of every road discovered so far?</p></div>
+    </div>
+    <div class="grid-footer"><button class="btn btn-primary" id="toPage5Btn" type="button">Next</button></div>
+  </section>
+
+  <!-- PAGE 5 -->
+  <section class="screen" id="page5" data-page="4">
+    <div class="concept-wrap">
+      <h2>What you just did: Dijkstra's algorithm</h2>
+
+      <div class="callout concept-callout">
+        <span class="kicker">In plain terms</span>
+        <p>Dijkstra's algorithm finds the shortest route from one starting point to every other point in a network, by always taking the smallest guaranteed step next. It keeps a running "shortest known time" for every location, and at each turn it locks in whichever unvisited location currently has the smallest number in that table — because once every cheaper path has already been checked, that number can't get any smaller. Locking it in, then rechecking its neighbors for shortcuts, is what lets the whole map's shortest routes fall into place one location at a time, without ever having to try every possible path by hand.</p>
+      </div>
+
+      <div class="formula-card">
+        <div class="formula-text">time(v) = min( time(v), time(u) + road(u, v) )</div>
+        <p class="formula-note">Whenever a shorter route to a location <em>v</em> is found by passing through a just-visited location <em>u</em>, its time is updated. This single check, repeated over and over, is called "relaxing" the road.</p>
+      </div>
+
+      <div class="visual-card card">
+        <h3>The route your courier found</h3>
+        <svg class="path-diagram" viewBox="0 0 1020 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Depot to Market shortest route diagram">
+          <line x1="70" y1="75" x2="950" y2="75" stroke="var(--panel-border)" stroke-width="3"></line>
+          <g id="pathStopsGroup"></g>
+        </svg>
+      </div>
+
+      <div class="compare-row">
+        <div class="compare-card naive">
+          <span class="compare-icon">🧭</span>
+          <span class="compare-stat">44</span>
+          <span class="compare-label">Routes to check by hand</span>
+          <span class="compare-caption">A brute-force search has to consider every possible way through the map — and that count explodes as more roads are added.</span>
+        </div>
+        <div class="compare-card smart">
+          <span class="compare-icon">📍</span>
+          <span class="compare-stat">8</span>
+          <span class="compare-label">Locations visited — once each</span>
+          <span class="compare-caption">Dijkstra's algorithm settles each location's shortest time exactly once, then moves on. It never has to revisit or backtrack.</span>
+        </div>
+      </div>
+
+      <div class="grid-footer"><button class="btn btn-primary" id="toPage6Btn" type="button">Next: Try the Exercises →</button></div>
+    </div>
+  </section>
+
+  <!-- PAGE 6 -->
+  <section class="screen" id="page6" data-page="5">
+    <div class="grid-heading">
+      <h2>Exercises</h2>
+      <p>A few "what would you do" scenarios — no map required, just the idea.</p>
+    </div>
+    <div class="card-grid">
+      <div class="grid-card">
+        <div class="grid-badge">1</div>
+        <span class="kicker exercise-kicker">A faster shortcut</span>
+        <p class="grid-question">A new road opens, connecting the depot directly to a location three streets away, cutting that stretch's time in half. Which entries in the distance table would need to be rechecked, and why?</p>
+      </div>
+      <div class="grid-card">
+        <div class="grid-badge">2</div>
+        <span class="kicker exercise-kicker">Already visited</span>
+        <p class="grid-question">A location has already been marked visited with a shortest time of 8 minutes. A moment later, a much faster road leading to it is discovered. Should its time be updated? Why or why not?</p>
+      </div>
+      <div class="grid-card">
+        <div class="grid-badge">3</div>
+        <span class="kicker exercise-kicker">A tie on the map</span>
+        <p class="grid-question">Two unvisited locations both currently show a shortest known time of 6 minutes. Does it matter which one gets visited first? What would you check to decide?</p>
+      </div>
+      <div class="grid-card">
+        <div class="grid-badge">4</div>
+        <span class="kicker exercise-kicker">Unreachable ground</span>
+        <p class="grid-question">One location has no roads connecting it to anywhere the algorithm has explored so far. What does its entry in the distance table look like, and when — if ever — does that change?</p>
+      </div>
+      <div class="grid-card">
+        <div class="grid-badge">5</div>
+        <span class="kicker exercise-kicker">Picking the wrong turn</span>
+        <p class="grid-question">Someone suggests always driving to whichever neighboring location looks physically closest on the map, instead of checking the distance table. Where would that plan break down?</p>
+      </div>
+    </div>
+    <div class="grid-footer"><button class="btn btn-destructive" id="restartBtn" type="button">Restart the Whole Journey</button></div>
+  </section>
+
+</div>
+
+<!-- Back confirmation modal -->
+<div class="modal-overlay" id="backModal">
+  <div class="modal-box">
+    <h3>Go back a step?</h3>
+    <p>Going back will lose your progress on this page — are you sure?</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="cancelBackBtn" type="button">Cancel</button>
+      <button class="btn btn-destructive" id="confirmBackBtn" type="button">Yes, go back</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ graph data ============ */
+  var NODES = [
+    { id:'S', short:'S', name:'Depot',    x:80,  y:175 },
+    { id:'A', short:'A', name:'Oak St',   x:270, y:70  },
+    { id:'B', short:'B', name:'Pine St',  x:270, y:280 },
+    { id:'C', short:'C', name:'Elm St',   x:500, y:70  },
+    { id:'D', short:'D', name:'Maple St', x:500, y:280 },
+    { id:'E', short:'E', name:'Cedar St', x:730, y:70  },
+    { id:'F', short:'F', name:'Birch St', x:730, y:280 },
+    { id:'T', short:'T', name:'Market',   x:920, y:175 }
+  ];
+  var EDGES = [
+    { id:'S-A', a:'S', b:'A', w:2 },
+    { id:'S-B', a:'S', b:'B', w:5 },
+    { id:'A-B', a:'A', b:'B', w:2 },
+    { id:'A-C', a:'A', b:'C', w:6 },
+    { id:'B-C', a:'B', b:'C', w:2 },
+    { id:'B-D', a:'B', b:'D', w:5 },
+    { id:'C-D', a:'C', b:'D', w:1 },
+    { id:'C-E', a:'C', b:'E', w:5 },
+    { id:'D-E', a:'D', b:'E', w:2 },
+    { id:'D-F', a:'D', b:'F', w:4 },
+    { id:'E-F', a:'E', b:'F', w:1 },
+    { id:'E-T', a:'E', b:'T', w:6 },
+    { id:'F-T', a:'F', b:'T', w:2 }
+  ];
+  var START = 'S', TARGET = 'T';
+
+  var NODE_MAP = {};
+  NODES.forEach(function(n){ NODE_MAP[n.id] = n; });
+
+  var ADJ = {};
+  function buildAdjacency(){
+    ADJ = {};
+    NODES.forEach(function(n){ ADJ[n.id] = []; });
+    EDGES.forEach(function(e){
+      ADJ[e.a].push([e.b, e.w]);
+      ADJ[e.b].push([e.a, e.w]);
+    });
+  }
+
+  function nodeName(id){ return NODE_MAP[id] ? NODE_MAP[id].name : id; }
+
+  var EDGE_LOOKUP = {};
+  EDGES.forEach(function(e){
+    EDGE_LOOKUP[e.a + '|' + e.b] = e.id;
+    EDGE_LOOKUP[e.b + '|' + e.a] = e.id;
+  });
+  function findEdgeId(aId, bId){ return EDGE_LOOKUP[aId + '|' + bId] || null; }
+
+  function randomInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  // Runs the same greedy selection Dijkstra uses and reports whether any step
+  // has two or more unvisited locations tied for the smallest known time —
+  // a tie would make "the one correct next pick" ambiguous for the quiz.
+  function hasTieInSelection(){
+    var dist = {}, visited = {};
+    NODES.forEach(function(n){ dist[n.id] = Infinity; });
+    dist[START] = 0;
+    while(true){
+      var best = Infinity, candidates = [];
+      NODES.forEach(function(n){
+        if(visited[n.id]) return;
+        if(dist[n.id] < best){ best = dist[n.id]; candidates = [n.id]; }
+        else if(dist[n.id] === best && dist[n.id] !== Infinity){ candidates.push(n.id); }
+      });
+      if(candidates.length === 0) return false;
+      if(candidates.length > 1) return true;
+      var u = candidates[0];
+      visited[u] = true;
+      ADJ[u].forEach(function(pair){
+        var v = pair[0], w = pair[1];
+        if(!visited[v]){
+          var nd = dist[u] + w;
+          if(nd < dist[v]) dist[v] = nd;
+        }
+      });
+    }
+  }
+
+  // Reshuffles every road's drive time (1–9 min) so the map plays out
+  // differently each time the page loads or the journey is restarted, while
+  // guaranteeing the resulting map still has one unambiguous correct answer
+  // at every step (no tied distances).
+  function randomizeGraphWeights(){
+    var attempts = 0;
+    do {
+      EDGES.forEach(function(e){ e.w = randomInt(1, 9); });
+      buildAdjacency();
+      attempts++;
+    } while(hasTieInSelection() && attempts < 60);
+  }
+  randomizeGraphWeights();
+
+  /* ============ core dijkstra step-script (shared answer key) ============ */
+  function computeStepScript(){
+    var dist = {}, prev = {}, visited = {};
+    NODES.forEach(function(n){ dist[n.id] = Infinity; });
+    dist[START] = 0;
+    var steps = [];
+    while(true){
+      var u = null, best = Infinity;
+      NODES.forEach(function(n){
+        if(!visited[n.id] && dist[n.id] < best){ best = dist[n.id]; u = n.id; }
+      });
+      if(u === null) break;
+      visited[u] = true;
+      var relax = [];
+      ADJ[u].forEach(function(pair){
+        var v = pair[0], w = pair[1];
+        if(!visited[v]){
+          var nd = dist[u] + w;
+          if(nd < dist[v]){
+            relax.push({ to:v, from:u, oldDist:dist[v], newDist:nd });
+            dist[v] = nd; prev[v] = u;
+          }
+        }
+      });
+      steps.push({ visit:u, visitDist:dist[u], relax:relax });
+    }
+    return steps;
+  }
+
+  function reconstructPath(prev, target){
+    var path = [], cur = target;
+    while(cur){ path.unshift(cur); cur = prev[cur]; }
+    return path;
+  }
+
+  /* ============ page navigation ============ */
+  var PAGE_LABELS = ['Problem','Setup','Explore','Reflect','Concept','Exercises'];
+  var currentIndex = 0;
+  var screens = Array.prototype.slice.call(document.querySelectorAll('.screen'));
+  var progressTrack = document.getElementById('progressTrack');
+  var backBtn = document.getElementById('backBtn');
+  var backModal = document.getElementById('backModal');
+
+  function buildProgress(){
+    progressTrack.innerHTML = '';
+    PAGE_LABELS.forEach(function(label, i){
+      if(i > 0){
+        var line = document.createElement('div');
+        line.className = 'progress-line';
+        line.setAttribute('data-line-index', i);
+        progressTrack.appendChild(line);
+      }
+      var step = document.createElement('div');
+      step.className = 'progress-step';
+      step.setAttribute('data-step-index', i);
+      step.innerHTML = '<div class="circle">' + (i+1) + '</div><div class="label">' + label + '</div>';
+      progressTrack.appendChild(step);
+    });
+  }
+  buildProgress();
+
+  function renderNav(){
+    screens.forEach(function(s, i){ s.classList.toggle('active', i === currentIndex); });
+    backBtn.classList.toggle('hidden-btn', currentIndex === 0);
+    Array.prototype.forEach.call(progressTrack.querySelectorAll('.progress-step'), function(el){
+      var i = parseInt(el.getAttribute('data-step-index'), 10);
+      el.classList.remove('done','active');
+      if(i < currentIndex) el.classList.add('done');
+      else if(i === currentIndex) el.classList.add('active');
+    });
+    Array.prototype.forEach.call(progressTrack.querySelectorAll('.progress-line'), function(el){
+      var i = parseInt(el.getAttribute('data-line-index'), 10);
+      el.classList.toggle('done', i <= currentIndex);
+    });
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top:0, behavior: reduceMotion ? 'auto' : 'smooth' });
+  }
+
+  function goNext(){
+    if(currentIndex < screens.length - 1){ currentIndex++; renderNav(); }
+  }
+  function requestBack(){
+    if(currentIndex === 0) return;
+    backModal.classList.add('active');
+  }
+  function confirmBack(){
+    if(currentIndex > 0) currentIndex--;
+    backModal.classList.remove('active');
+    renderNav();
+  }
+  function cancelBack(){ backModal.classList.remove('active'); }
+
+  document.getElementById('toPage2Btn').addEventListener('click', goNext);
+  document.getElementById('toPage3Btn').addEventListener('click', goNext);
+  document.getElementById('toPage4Btn').addEventListener('click', goNext);
+  document.getElementById('toPage5Btn').addEventListener('click', goNext);
+  document.getElementById('toPage6Btn').addEventListener('click', goNext);
+  backBtn.addEventListener('click', requestBack);
+  document.getElementById('cancelBackBtn').addEventListener('click', cancelBack);
+  document.getElementById('confirmBackBtn').addEventListener('click', confirmBack);
+  backModal.addEventListener('click', function(e){ if(e.target === backModal) cancelBack(); });
+
+  document.getElementById('restartBtn').addEventListener('click', function(){
+    currentIndex = 0;
+    randomizeGraphWeights();
+    buildGraphSVG();
+    resetPage3(true);
+    buildPathDiagram();
+    renderNav();
+  });
+
+  /* ============ page 3: graph rendering ============ */
+  var edgesGroup = document.getElementById('edgesGroup');
+  var nodesGroup = document.getElementById('nodesGroup');
+  var R = 30;
+
+  function buildGraphSVG(){
+    edgesGroup.innerHTML = '';
+    EDGES.forEach(function(e){
+      var na = NODE_MAP[e.a], nb = NODE_MAP[e.b];
+      var line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('id', 'edge-' + e.id);
+      line.setAttribute('class', 'edge-line');
+      line.setAttribute('x1', na.x); line.setAttribute('y1', na.y);
+      line.setAttribute('x2', nb.x); line.setAttribute('y2', nb.y);
+      edgesGroup.appendChild(line);
+
+      var mx = (na.x + nb.x) / 2, my = (na.y + nb.y) / 2;
+      var bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      bg.setAttribute('class','edge-weight-bg');
+      bg.setAttribute('x', mx - 16); bg.setAttribute('y', my - 14);
+      bg.setAttribute('width', 32); bg.setAttribute('height', 22); bg.setAttribute('rx', 6);
+      edgesGroup.appendChild(bg);
+
+      var wt = document.createElementNS('http://www.w3.org/2000/svg','text');
+      wt.setAttribute('class','edge-weight');
+      wt.setAttribute('x', mx); wt.setAttribute('y', my + 1);
+      wt.setAttribute('text-anchor','middle');
+      wt.textContent = e.w;
+      edgesGroup.appendChild(wt);
+    });
+
+    nodesGroup.innerHTML = '';
+    NODES.forEach(function(n){
+      var g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.setAttribute('id', 'group-' + n.id);
+      g.setAttribute('class', 'node-group');
+      g.setAttribute('tabindex', '0');
+      g.setAttribute('role', 'button');
+      g.setAttribute('aria-label', n.name);
+
+      var nameLbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+      nameLbl.setAttribute('class','node-name');
+      nameLbl.setAttribute('x', n.x); nameLbl.setAttribute('y', n.y - R - 14);
+      nameLbl.setAttribute('text-anchor','middle');
+      nameLbl.textContent = n.name;
+      g.appendChild(nameLbl);
+
+      var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      circle.setAttribute('id', 'circle-' + n.id);
+      circle.setAttribute('class', 'node-circle');
+      circle.setAttribute('cx', n.x); circle.setAttribute('cy', n.y); circle.setAttribute('r', R);
+      g.appendChild(circle);
+
+      var idLbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+      idLbl.setAttribute('id', 'idlbl-' + n.id);
+      idLbl.setAttribute('class','node-id off-node');
+      idLbl.setAttribute('x', n.x); idLbl.setAttribute('y', n.y + 6);
+      idLbl.setAttribute('text-anchor','middle');
+      idLbl.textContent = n.short;
+      g.appendChild(idLbl);
+
+      var distLbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+      distLbl.setAttribute('id', 'dist-' + n.id);
+      distLbl.setAttribute('class','node-dist');
+      distLbl.setAttribute('x', n.x); distLbl.setAttribute('y', n.y + R + 26);
+      distLbl.setAttribute('text-anchor','middle');
+      distLbl.textContent = '∞';
+      g.appendChild(distLbl);
+
+      g.addEventListener('click', function(){ handleNodeActivate(n.id); });
+      g.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); handleNodeActivate(n.id); }
+      });
+
+      nodesGroup.appendChild(g);
+    });
+  }
+  buildGraphSVG();
+
+  /* ============ page 3: state ============ */
+  var phase1, phase2, phase3Unlocked, activeTab;
+
+  // Visiting the start node itself (distance 0) isn't a real decision — it's the
+  // given starting point. We pre-apply that trivial first step silently so both
+  // the guided walkthrough and the free-practice quiz begin at the first real
+  // fork in the road, not by asking the user to "pick" the depot.
+  function freshState(){
+    var dist = {}, prev = {}, visited = {};
+    NODES.forEach(function(n){ dist[n.id] = (n.id === START) ? 0 : Infinity; });
+    var steps = computeStepScript();
+    var initLog = [];
+    var first = steps[0];
+    visited[first.visit] = true;
+    initLog.push({ text:'Starting at ' + nodeName(first.visit) + ' — shortest known time: 0 min.', kind:'info' });
+    first.relax.forEach(function(r){
+      dist[r.to] = r.newDist; prev[r.to] = r.from;
+      initLog.push({ text:'Found a route to ' + nodeName(r.to) + ': ' + r.newDist + ' min, via ' + nodeName(first.visit) + '.', kind:'success' });
+    });
+    return { dist:dist, prev:prev, visited:visited, steps:steps, stepIndex:1, done:false, initLog:initLog };
+  }
+
+  function renderInitialLog(mode, state){
+    var panel = document.getElementById(mode === 'phase1' ? 'logPhase1' : 'logPhase2');
+    panel.innerHTML = '';
+    state.initLog.forEach(function(entry){
+      var p = document.createElement('p');
+      p.className = 'log-entry' + (entry.kind ? ' ' + entry.kind : '');
+      p.textContent = entry.text;
+      panel.appendChild(p);
+    });
+    var hint = document.createElement('p');
+    hint.className = 'log-entry';
+    hint.textContent = (mode === 'phase1')
+      ? 'Click "Next Step" below to keep going.'
+      : 'Your turn — click the location you think comes next.';
+    panel.appendChild(hint);
+  }
+
+  function resetPage3(fullReset){
+    phase1 = freshState();
+    phase2 = freshState();
+    phase2.stats = { correct:0, wrong:0 };
+    phase3Unlocked = false;
+    activeTab = 'phase1';
+
+    renderInitialLog('phase1', phase1);
+    renderInitialLog('phase2', phase2);
+    document.getElementById('statCorrect').textContent = '0';
+    document.getElementById('statWrong').textContent = '0';
+    document.getElementById('statsRow').style.display = 'none';
+    document.getElementById('replayPhase1Btn').style.display = 'none';
+    document.getElementById('nextStepBtn').style.display = 'inline-flex';
+    document.getElementById('nextStepBtn').disabled = false;
+    document.getElementById('phase1Hint').textContent = '';
+    document.getElementById('routeFoundBox').style.display = 'none';
+    document.getElementById('confettiLayer').innerHTML = '';
+
+    updateTabUI();
+    renderGraph();
+    renderTable();
+  }
+
+  function updateTabUI(){
+    var tab1 = document.getElementById('tabPhase1');
+    var tab2 = document.getElementById('tabPhase2');
+    tab1.classList.toggle('active', activeTab === 'phase1');
+    tab2.classList.toggle('active', activeTab === 'phase2');
+    tab2.classList.toggle('locked', !phase3Unlocked);
+    tab2.setAttribute('aria-disabled', phase3Unlocked ? 'false' : 'true');
+    tab2.textContent = phase3Unlocked ? 'Try It Yourself' : 'Try It Yourself 🔒';
+    tab1.setAttribute('aria-selected', activeTab === 'phase1' ? 'true' : 'false');
+    tab2.setAttribute('aria-selected', activeTab === 'phase2' ? 'true' : 'false');
+
+    document.getElementById('phase1Controls').style.display = (activeTab === 'phase1') ? 'flex' : 'none';
+    document.getElementById('phase2Controls').style.display = (activeTab === 'phase2' && !phase2.done) ? 'flex' : 'none';
+    document.getElementById('routeFoundBox').style.display = (activeTab === 'phase2' && phase2.done) ? 'block' : 'none';
+    document.getElementById('statsRow').style.display = (activeTab === 'phase2') ? 'flex' : 'none';
+
+    document.getElementById('logPhase1').classList.toggle('visible-log', activeTab === 'phase1');
+    document.getElementById('logPhase2').classList.toggle('visible-log', activeTab === 'phase2');
+
+    var bannerText = document.getElementById('bannerText');
+    if(activeTab === 'phase1'){
+      bannerText.innerHTML = '<strong>Guided Walkthrough:</strong>&nbsp; Click "Next Step" to watch the map find the fastest route, one location at a time.';
+    } else {
+      bannerText.innerHTML = '<strong>Try It Yourself:</strong>&nbsp; Click the location on the map you think Dijkstra should visit next.';
+    }
+  }
+
+  function setTab(mode){
+    if(mode === 'phase2' && !phase3Unlocked) return;
+    activeTab = mode;
+    updateTabUI();
+    renderGraph();
+    renderTable();
+  }
+  document.getElementById('tabPhase1').addEventListener('click', function(){ setTab('phase1'); });
+  document.getElementById('tabPhase2').addEventListener('click', function(){ setTab('phase2'); });
+
+  function currentState(){ return activeTab === 'phase1' ? phase1 : phase2; }
+
+  /* ============ page 3: rendering ============ */
+  function renderGraph(){
+    var state = currentState();
+    NODES.forEach(function(n){
+      var circle = document.getElementById('circle-' + n.id);
+      var idLbl = document.getElementById('idlbl-' + n.id);
+      var distLbl = document.getElementById('dist-' + n.id);
+      var group = document.getElementById('group-' + n.id);
+
+      var isVisited = !!state.visited[n.id];
+      circle.classList.toggle('visited', isVisited);
+      idLbl.classList.toggle('on-node', isVisited);
+      idLbl.classList.toggle('off-node', !isVisited);
+
+      distLbl.textContent = (state.dist[n.id] === Infinity) ? '∞' : (state.dist[n.id] + ' min');
+
+      var clickable = (activeTab === 'phase2') && phase3Unlocked && !phase2.done && !isVisited;
+      group.classList.toggle('clickable', clickable);
+      group.setAttribute('tabindex', clickable ? '0' : (activeTab === 'phase2' ? '-1' : '-1'));
+    });
+
+    EDGES.forEach(function(e){
+      var line = document.getElementById('edge-' + e.id);
+      var isConfirmed = false;
+      NODES.forEach(function(n){
+        if(state.visited[n.id] && state.prev[n.id]){
+          var confirmedEdgeId = findEdgeId(state.prev[n.id], n.id);
+          if(confirmedEdgeId === e.id) isConfirmed = true;
+        }
+      });
+      line.classList.toggle('path-edge', isConfirmed);
+    });
+  }
+
+  function renderTable(){
+    var state = currentState();
+    var body = document.getElementById('distTableBody');
+    body.innerHTML = '';
+    NODES.forEach(function(n){
+      var tr = document.createElement('tr');
+      var timeVal = (state.dist[n.id] === Infinity) ? '∞' : (state.dist[n.id] + ' min');
+      var viaVal = state.prev[n.id] ? nodeName(state.prev[n.id]) : '—';
+      var statusHtml = state.visited[n.id]
+        ? '<span class="status-visited">✓ Visited</span>'
+        : '<span class="status-pending">Not yet</span>';
+      tr.innerHTML = '<td>' + n.name + '</td><td>' + timeVal + '</td><td>' + viaVal + '</td><td>' + statusHtml + '</td>';
+      body.appendChild(tr);
+    });
+  }
+
+  function flashNode(id){
+    var group = document.getElementById('group-' + id);
+    group.classList.remove('flash');
+    void group.offsetWidth;
+    group.classList.add('flash');
+  }
+
+  function flashNodeWrong(id){
+    var group = document.getElementById('group-' + id);
+    group.classList.remove('flash-wrong');
+    void group.offsetWidth;
+    group.classList.add('flash-wrong');
+  }
+
+  // Animates the edge from "via" to the newly-confirmed node drawing in blue.
+  function drawEdgeCorrect(fromId, toId){
+    var edgeId = findEdgeId(fromId, toId);
+    if(!edgeId) return;
+    var line = document.getElementById('edge-' + edgeId);
+    if(!line) return;
+    line.classList.remove('draw-in');
+    void line.offsetWidth;
+    line.classList.add('draw-in');
+  }
+
+  // Briefly flashes an edge red for a wrong guess. Falls back to flashing the
+  // node itself if that location has no known "via" edge yet (still ∞).
+  function flashWrongGuess(fromId, toId){
+    if(fromId){
+      var edgeId = findEdgeId(fromId, toId);
+      if(edgeId){
+        var line = document.getElementById('edge-' + edgeId);
+        line.classList.remove('wrong-flash');
+        void line.offsetWidth;
+        line.classList.add('wrong-flash');
+        setTimeout(function(){ line.classList.remove('wrong-flash'); }, 900);
+        return;
+      }
+    }
+    flashNodeWrong(toId);
+  }
+
+  function log(mode, text, kind){
+    var panel = document.getElementById(mode === 'phase1' ? 'logPhase1' : 'logPhase2');
+    var empty = panel.querySelector('.log-empty');
+    if(empty) empty.remove();
+    var entry = document.createElement('p');
+    entry.className = 'log-entry' + (kind ? ' ' + kind : '');
+    entry.textContent = text;
+    panel.appendChild(entry);
+    panel.scrollTop = panel.scrollHeight;
+  }
+
+  /* ============ page 3: phase 1 (guided) ============ */
+  function phase1Next(){
+    if(phase1.stepIndex >= phase1.steps.length) return;
+    var step = phase1.steps[phase1.stepIndex];
+    phase1.visited[step.visit] = true;
+    phase1.dist[step.visit] = step.visitDist;
+    var visitName = nodeName(step.visit);
+
+    log('phase1', 'Visiting ' + visitName + ' — shortest known time so far: ' + step.visitDist + ' min.', 'info');
+    step.relax.forEach(function(r){
+      phase1.dist[r.to] = r.newDist;
+      phase1.prev[r.to] = r.from;
+      var msg = (r.oldDist === Infinity)
+        ? ('Found a route to ' + nodeName(r.to) + ': ' + r.newDist + ' min, via ' + visitName + '.')
+        : ('Found a faster route to ' + nodeName(r.to) + ': ' + r.oldDist + ' min → ' + r.newDist + ' min, via ' + visitName + '.');
+      log('phase1', msg, 'success');
+    });
+
+    phase1.stepIndex++;
+    renderGraph();
+    renderTable();
+    if(activeTab === 'phase1'){
+      flashNode(step.visit);
+      drawEdgeCorrect(phase1.prev[step.visit], step.visit);
+    }
+
+    if(phase1.stepIndex >= phase1.steps.length){
+      phase1.done = true;
+      var path = reconstructPath(phase1.prev, TARGET);
+      log('phase1', 'Every location the depot can reach has been visited. Fastest route to Market: ' + path.map(nodeName).join(' → ') + ' — ' + phase1.dist[TARGET] + ' minutes total.', 'success');
+      renderGraph();
+      document.getElementById('nextStepBtn').style.display = 'none';
+      document.getElementById('replayPhase1Btn').style.display = 'inline-flex';
+      document.getElementById('phase1Hint').textContent = 'Guided walkthrough complete.';
+      if(!phase3Unlocked){
+        phase3Unlocked = true;
+        updateTabUI();
+      }
+    }
+  }
+  document.getElementById('nextStepBtn').addEventListener('click', phase1Next);
+
+  document.getElementById('replayPhase1Btn').addEventListener('click', function(){
+    phase1 = freshState();
+    renderInitialLog('phase1', phase1);
+    document.getElementById('nextStepBtn').style.display = 'inline-flex';
+    document.getElementById('nextStepBtn').disabled = false;
+    document.getElementById('replayPhase1Btn').style.display = 'none';
+    document.getElementById('phase1Hint').textContent = '';
+    renderGraph();
+    renderTable();
+  });
+
+  /* ============ page 3: phase 2 (free interaction) ============ */
+  function handleNodeActivate(nodeId){
+    if(activeTab !== 'phase2' || !phase3Unlocked || phase2.done) return;
+    if(phase2.visited[nodeId]){
+      log('phase2', nodeName(nodeId) + ' has already been visited — pick a different location.', 'error');
+      return;
+    }
+    var expected = phase2.steps[phase2.stepIndex];
+    var wasCorrect = (nodeId === expected.visit);
+    var viaId = phase2.prev[nodeId];
+
+    if(wasCorrect){
+      phase2.visited[nodeId] = true;
+      phase2.dist[nodeId] = expected.visitDist;
+      log('phase2', 'Correct! ' + nodeName(nodeId) + ' is the closest unvisited location — locking in ' + expected.visitDist + ' min.', 'success');
+      expected.relax.forEach(function(r){
+        phase2.dist[r.to] = r.newDist;
+        phase2.prev[r.to] = r.from;
+        var msg = (r.oldDist === Infinity)
+          ? ('That opens up a route to ' + nodeName(r.to) + ': ' + r.newDist + ' min.')
+          : ('That opens a faster route to ' + nodeName(r.to) + ': ' + r.oldDist + ' min → ' + r.newDist + ' min.');
+        log('phase2', msg, 'info');
+      });
+      phase2.stats.correct++;
+      phase2.stepIndex++;
+      document.getElementById('statCorrect').textContent = phase2.stats.correct;
+    } else {
+      phase2.stats.wrong++;
+      document.getElementById('statWrong').textContent = phase2.stats.wrong;
+      log('phase2', 'Not quite — ' + nodeName(nodeId) + " isn't the closest unvisited location right now. Check the Time column for the smallest value without a checkmark.", 'error');
+    }
+
+    renderGraph();
+    renderTable();
+
+    if(wasCorrect){
+      flashNode(nodeId);
+      drawEdgeCorrect(viaId, nodeId);
+    } else {
+      flashWrongGuess(viaId, nodeId);
+    }
+
+    if(wasCorrect && phase2.stepIndex >= phase2.steps.length){
+      phase2.done = true;
+      var path = reconstructPath(phase2.prev, TARGET);
+      log('phase2', 'Every reachable location has been visited. Fastest route to Market: ' + path.map(nodeName).join(' → ') + ' — ' + phase2.dist[TARGET] + ' minutes total.', 'success');
+      showRouteFoundBox(path, phase2.dist[TARGET], phase2.stats);
+    }
+  }
+
+  function launchConfetti(){
+    var layer = document.getElementById('confettiLayer');
+    layer.innerHTML = '';
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var colors = ['var(--blue)', 'var(--blue-dark)', 'var(--orange)', 'var(--orange-base)', 'var(--success-border)'];
+    var count = 30;
+    for(var i = 0; i < count; i++){
+      var piece = document.createElement('span');
+      piece.className = 'confetti-piece';
+      var angle = (Math.random() * 2 - 1) * 75;
+      var distance = 70 + Math.random() * 110;
+      var rad = angle * Math.PI / 180;
+      var tx = Math.sin(rad) * distance;
+      var ty = Math.abs(Math.cos(rad)) * distance + 40 + Math.random() * 40;
+      var rot = (Math.random() * 720 - 360);
+      var size = 5 + Math.random() * 6;
+      piece.style.setProperty('--tx', tx.toFixed(1) + 'px');
+      piece.style.setProperty('--ty', ty.toFixed(1) + 'px');
+      piece.style.setProperty('--rot', rot.toFixed(0) + 'deg');
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.width = size + 'px';
+      piece.style.height = (size * 0.45) + 'px';
+      piece.style.animationDelay = (Math.random() * 130) + 'ms';
+      layer.appendChild(piece);
+    }
+    setTimeout(function(){ layer.innerHTML = ''; }, 1500);
+  }
+
+  function showRouteFoundBox(path, total, stats){
+    document.getElementById('routeFoundText').textContent = 'Your fastest route to Market: ' + path.map(nodeName).join(' → ') + '.';
+    document.getElementById('routeFoundStats').innerHTML =
+      '<span><b>Total time:</b> ' + total + ' minutes</span>' +
+      '<span><b>Correct picks:</b> ' + stats.correct + '</span>' +
+      '<span><b>Wrong tries:</b> ' + stats.wrong + '</span>';
+    var box = document.getElementById('routeFoundBox');
+    box.style.display = 'block';
+    document.getElementById('phase2Controls').style.display = 'none';
+    launchConfetti();
+    box.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'nearest' });
+  }
+
+  document.getElementById('playAgainBtn').addEventListener('click', function(){
+    phase2 = freshState();
+    phase2.stats = { correct:0, wrong:0 };
+    renderInitialLog('phase2', phase2);
+    document.getElementById('statCorrect').textContent = '0';
+    document.getElementById('statWrong').textContent = '0';
+    document.getElementById('routeFoundBox').style.display = 'none';
+    document.getElementById('confettiLayer').innerHTML = '';
+    document.getElementById('phase2Controls').style.display = 'flex';
+    renderGraph();
+    renderTable();
+  });
+  document.getElementById('modalNextBtn').addEventListener('click', function(){
+    goNext();
+  });
+
+  /* ============ page 5: static path diagram ============ */
+  function buildPathDiagram(){
+    var group = document.getElementById('pathStopsGroup');
+    group.innerHTML = '';
+    var finalPath = reconstructPath((function(){
+      var s = freshState();
+      s.steps.forEach(function(step){
+        s.visited[step.visit] = true; s.dist[step.visit] = step.visitDist;
+        step.relax.forEach(function(r){ s.dist[r.to] = r.newDist; s.prev[r.to] = r.from; });
+      });
+      return s.prev;
+    })(), TARGET);
+
+    var margin = 70, viewW = 1020;
+    var xs = [];
+    finalPath.forEach(function(id, i){
+      xs.push(finalPath.length === 1 ? viewW / 2 : margin + (viewW - margin * 2) * (i / (finalPath.length - 1)));
+    });
+    var y = 75, r = 24;
+    var cumulative = 0;
+    finalPath.forEach(function(id, i){
+      var n = NODE_MAP[id];
+      var x = xs[i];
+      if(i > 0){
+        var prevId = finalPath[i-1];
+        var w = EDGES.filter(function(e){
+          return (e.a === prevId && e.b === id) || (e.b === prevId && e.a === id);
+        })[0].w;
+        cumulative += w;
+        var wt = document.createElementNS('http://www.w3.org/2000/svg','text');
+        wt.setAttribute('x', (xs[i-1] + x) / 2); wt.setAttribute('y', y - 14);
+        wt.setAttribute('text-anchor','middle');
+        wt.setAttribute('font-family',"'Inter',sans-serif"); wt.setAttribute('font-size','12'); wt.setAttribute('font-weight','600');
+        wt.setAttribute('fill','var(--text-dim)');
+        wt.textContent = '+' + w;
+        group.appendChild(wt);
+
+        var arrow = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+        var ax = x - r - 2;
+        arrow.setAttribute('points', (ax-8)+','+(y-6)+' '+ax+','+y+' '+(ax-8)+','+(y+6));
+        arrow.setAttribute('fill','var(--blue-dark)');
+        group.appendChild(arrow);
+      }
+      var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      circle.setAttribute('cx', x); circle.setAttribute('cy', y); circle.setAttribute('r', r);
+      circle.setAttribute('fill', (id === TARGET) ? 'var(--blue-dark)' : '#fff');
+      circle.setAttribute('stroke', 'var(--blue-dark)'); circle.setAttribute('stroke-width', '2.5');
+      group.appendChild(circle);
+
+      var lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+      lbl.setAttribute('x', x); lbl.setAttribute('y', y + 5);
+      lbl.setAttribute('text-anchor','middle');
+      lbl.setAttribute('font-family',"'Poppins',sans-serif"); lbl.setAttribute('font-weight','700'); lbl.setAttribute('font-size','14');
+      lbl.setAttribute('fill', (id === TARGET) ? '#fff' : 'var(--blue-dark)');
+      lbl.textContent = n.short;
+      group.appendChild(lbl);
+
+      var nameLbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+      nameLbl.setAttribute('x', x); nameLbl.setAttribute('y', y + r + 20);
+      nameLbl.setAttribute('text-anchor','middle');
+      nameLbl.setAttribute('font-family',"'Inter',sans-serif"); nameLbl.setAttribute('font-size','11.5'); nameLbl.setAttribute('font-weight','600');
+      nameLbl.setAttribute('fill','var(--text-dim)');
+      nameLbl.textContent = n.name;
+      group.appendChild(nameLbl);
+
+      var cumLbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+      cumLbl.setAttribute('x', x); cumLbl.setAttribute('y', y - r - 12);
+      cumLbl.setAttribute('text-anchor','middle');
+      cumLbl.setAttribute('font-family',"'Poppins',sans-serif"); cumLbl.setAttribute('font-size','12'); cumLbl.setAttribute('font-weight','700');
+      cumLbl.setAttribute('fill','var(--orange)');
+      cumLbl.textContent = cumulative + ' min';
+      group.appendChild(cumLbl);
+    });
+
+    var svgEl = document.querySelector('.path-diagram');
+    if(svgEl){
+      svgEl.setAttribute('aria-label', 'Depot to Market, via ' + finalPath.slice(1, -1).map(nodeName).join(', ') + ', totalling ' + cumulative + ' minutes');
+    }
+  }
+  buildPathDiagram();
+
+  /* ============ init ============ */
+  resetPage3(true);
+  renderNav();
+
+})();
+</script>
+</body>
+</html>

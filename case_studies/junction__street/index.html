@@ -5,36 +5,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Junction Street — A Case Study</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #14171a;
-    --bg-shell: #1a1e22;
-    --bg-panel: #1f242a;
-    --bg-panel-raised: #262c33;
-    --border: #313841;
-    --border-soft: #262b31;
-    --text: #ecebe6;
-    --text-dim: #9ba3ab;
-    --text-faint: #5f6870;
-    --line: #f2c744;
-    --go: #37b24d;
-    --go-dim: #1f3d28;
-    --blocked: #e5484d;
-    --blocked-dim: #3d2426;
-    --info: #4c9fe8;
+    --bg-top: #FDF1E9;
+    --bg: #EDF3FA;
+    --bg-shell: #FFFFFF;
+    --bg-panel: #FFFFFF;
+    --bg-panel-raised: #F5F9FD;
+    --border: #D9E5F2;
+    --border-soft: #E4EDF6;
+    --text: #1F2E37;
+    --text-dim: #54666D;
+    --text-faint: #93A5AB;
+
+    --blue: #4A9BD1;
+    --blue-dark: #2B6FA3;
+    --blue-light: #8FCBEF;
+    --orange: #EA8C36;
+    --orange-dark: #C96F1F;
+    --orange-light: #F3A65C;
+    --footer-bg: #22496B;
+
+    --line: var(--orange);
+    --info: var(--blue);
+    --go: #4B7A4A;
+    --go-dim: #DCEAD8;
+    --blocked: #D9714F;
+    --blocked-dim: #FBE1DC;
+
+    --success-bg: #DCEAD8; --success-text: #274B26; --success-border: #4B7A4A;
+    --error-bg: #FBE1DC; --error-text: #8A3420; --error-border: #D9714F;
+
     --car-N: #e8b13a;
     --car-E: #4c9fe8;
     --car-S: #e5748d;
     --car-W: #7cd992;
-    --radius: 10px;
-    --shadow: 0 20px 50px -20px rgba(0,0,0,0.6);
+
+    --radius: 14px;
+    --shadow: 0 20px 44px -18px rgba(23,50,77,0.22);
+    --shadow-card: 0 10px 28px -12px rgba(23,50,77,0.12);
+    --shadow-btn: 0 8px 20px -6px rgba(43,111,163,0.3);
   }
   *{ box-sizing:border-box; }
   html,body{ margin:0; padding:0; }
   body{
-    background:
-      radial-gradient(1200px 600px at 50% -10%, #1f252b 0%, var(--bg) 55%);
+    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg) 320px, var(--bg) 100%);
     color: var(--text);
     font-family: 'Inter', sans-serif;
     min-height:100vh;
@@ -47,16 +63,15 @@
     max-width: 880px;
     background: var(--bg-shell);
     border: 1px solid var(--border-soft);
-    border-radius: 16px;
+    border-radius: 20px;
     box-shadow: var(--shadow);
     overflow:hidden;
     position:relative;
   }
   .shell::before{
     content:"";
-    position:absolute; top:0; left:0; right:0; height:4px;
-    background: repeating-linear-gradient(90deg, var(--line) 0 22px, transparent 22px 40px);
-    opacity:0.8;
+    position:absolute; top:0; left:0; right:0; height:5px;
+    background: linear-gradient(90deg, var(--orange) 0%, var(--blue-light) 50%, var(--blue-dark) 100%);
   }
 
   /* ---------- header / progress ---------- */
@@ -65,20 +80,21 @@
     border-bottom: 1px solid var(--border-soft);
   }
   .eyebrow{
-    font-family:'JetBrains Mono', monospace;
+    font-family:'Inter', sans-serif;
+    font-weight:700;
     font-size: 11px;
-    letter-spacing: 0.14em;
-    color: var(--text-faint);
+    letter-spacing: 0.12em;
+    color: var(--orange);
     text-transform: uppercase;
     margin-bottom: 6px;
   }
   h1.title{
-    font-family:'Barlow Condensed', sans-serif;
+    font-family:'Poppins', sans-serif;
     font-weight:700;
     font-size: 30px;
-    letter-spacing: 0.01em;
+    letter-spacing: -0.01em;
     margin: 0 0 18px;
-    color: var(--text);
+    color: var(--blue-dark);
   }
   .rail{
     display:flex;
@@ -106,17 +122,18 @@
     transform-origin:left;
     transition: transform .5s ease, background .3s ease;
   }
-  .rail .seg.done .bar::after{ background: var(--line); transform: scaleX(1); }
-  .rail .seg.current .bar::after{ background: var(--info); transform: scaleX(1); }
+  .rail .seg.done .bar::after{ background: var(--orange); transform: scaleX(1); }
+  .rail .seg.current .bar::after{ background: linear-gradient(90deg, var(--blue-light), var(--blue-dark)); transform: scaleX(1); }
   .rail .label{
-    font-family:'JetBrains Mono', monospace;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
     font-size: 10px;
     letter-spacing: 0.04em;
     color: var(--text-faint);
     white-space: nowrap;
   }
-  .rail .seg.current .label{ color: var(--info); }
-  .rail .seg.done .label{ color: var(--line); }
+  .rail .seg.current .label{ color: var(--blue-dark); }
+  .rail .seg.done .label{ color: var(--orange-dark); }
 
   /* ---------- page viewport ---------- */
   main{
@@ -128,17 +145,20 @@
   @keyframes fadeIn{ from{ opacity:0; transform: translateY(6px);} to{opacity:1; transform:none;} }
 
   .kicker{
-    font-family:'JetBrains Mono', monospace;
+    font-family:'Inter', sans-serif;
+    font-weight:700;
     font-size:11px;
-    color: var(--info);
-    letter-spacing:0.1em;
+    color: var(--orange);
+    letter-spacing:0.12em;
     text-transform:uppercase;
     margin-bottom:8px;
   }
   h2{
-    font-family:'Barlow Condensed', sans-serif;
-    font-size:28px;
+    font-family:'Poppins', sans-serif;
+    font-size:26px;
     font-weight:700;
+    letter-spacing:-0.01em;
+    color: var(--blue-dark);
     margin: 0 0 14px;
   }
   p{ line-height:1.65; color: var(--text-dim); margin: 0 0 14px; font-size:15px;}
@@ -147,7 +167,9 @@
   .card{
     background: var(--bg-panel);
     border:1px solid var(--border-soft);
+    border-left: 3px solid var(--orange);
     border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
     padding: 20px 22px;
     margin: 18px 0;
   }
@@ -158,9 +180,9 @@
     margin-top:18px;
   }
   .roster .driver{
-    background: var(--bg-panel);
+    background: var(--bg-panel-raised);
     border:1px solid var(--border-soft);
-    border-radius:8px;
+    border-radius:12px;
     padding:12px 10px;
     text-align:center;
   }
@@ -168,8 +190,8 @@
     width:10px; height:10px; border-radius:50%;
     margin: 0 auto 8px;
   }
-  .roster .name{ font-size:13px; font-weight:600; }
-  .roster .dest{ font-size:11px; color:var(--text-faint); margin-top:2px; font-family:'JetBrains Mono', monospace;}
+  .roster .name{ font-family:'Poppins', sans-serif; font-size:13px; font-weight:600; color:var(--text); }
+  .roster .dest{ font-size:11px; color:var(--text-faint); margin-top:2px; font-family:'Inter', sans-serif;}
 
   /* ---------- junction (game) ---------- */
   .junction-wrap{
@@ -186,27 +208,28 @@
   .road-board{
     position:relative;
     aspect-ratio: 1/1;
-    background: #171a1d;
+    background: #22496B;
     border:1px solid var(--border-soft);
     border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
     overflow:hidden;
   }
-  .hwy-v, .hwy-h{ position:absolute; background:#20242a; z-index:1; }
-  .hwy-v{ top:0; bottom:0; left:50%; width:30%; transform:translateX(-50%); border-left:1px solid var(--border-soft); border-right:1px solid var(--border-soft); }
-  .hwy-h{ left:0; right:0; top:50%; height:30%; transform:translateY(-50%); border-top:1px solid var(--border-soft); border-bottom:1px solid var(--border-soft); }
+  .hwy-v, .hwy-h{ position:absolute; background:#1C3E5A; z-index:1; }
+  .hwy-v{ top:0; bottom:0; left:50%; width:30%; transform:translateX(-50%); border-left:1px solid rgba(255,255,255,0.08); border-right:1px solid rgba(255,255,255,0.08); }
+  .hwy-h{ left:0; right:0; top:50%; height:30%; transform:translateY(-50%); border-top:1px solid rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.08); }
   .hwy-v::before{
     content:""; position:absolute; top:0; bottom:0; left:50%; width:2px; transform:translateX(-50%);
-    background: repeating-linear-gradient(180deg, var(--line) 0 14px, transparent 14px 28px);
-    opacity:0.65;
+    background: repeating-linear-gradient(180deg, var(--orange-light) 0 14px, transparent 14px 28px);
+    opacity:0.8;
   }
   .hwy-h::before{
     content:""; position:absolute; left:0; right:0; top:50%; height:2px; transform:translateY(-50%);
-    background: repeating-linear-gradient(90deg, var(--line) 0 14px, transparent 14px 28px);
-    opacity:0.65;
+    background: repeating-linear-gradient(90deg, var(--orange-light) 0 14px, transparent 14px 28px);
+    opacity:0.8;
   }
   .crosswalk{
     position:absolute; z-index:2;
-    background: repeating-linear-gradient(var(--stripe-dir), rgba(255,255,255,0.8) 0 4px, transparent 4px 9px);
+    background: repeating-linear-gradient(var(--stripe-dir), rgba(255,255,255,0.9) 0 4px, transparent 4px 9px);
   }
   .crosswalk.cw-N{ top:30%; left:50%; width:28%; height:9px; transform:translateX(-50%); --stripe-dir:90deg; }
   .crosswalk.cw-S{ bottom:30%; left:50%; width:28%; height:9px; transform:translateX(-50%); --stripe-dir:90deg; }
@@ -215,21 +238,21 @@
   .junction-box{
     position:absolute; left:50%; top:50%; width:32%; height:32%;
     transform:translate(-50%,-50%);
-    background:#262c33;
-    border:2px dashed var(--border);
-    border-radius:8px;
+    background:#1C3E5A;
+    border:2px dashed rgba(255,255,255,0.25);
+    border-radius:10px;
     display:flex; align-items:center; justify-content:center;
     z-index:3;
   }
   .junction-box span{
-    font-family:'JetBrains Mono', monospace; font-size:13.5px; font-weight:500; color: var(--text);
+    font-family:'Inter', sans-serif; font-size:13.5px; font-weight:600; color: #FFFFFF;
     text-align:center; line-height:1.4;
-    background: rgba(16,19,21,0.75); padding:7px 10px; border-radius:6px;
+    background: rgba(34,73,107,0.85); padding:7px 10px; border-radius:8px;
   }
   .junction-box.active-pass{ animation: centerPulse .7s ease; }
   @keyframes centerPulse{
-    0%{ box-shadow: inset 0 0 0 0 rgba(242,199,68,0.7); }
-    100%{ box-shadow: inset 0 0 0 20px rgba(242,199,68,0); }
+    0%{ box-shadow: inset 0 0 0 0 rgba(234,140,54,0.7); }
+    100%{ box-shadow: inset 0 0 0 20px rgba(234,140,54,0); }
   }
 
   .car-slot{
@@ -243,7 +266,7 @@
     position:absolute; left:9px; top:0; width:18px; height:36px;
     border-radius:5px;
     background: var(--accent, var(--border));
-    box-shadow: 0 3px 9px rgba(0,0,0,0.5);
+    box-shadow: 0 3px 9px rgba(0,0,0,0.35);
     transform: rotate(var(--angle, 0deg));
     transition: box-shadow .3s ease;
   }
@@ -253,38 +276,39 @@
   }
   .car-chip .car-badge{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    font-family:'Barlow Condensed', sans-serif; font-weight:700; font-size:11.5px; color:#0c0e10;
+    font-family:'Poppins', sans-serif; font-weight:700; font-size:11.5px; color:#1F2E37;
     transform: rotate(calc(var(--angle, 0deg) * -1));
   }
   .light{
     position:absolute; top:-10px; right:-10px;
     width:9px; height:9px; border-radius:50%;
-    background: var(--border);
+    background: rgba(255,255,255,0.3);
     z-index:5;
     transition: background .2s ease, box-shadow .2s ease;
   }
   .light.blink{ animation: lightBlink .9s ease; }
   @keyframes lightBlink{
-    0%,100%{ background: var(--border); box-shadow:none; }
-    15%,45%,75%{ background: var(--blocked); box-shadow: 0 0 9px 3px rgba(229,72,77,0.75); }
-    30%,60%,90%{ background: var(--border); box-shadow:none; }
+    0%,100%{ background: rgba(255,255,255,0.3); box-shadow:none; }
+    15%,45%,75%{ background: var(--blocked); box-shadow: 0 0 9px 3px rgba(217,113,79,0.8); }
+    30%,60%,90%{ background: rgba(255,255,255,0.3); box-shadow:none; }
   }
-  .car-slot.moved .car-chip{ box-shadow: 0 0 14px 3px rgba(55,178,77,0.65); }
-  .car-slot.moved .light{ background: var(--go); box-shadow: 0 0 8px 2px rgba(55,178,77,0.65); }
+  .car-slot.moved .car-chip{ box-shadow: 0 0 14px 3px rgba(75,122,74,0.65); }
+  .car-slot.moved .light{ background: var(--go); box-shadow: 0 0 8px 2px rgba(75,122,74,0.65); }
   .car-slot.reversed{ opacity:0.2; }
   .queue{
     position:absolute; top:-10px; left:-6px;
     display:flex; gap:2px; z-index:5;
-    font-size:8px; letter-spacing:1px; color: var(--blocked);
+    font-size:8px; letter-spacing:1px; color: var(--orange-light);
     white-space:nowrap;
   }
 
   /* ---------- start button ---------- */
   .start-wrap{ margin-top:16px; text-align:center; }
   #btnStart{
-    font-size:14px; font-weight:700; padding:13px 28px;
-    border-color: var(--go); color: var(--go);
-    background: rgba(55,178,77,0.1);
+    font-size:14px; font-weight:700; padding:14px 30px;
+    border:none; color:#FFFFFF;
+    background: linear-gradient(135deg, var(--blue-light), var(--blue-dark));
+    box-shadow: var(--shadow-btn);
   }
   .controls-hidden{ display:none !important; }
 
@@ -292,31 +316,33 @@
   .tension-wrap{ margin: 14px 0 4px; }
   .tension-label{
     display:flex; justify-content:space-between;
-    font-family:'JetBrains Mono', monospace;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
     font-size:10.5px; color: var(--text-faint);
     letter-spacing:0.05em; text-transform:uppercase;
     margin-bottom:5px;
   }
   #tensionPct{ color: var(--text-dim); }
   .tension-bar{
-    height:8px; border-radius:4px; background: var(--bg-panel);
+    height:8px; border-radius:4px; background: var(--bg-panel-raised);
     border:1px solid var(--border-soft); overflow:hidden;
   }
   .tension-fill{
     height:100%; width:0%; border-radius:4px;
-    background: linear-gradient(90deg, var(--go), var(--line), var(--blocked));
+    background: linear-gradient(90deg, var(--go), var(--orange), var(--blocked));
     transition: width .4s ease;
   }
   .tension-fill.boiling{ animation: boil 1s ease infinite; }
   @keyframes boil{
     0%,100%{ filter: brightness(1); }
-    50%{ filter: brightness(1.4); }
+    50%{ filter: brightness(1.15); }
   }
 
   .console{
-    background:#101315;
+    background:#1C3E5A;
     border:1px solid var(--border-soft);
     border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
     display:flex;
     flex-direction:column;
     height: 100%;
@@ -324,28 +350,29 @@
   }
   .console .console-head{
     padding:10px 14px;
-    border-bottom:1px solid var(--border-soft);
-    font-family:'JetBrains Mono', monospace;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+    font-family:'Inter', sans-serif;
+    font-weight:700;
     font-size:11px;
-    color: var(--text-faint);
+    color: rgba(255,255,255,0.65);
     letter-spacing:0.06em;
     display:flex; justify-content:space-between; align-items:center;
   }
   .console .console-body{
     padding: 12px 14px;
-    font-family:'JetBrains Mono', monospace;
-    font-size: 12px;
+    font-family:'Inter', sans-serif;
+    font-size: 12.5px;
     line-height:1.75;
-    color: var(--text-dim);
+    color: rgba(255,255,255,0.82);
     overflow-y:auto;
     flex:1;
     max-height: 260px;
   }
-  .console .console-body p{ margin:0 0 4px; color:inherit; font-size:12px;}
-  .console .console-body .go{ color: var(--go); }
-  .console .console-body .blocked{ color: var(--blocked); }
-  .console .console-body .info{ color: var(--info); }
-  .console .console-body .idea{ color: var(--line); }
+  .console .console-body p{ margin:0 0 4px; color:inherit; font-size:12.5px;}
+  .console .console-body .go{ color: #8FD98D; }
+  .console .console-body .blocked{ color: #F0A98A; }
+  .console .console-body .info{ color: var(--blue-light); }
+  .console .console-body .idea{ color: var(--orange-light); }
 
   .controls{
     display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;
@@ -364,9 +391,10 @@
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     gap:6px;
     padding: 20px 10px;
-    border-radius: 12px;
+    border-radius: 14px;
     border: 2px solid var(--accent);
     background: var(--bg-panel);
+    box-shadow: var(--shadow-card);
     cursor:pointer;
     transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
     font-family:'Inter', sans-serif;
@@ -374,57 +402,63 @@
   .go-card:hover:not(:disabled){
     transform: translateY(-3px);
     background: var(--bg-panel-raised);
-    box-shadow: 0 10px 22px -12px var(--accent);
+    box-shadow: 0 12px 24px -12px var(--accent);
   }
   .go-card:active:not(:disabled){ transform: translateY(-1px); }
-  .go-card:disabled{ opacity:0.3; cursor:not-allowed; }
+  .go-card:disabled{ opacity:0.35; cursor:not-allowed; }
   .go-card .go-icon{ font-size:20px; color: var(--accent); }
-  .go-card .go-label{ font-weight:700; font-size:15px; color: var(--text); }
-  .go-card .go-sub{ font-family:'JetBrains Mono', monospace; font-size:10px; color: var(--text-faint); }
+  .go-card .go-label{ font-family:'Poppins', sans-serif; font-weight:700; font-size:14.5px; color: var(--text); }
+  .go-card .go-sub{ font-family:'Inter', sans-serif; font-size:10px; color: var(--text-faint); }
   .go-card.flash-blocked{ animation: cardFlash .5s ease; }
   @keyframes cardFlash{
-    0%,100%{ box-shadow:none; border-color: var(--accent); }
-    40%{ box-shadow: 0 0 0 4px rgba(229,72,77,0.45); border-color: var(--blocked); }
+    0%,100%{ box-shadow:var(--shadow-card); border-color: var(--accent); }
+    40%{ box-shadow: 0 0 0 4px rgba(217,113,79,0.35); border-color: var(--blocked); }
   }
   button{
     font-family:'Inter', sans-serif;
     font-weight:600;
     font-size:13px;
-    border-radius:7px;
-    border:1px solid var(--border);
-    background: var(--bg-panel-raised);
-    color: var(--text);
-    padding: 9px 14px;
+    border-radius:999px;
+    border:1.5px solid var(--blue);
+    background: transparent;
+    color: var(--blue-dark);
+    padding: 10px 18px;
     cursor:pointer;
     transition: all .15s ease;
   }
-  button:hover:not(:disabled){ border-color: var(--text-faint); transform: translateY(-1px); }
+  button:hover:not(:disabled){ transform: translateY(-1px); box-shadow: 0 6px 14px -8px rgba(43,111,163,0.35); }
   button:active:not(:disabled){ transform: translateY(0); }
-  button:disabled{ opacity:0.35; cursor:not-allowed; }
-  button.mini{ padding:6px 10px; font-size:11px; }
+  button:disabled{ opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
+  button.mini{ padding:7px 12px; font-size:11px; }
   button.go-btn{ border-color: var(--go); color: var(--go); }
-  button.reverse-btn{ border-color: var(--blocked); color: var(--blocked); }
+  button.reverse-btn{
+    border:none; color:#FFFFFF;
+    background: linear-gradient(135deg, var(--orange-light), var(--orange-dark));
+    box-shadow: 0 8px 18px -8px rgba(201,111,31,0.45);
+  }
+  button.reverse-btn:hover:not(:disabled){ box-shadow: 0 10px 22px -8px rgba(201,111,31,0.55); }
 
   .hint-box{
     display:none;
-    background: rgba(76,159,232,0.08);
-    border:1px solid rgba(76,159,232,0.35);
-    border-radius:8px;
-    padding: 12px 14px;
+    background: #F5F9FD;
+    border:1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius:12px;
+    padding: 14px 16px;
     margin-top:14px;
     font-size:13px;
-    color: #a9cff2;
+    color: var(--text-dim);
   }
   .hint-box.show{ display:block; }
 
   .success-banner{
     display:none;
     margin-top:16px;
-    background: rgba(55,178,77,0.1);
-    border:1px solid rgba(55,178,77,0.4);
-    border-radius:8px;
+    background: var(--success-bg);
+    border:1px solid var(--success-border);
+    border-radius:12px;
     padding:14px 16px;
-    color:#9fe0ac;
+    color:var(--success-text);
     font-size:14px;
     font-weight:600;
   }
@@ -432,34 +466,35 @@
 
   /* ---------- reflection / quiz ---------- */
   .qgroup{ margin-bottom: 22px; }
-  .qgroup .qtext{ font-weight:600; color:var(--text); margin-bottom:10px; font-size:14px;}
+  .qgroup .qtext{ font-family:'Poppins', sans-serif; font-weight:600; color:var(--text); margin-bottom:10px; font-size:14.5px;}
   .options{ display:flex; flex-direction:column; gap:8px; }
   .option{
     display:flex; align-items:flex-start; gap:10px;
-    padding: 11px 13px;
+    padding: 12px 14px;
     border:1px solid var(--border-soft);
-    border-radius:8px;
+    border-radius:12px;
     background: var(--bg-panel);
     cursor:pointer;
     transition: border-color .15s ease, background .15s ease;
     font-size:13.5px;
     color: var(--text-dim);
   }
-  .option:hover{ border-color: var(--text-faint); }
-  .option input{ margin-top:2px; accent-color: var(--info); flex-shrink:0; }
-  .option.selected{ border-color: var(--info); background: rgba(76,159,232,0.06); color: var(--text); }
-  .option.correct-flag{ border-color: var(--go); background: rgba(55,178,77,0.07); }
-  .option.wrong-flag{ border-color: var(--blocked); background: rgba(229,72,77,0.07); }
+  .option:hover{ border-color: var(--blue-light); }
+  .option input{ margin-top:2px; accent-color: var(--blue); flex-shrink:0; }
+  .option.selected{ border-color: var(--blue); background: rgba(74,155,209,0.07); color: var(--text); }
+  .option.correct-flag{ border-color: var(--success-border); background: var(--success-bg); }
+  .option.wrong-flag{ border-color: var(--error-border); background: var(--error-bg); }
   .qfeedback{
     font-size:12.5px;
     margin-top:8px;
     padding: 9px 12px;
-    border-radius:6px;
+    border-radius:8px;
     display:none;
-    font-family:'JetBrains Mono', monospace;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
   }
   .qfeedback.show{ display:block; }
-  .qfeedback.ok{ background: var(--go-dim); color:#9fe0ac; }
+  .qfeedback.ok{ background: var(--success-bg); color:var(--success-text); }
   .qfeedback.notyet{ background: var(--bg-panel-raised); color: var(--text-faint); }
 
   .reveal{
@@ -471,15 +506,16 @@
   .ingredient{
     display:flex; gap:12px; align-items:flex-start;
     padding: 12px 14px;
-    background: var(--bg-panel);
+    background: var(--bg-panel-raised);
     border:1px solid var(--border-soft);
-    border-radius:8px;
+    border-left: 3px solid var(--orange);
+    border-radius:12px;
   }
   .ingredient .num{
-    font-family:'Barlow Condensed', sans-serif;
+    font-family:'Poppins', sans-serif;
     font-weight:700;
     font-size:20px;
-    color: var(--line);
+    color: var(--orange);
     min-width: 26px;
   }
   .ingredient .txt{ font-size:13.5px; color: var(--text-dim); line-height:1.5; }
@@ -489,20 +525,22 @@
     display:none;
     margin: 18px 0;
     padding: 16px 18px;
-    border-radius:10px;
-    background: var(--bg-panel);
+    border-radius: var(--radius);
+    background: var(--bg-panel-raised);
     border:1px solid var(--border-soft);
+    box-shadow: var(--shadow-card);
     text-align:center;
   }
   .score-banner.show{ display:block; }
   .score-banner .num{
-    font-family:'Barlow Condensed', sans-serif;
+    font-family:'Poppins', sans-serif;
     font-size:44px;
     font-weight:700;
-    color: var(--line);
+    color: var(--blue-dark);
   }
   .score-banner .cap{
-    font-family:'JetBrains Mono', monospace;
+    font-family:'Inter', sans-serif;
+    font-weight:700;
     font-size:11px;
     color: var(--text-faint);
     letter-spacing:0.08em;
@@ -519,7 +557,7 @@
     border-top:1px solid var(--border-soft);
   }
   .nav-hint{
-    font-family:'JetBrains Mono', monospace;
+    font-family:'Inter', sans-serif;
     font-size:10.5px;
     color: var(--text-faint);
   }
@@ -527,16 +565,24 @@
     animation: pulseBtn 1.4s ease infinite;
   }
   @keyframes pulseBtn{
-    0%,100%{ box-shadow: 0 0 0 0 rgba(76,159,232,0.35); }
-    50%{ box-shadow: 0 0 0 6px rgba(76,159,232,0); }
+    0%,100%{ box-shadow: 0 0 0 0 rgba(43,111,163,0.35); }
+    50%{ box-shadow: 0 0 0 6px rgba(43,111,163,0); }
   }
-  #btnNext{ border-color: var(--info); color:#cfe6fb; background: rgba(76,159,232,0.1); }
-  #btnRestart{ border-color: var(--line); color: var(--line); }
+  #btnNext{
+    border:none; color:#FFFFFF;
+    background: linear-gradient(135deg, var(--blue-light), var(--blue-dark));
+    box-shadow: var(--shadow-btn);
+  }
+  #btnRestart{
+    border:none; color:#FFFFFF;
+    background: linear-gradient(135deg, var(--orange-light), var(--orange-dark));
+    box-shadow: 0 8px 20px -6px rgba(201,111,31,0.35);
+  }
 
   /* ---------- modal ---------- */
   .modal-overlay{
     position:fixed; inset:0;
-    background: rgba(6,8,10,0.72);
+    background: rgba(31,46,55,0.55);
     display:none;
     align-items:center; justify-content:center;
     z-index: 50;
@@ -544,24 +590,27 @@
   }
   .modal-overlay.show{ display:flex; }
   .modal{
-    background: var(--bg-panel-raised);
-    border:1px solid var(--border);
-    border-radius: 12px;
+    background: #FFFFFF;
+    border:1px solid var(--border-soft);
+    border-radius: 16px;
     max-width: 360px;
     width:100%;
     padding: 22px 22px 18px;
     box-shadow: var(--shadow);
   }
   .modal .mtitle{
-    font-family:'Barlow Condensed', sans-serif;
-    font-size:20px;
+    font-family:'Poppins', sans-serif;
+    font-size:19px;
     font-weight:700;
-    color: var(--blocked);
+    color: var(--error-text);
     margin-bottom:8px;
   }
   .modal p{ font-size:13.5px; margin-bottom:18px; }
   .modal .mrow{ display:flex; gap:10px; justify-content:flex-end; }
-  .modal button.confirm-back{ border-color: var(--blocked); color: var(--blocked); }
+  .modal button.confirm-back{
+    border:none; color:#FFFFFF;
+    background: linear-gradient(135deg, var(--error-border), var(--error-text));
+  }
 
   ::-webkit-scrollbar{ width:8px; }
   ::-webkit-scrollbar-thumb{ background:var(--border); border-radius:4px; }
@@ -582,20 +631,19 @@
     <section class="page" id="page-1">
       <div class="kicker">Mile 1 · A Familiar Problem</div>
       <h2>You've seen this before</h2>
-      <p>Two ships meet in a narrow canal, too tight for both to pass. Each waits for the other to reverse first. Neither does — so both sit there, engines idling, going nowhere.</p>
-      <p>Two roommates share one bathroom and one hair dryer. One's in the shower, waiting for the dryer to free up. The other's drying their hair, waiting for the shower to free up. Both reasonable. Both late.</p>
-      <p>Two people meet in a narrow doorway. Each steps aside to let the other through — and steps into the exact spot the other just left. They do this three or four times before anyone actually gets past.</p>
+      <p>Two ships meet in a narrow canal, too tight for both to pass. Each waits for the other to reverse first. Neither does — both just sit there.</p>
+      <p>Two roommates share one bathroom and one hair dryer. Each is waiting on the other to finish. Both reasonable. Both stuck.</p>
       <div class="card">
-        <p style="margin-bottom:0;">Notice the shape: each one is waiting on exactly one other thing to move first. Nobody's wrong. Nothing's broken. Everyone's just stuck.</p>
+        <p style="margin-bottom:0;">Notice the shape: each one is waiting on exactly one other thing to move first. Nobody's wrong — everyone's just stuck.</p>
       </div>
-      <p>How does something freeze completely when every part of it is just one small step from moving? On the next stop, you'll watch the same shape play out at a street crossing.</p>
+      <p>Next stop, you'll watch this exact shape play out at a street crossing.</p>
     </section>
 
     <!-- PAGE 2 — HOW IT WORKS -->
     <section class="page" id="page-2">
       <div class="kicker">Mile 2 · Before You Start</div>
       <h2>How this stop works</h2>
-      <p>Junction Street has an unmarked crossing where four highways meet — North, East, South, and West. There are no traffic lights. There's just one old rule everyone follows: <strong>if two cars arrive together, whoever has a car on their right lets it go first.</strong></p>
+      <p>Four highways meet at one crossing. No lights — just one rule: <strong>if two cars arrive together, whoever has a car on their right goes first.</strong></p>
       <div class="card">
         <p style="margin-bottom:0;">Here's who each driver is waiting on:</p>
         <div class="roster">
@@ -605,9 +653,7 @@
           <div class="driver"><div class="dot" style="background:#7cd992;"></div><div class="name">Driver W</div><div class="dest">yields to → S</div></div>
         </div>
       </div>
-      <p>On the next stop, you'll press <strong>Start</strong> and all four drivers will pull up to the crossing together. Try tapping <strong>Signal</strong> under any driver — you'll see exactly why nothing moves. Keep an eye on the tension meter as you try.</p>
-      <p>After a few blocked attempts, an option will appear letting you wave one driver through, out of turn. That single choice is what actually clears the whole crossing — watch closely to see why.</p>
-      <p style="color:var(--text);"><strong>Your task on the next stop:</strong> press start, let them arrive, and see what actually happens.</p>
+      <p style="color:var(--text);"><strong>Your task:</strong> press Start, then try Signal on any driver. If they get stuck, an option will appear to wave one through, out of turn.</p>
     </section>
 
     <!-- PAGE 3 — INTERACTIVE GAME -->
