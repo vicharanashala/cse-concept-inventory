@@ -728,20 +728,20 @@
       <div class="echo" id="echoAnswer"></div>
 
       <div class="q-block">
-        <label><span class="q-num">01</span>What pattern showed up right before things froze?</label>
-        <textarea data-q="q1" placeholder="Describe what each train was holding and waiting for at that moment."></textarea>
+        <label><span class="q-num">01</span>At the exact moment everything froze, what did each train already have — and what was it still waiting for?</label>
+        <textarea data-q="q1" placeholder="Name what each train was holding and what it needed next."></textarea>
       </div>
       <div class="q-block">
-        <label><span class="q-num">02</span>Mutual exclusion, hold-and-wait, no preemption, circular wait — which one, if broken, would have prevented this? How?</label>
-        <textarea data-q="q2" placeholder="Pick one condition and explain the fix."></textarea>
+        <label><span class="q-num">02</span>Was there a single move, made in a different order, that would have avoided the standoff? Which one?</label>
+        <textarea data-q="q2" placeholder="Point to one specific decision point in the run."></textarea>
       </div>
       <div class="q-block">
-        <label><span class="q-num">03</span>If "deadlock" had never been named or studied as a concept, how would you have figured out what went wrong here?</label>
-        <textarea data-q="q3" placeholder="Think about debugging it cold, with no theory to reach for."></textarea>
+        <label><span class="q-num">03</span>Once a train got stuck, could it have simply given up what it was holding? What does your answer say about how the standoff formed?</label>
+        <textarea data-q="q3" placeholder="Think about whether backing out was ever an option."></textarea>
       </div>
       <div class="q-block">
-        <label><span class="q-num">04</span>What single rule change to the yard would make this standoff impossible, permanently?</label>
-        <textarea data-q="q4" placeholder="One rule. State it plainly."></textarea>
+        <label><span class="q-num">04</span>If you were watching live as the dispatcher, what's the earliest moment you'd have stepped in — and what would you have changed?</label>
+        <textarea data-q="q4" placeholder="Name the moment and the one change you'd make."></textarea>
       </div>
     </section>
 
@@ -817,10 +817,10 @@
     current = i;
     if(i > maxReached) maxReached = i;
     if(i === 0) resetEverything(false);
-    if(i === 2) syncGameUI();
+    renderNav();
+    if(i === 2){ refreshLinearGeometry(); syncGameUI(); }
     if(i === 3) syncReflectionEcho();
     if(i === 4) renderQuiz();
-    renderNav();
     window.scrollTo({top:0, behavior:'smooth'});
   }
 
@@ -1267,22 +1267,32 @@
       correct: 2
     },
     {
-      q: 'What is the simplest way to prevent the exact deadlock shown in this simulation?',
+      q: 'One general way to prevent this exact deadlock is to require every train to request resources in the same fixed order. Why does that work?',
       options: [
-        'Require both trains to request resources in the same fixed order (e.g., always bridge before tunnel).',
-        'Make the trains faster.',
-        'Remove the tunnel entirely.',
-        'Add a third train.'
+        'A fixed order makes a circular chain of waiting impossible — someone is always first.',
+        'It makes every train move faster.',
+        'It removes the need for a shared resource entirely.',
+        'It guarantees no train ever has to wait.'
       ],
       correct: 0
     },
     {
-      q: 'Why can\u2019t a deadlock resolve itself without outside intervention?',
+      q: 'In the simulation, switching on Prevention Mode stopped the deadlock by doing what?',
       options: [
-        'Each party is stuck holding a resource it won\u2019t release until it gets one that will never come free.',
-        'The processes are too slow to notice.',
-        'It always resolves itself given enough time.',
-        'One process always crashes first.'
+        'Letting only one train hold junction resources at a time, so a circular wait can never form.',
+        'Making the trains move faster through the junction.',
+        'Deleting one of the tracks so there\u2019s nothing to fight over.',
+        'Forcing both trains to reverse automatically.'
+      ],
+      correct: 0
+    },
+    {
+      q: 'When a deadlock hit, sending one train back to the start un-froze the others. What is this technique called?',
+      options: [
+        'Deadlock recovery by preemption — forcibly taking back a held resource.',
+        'Deadlock prevention.',
+        'Deadlock avoidance.',
+        'Starvation.'
       ],
       correct: 0
     }
