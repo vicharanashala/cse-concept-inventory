@@ -643,14 +643,14 @@
     <section class="page" id="page-2">
       <div class="kicker">Mile 2 · Before You Start</div>
       <h2>How this stop works</h2>
-      <p>Four highways meet at one crossing. No lights — just one rule: <strong>if two cars arrive together, whoever has a car on their right goes first.</strong></p>
+      <p>Four highways meet at one crossing. No lights — just one rule everyone already agreed on: <strong>each driver waits for one specific driver to go first.</strong></p>
       <div class="card">
         <p style="margin-bottom:0;">Here's who each driver is waiting on:</p>
         <div class="roster">
-          <div class="driver"><div class="dot" style="background:#e8b13a;"></div><div class="name">Driver N</div><div class="dest">yields to → W</div></div>
-          <div class="driver"><div class="dot" style="background:#4c9fe8;"></div><div class="name">Driver E</div><div class="dest">yields to → N</div></div>
-          <div class="driver"><div class="dot" style="background:#e5748d;"></div><div class="name">Driver S</div><div class="dest">yields to → E</div></div>
-          <div class="driver"><div class="dot" style="background:#7cd992;"></div><div class="name">Driver W</div><div class="dest">yields to → S</div></div>
+          <div class="driver"><div class="dot" style="background:#e8b13a;"></div><div class="name">Aarav</div><div class="dest">waits for → Rhea</div></div>
+          <div class="driver"><div class="dot" style="background:#4c9fe8;"></div><div class="name">Dev</div><div class="dest">waits for → Aarav</div></div>
+          <div class="driver"><div class="dot" style="background:#e5748d;"></div><div class="name">Meera</div><div class="dest">waits for → Dev</div></div>
+          <div class="driver"><div class="dot" style="background:#7cd992;"></div><div class="name">Rhea</div><div class="dest">waits for → Meera</div></div>
         </div>
       </div>
       <p style="color:var(--text);"><strong>Your task:</strong> press Start, then try Signal on any driver. If they get stuck, an option will appear to wave one through, out of turn.</p>
@@ -680,22 +680,22 @@
           <div class="car-slot slot-N" id="slot-N" style="--accent:var(--car-N); --angle:180deg;">
             <div class="light" id="light-N"></div>
             <div class="queue" id="queue-N"></div>
-            <div class="car-chip"><div class="windshield"></div><span class="car-badge">N</span></div>
+            <div class="car-chip"><div class="windshield"></div><span class="car-badge">A</span></div>
           </div>
           <div class="car-slot slot-S" id="slot-S" style="--accent:var(--car-S); --angle:0deg;">
             <div class="light" id="light-S"></div>
             <div class="queue" id="queue-S"></div>
-            <div class="car-chip"><div class="windshield"></div><span class="car-badge">S</span></div>
+            <div class="car-chip"><div class="windshield"></div><span class="car-badge">M</span></div>
           </div>
           <div class="car-slot slot-E" id="slot-E" style="--accent:var(--car-E); --angle:-90deg;">
             <div class="light" id="light-E"></div>
             <div class="queue" id="queue-E"></div>
-            <div class="car-chip"><div class="windshield"></div><span class="car-badge">E</span></div>
+            <div class="car-chip"><div class="windshield"></div><span class="car-badge">D</span></div>
           </div>
           <div class="car-slot slot-W" id="slot-W" style="--accent:var(--car-W); --angle:90deg;">
             <div class="light" id="light-W"></div>
             <div class="queue" id="queue-W"></div>
-            <div class="car-chip"><div class="windshield"></div><span class="car-badge">W</span></div>
+            <div class="car-chip"><div class="windshield"></div><span class="car-badge">R</span></div>
           </div>
         </div>
 
@@ -714,33 +714,33 @@
       <div class="go-grid controls-hidden" id="goControls">
         <button class="go-card" id="gocard-N" style="--accent:var(--car-N);" onclick="signalGo('N')">
           <span class="go-icon">▲</span>
-          <span class="go-label">Signal N</span>
+          <span class="go-label">Signal Aarav</span>
           <span class="go-sub">go →</span>
         </button>
         <button class="go-card" id="gocard-E" style="--accent:var(--car-E);" onclick="signalGo('E')">
           <span class="go-icon">▶</span>
-          <span class="go-label">Signal E</span>
+          <span class="go-label">Signal Dev</span>
           <span class="go-sub">go →</span>
         </button>
         <button class="go-card" id="gocard-S" style="--accent:var(--car-S);" onclick="signalGo('S')">
           <span class="go-icon">▼</span>
-          <span class="go-label">Signal S</span>
+          <span class="go-label">Signal Meera</span>
           <span class="go-sub">go →</span>
         </button>
         <button class="go-card" id="gocard-W" style="--accent:var(--car-W);" onclick="signalGo('W')">
           <span class="go-icon">◀</span>
-          <span class="go-label">Signal W</span>
+          <span class="go-label">Signal Rhea</span>
           <span class="go-sub">go →</span>
         </button>
       </div>
 
       <div class="hint-box" id="hintBox">
-        Nothing you've tried actually breaks the loop — every driver is still only waiting on the one to their right. What if <strong>one</strong> driver went out of turn, even though it isn't technically their right of way?
+        Nothing you've tried actually breaks the loop — every driver is still only waiting on one specific other driver. What if <strong>one</strong> driver went out of turn, even though it isn't technically their turn?
         <div class="controls" id="reverseControls" style="margin-top:10px;">
-          <button class="reverse-btn" onclick="reverseCar('N')">Wave N through</button>
-          <button class="reverse-btn" onclick="reverseCar('E')">Wave E through</button>
-          <button class="reverse-btn" onclick="reverseCar('S')">Wave S through</button>
-          <button class="reverse-btn" onclick="reverseCar('W')">Wave W through</button>
+          <button class="reverse-btn" onclick="reverseCar('N')">Wave Aarav through</button>
+          <button class="reverse-btn" onclick="reverseCar('E')">Wave Dev through</button>
+          <button class="reverse-btn" onclick="reverseCar('S')">Wave Meera through</button>
+          <button class="reverse-btn" onclick="reverseCar('W')">Wave Rhea through</button>
         </div>
       </div>
 
@@ -780,7 +780,7 @@
             <div class="ingredient"><div class="num">1</div><div class="txt"><strong>Only one car fits at a time.</strong> The crossing couldn't be shared — a spot belonged to whoever was in it.</div></div>
             <div class="ingredient"><div class="num">2</div><div class="txt"><strong>Everyone held their ground while waiting.</strong> No driver gave up their spot just because they were stuck.</div></div>
             <div class="ingredient"><div class="num">3</div><div class="txt"><strong>Nobody would go out of turn.</strong> Everyone followed the rule correctly, so no one broke the pattern on their own.</div></div>
-            <div class="ingredient"><div class="num">4</div><div class="txt"><strong>The waiting formed a closed loop.</strong> N waited on W, who waited on S, who waited on E, who waited on N — right back to the start.</div></div>
+            <div class="ingredient"><div class="num">4</div><div class="txt"><strong>The waiting formed a closed loop.</strong> Aarav waited on Rhea, who waited on Meera, who waited on Dev, who waited on Aarav — right back to the start.</div></div>
           </div>
           <p style="margin-bottom:0;">Take away any one of those four and the freeze breaks. That's exactly what happened when you waved one driver through, out of turn.</p>
           <p style="margin-bottom:0; color:var(--text-faint); font-size:12.5px;">You'll spot this same shape in surprising places — two cooks each holding the tool the other one needs, a group chat where everyone's waiting for someone else to reply first, even two computer programs each holding a file the other one is waiting on.</p>
@@ -888,8 +888,11 @@ let state = {
 };
 
 const ORDER = ['N','E','S','W'];
-// right-of-way rule: X yields to TARGET[X] (the car on X's right)
+// waiting rule: X waits for NAME[X] to go first — a fixed order, not based on direction
 const TARGET = { N:'W', E:'N', S:'E', W:'S' };
+// display names — the crossing still has four physical roads, but nothing shown
+// to the student ever needs to reason about compass direction
+const NAME = { N:'Aarav', E:'Dev', S:'Meera', W:'Rhea' };
 // travel geometry: which CSS property animates; start (far away), stop (parked behind the crosswalk), cross (its own crosswalk, once released)
 const CAR_AXIS = {
   N: { prop:'top',  start:6,  stop:22, lane:'left', laneOffset:-11 },
@@ -1113,7 +1116,7 @@ function signalGo(car){
   }, 900);
 
   const target = TARGET[car];
-  log(`Car ${car} inches forward — blocked, Car ${target} has the right of way.`, 'blocked');
+  log(`${NAME[car]} tries to go — blocked, ${NAME[target]} hasn't gone yet.`, 'blocked');
   checkUnlock();
   renderGame();
 }
@@ -1139,7 +1142,7 @@ function reverseCar(car){
   slot.classList.add('reversed');
   updatePosition(car, exitTarget(car, false), 900);
   setTimeout(()=>{ slot.style.opacity = '0'; }, 150);
-  log(`Car ${car} backs all the way out and clears off, giving up the crossing.`, 'go');
+  log(`${NAME[car]} backs all the way out and clears off, giving up the crossing.`, 'go');
   renderGame();
 
   // whoever was waiting on `car` can go next, and so on around the loop
@@ -1155,7 +1158,7 @@ function reverseCar(car){
       const slotC = document.getElementById('slot-'+c);
       updatePosition(c, exitTarget(c, true), 1100);
       setTimeout(()=>{ slotC.style.opacity = '0'; }, 550);
-      log(`Car ${c} finally goes — straight through and gone.`, 'go');
+      log(`${NAME[c]} finally goes — straight through and gone.`, 'go');
       setTimeout(()=>{
         state.game.movedSet.add(c);
         slotC.classList.add('moved');
