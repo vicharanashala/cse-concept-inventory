@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Nuts &amp; Bolts Workshop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --steel-1:#fdf3e2; --steel-2:#fff8ec;
+  --primary:#d97706; --primary-dark:#b45309; --primary-deep:#7c3a0a;
+  --accent:#0891b2; --green:#22c55e; --red:#ef5a5a;
+  --ink:#2a1c0f; --muted:#8a7156;
+  --glass:rgba(255,255,255,0.68); --glass-border:rgba(255,255,255,0.7);
+  --shadow:0 20px 46px -20px rgba(120,70,10,0.35);
+  --radius:22px;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;font-family:'Inter',sans-serif;color:var(--ink);
+  background:radial-gradient(1100px 550px at 15% -10%, #fff2d6 0%, transparent 60%),
+             linear-gradient(180deg,var(--steel-1) 0%, var(--steel-2) 55%, #fbf6ee 100%);
+  min-height:100vh;
+}
+h1,h2,.display{font-family:'Baloo 2',sans-serif;}
+p{line-height:1.6;color:var(--muted);}
+button{font-family:inherit;cursor:pointer;}
+.wrap{max-width:920px;margin:0 auto;padding:40px 20px 70px;}
+
+/* ---- hero ---- */
+.hero{text-align:center;margin-bottom:26px;}
+.hero h1{font-size:clamp(28px,5vw,42px);color:var(--primary-deep);margin:0 0 10px;}
+.hero p{max-width:620px;margin:0 auto 6px;font-size:16px;}
+.rule-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px;}
+.rule-chip{
+  display:inline-flex;align-items:center;gap:8px;
+  font-weight:700;font-size:13px;padding:9px 15px;border-radius:999px;border:1.5px solid transparent;
+}
+.rule-chip.no{background:rgba(239,90,90,.12);color:#a12525;border-color:rgba(239,90,90,.3);}
+.rule-chip.yes{background:rgba(34,197,94,.14);color:#177a41;border-color:rgba(34,197,94,.35);}
+.outcome-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.outcome-chip{background:#fff;border:1.5px solid #f0dcb8;color:var(--primary-deep);font-weight:700;font-size:12.5px;
+  padding:7px 14px;border-radius:999px;}
+
+/* ---- card / controls (shared) ---- */
+.card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);
+  box-shadow:var(--shadow);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:26px;}
+.center{text-align:center;}
+.btn{border:none;border-radius:14px;padding:13px 22px;font-weight:700;font-size:15px;color:#fff;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  box-shadow:0 12px 24px -10px rgba(217,119,6,.55);transition:transform .15s,box-shadow .15s;}
+.btn:hover{transform:translateY(-2px);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn.big{font-size:17px;padding:16px 30px;border-radius:16px;}
+.btn.secondary{background:#fff;color:var(--primary-dark);border:1.5px solid #f0dcb8;box-shadow:none;}
+.btn.small{padding:9px 15px;font-size:13px;border-radius:11px;}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:1.5px solid #f0dcb8;background:#fff;color:var(--primary-dark);
+  font-size:18px;display:flex;align-items:center;justify-content:center;transition:.15s;}
+.icon-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+.icon-btn:disabled{opacity:.4;}
+
+/* ---- section framing (wizard: one chapter visible at a time) ---- */
+.section{display:none;margin-top:0;}
+.section.active{display:block;animation:fadein .35s;}
+@keyframes fadein{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--primary-dark);
+  background:rgba(217,119,6,0.1);padding:6px 14px;border-radius:999px;margin-bottom:10px;
+}
+.section-title{font-size:clamp(22px,3.4vw,30px);color:var(--primary-deep);margin:0 0 6px;text-align:center;}
+.section-sub{max-width:620px;margin:0 auto 18px;text-align:center;font-size:14.5px;}
+
+/* ---- wizard nav ---- */
+.wizard-nav{
+  position:sticky;top:14px;z-index:80;display:flex;align-items:center;justify-content:space-between;
+  gap:10px;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--glass-border);border-radius:16px;padding:12px 14px;margin-bottom:26px;
+  box-shadow:0 10px 26px -16px rgba(120,70,10,0.35);
+}
+.wizard-nav .btn{padding:10px 16px;font-size:13.5px;border-radius:12px;white-space:nowrap;}
+.wizard-nav .btn:disabled{opacity:.35;}
+.wizard-progress{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;font-weight:800;color:var(--primary-dark);text-align:center;flex:1;}
+.wizard-dots{display:flex;gap:6px;}
+.wizard-dots span{width:8px;height:8px;border-radius:50%;background:#f0dcb8;transition:.2s;}
+.wizard-dots span.done{background:var(--green);}
+.wizard-dots span.current{background:var(--primary);width:20px;border-radius:5px;}
+
+/* ---- game HUD ---- */
+.hud{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:18px;}
+.hud-pill{background:rgba(255,255,255,.75);border:1px solid var(--glass-border);border-radius:12px;
+  padding:8px 15px;font-size:12px;font-weight:700;color:var(--primary-deep);text-align:center;min-width:78px;}
+.hud-pill span{display:block;font-size:18px;color:var(--ink);}
+.hud-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;align-items:center;}
+.speed-wrap{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--primary-deep);
+  background:#fff;border:1.5px solid #f0dcb8;border-radius:12px;padding:6px 12px;}
+.speed-wrap input{accent-color:var(--primary);}
+.hint-line{font-size:12.5px;color:var(--muted);text-align:center;margin:0 0 4px;}
+#autoplay-btn.active-auto{background:linear-gradient(135deg,var(--accent),#0e7490);color:#fff;border-color:transparent;}
+
+/* ---- workbench (nuts & bolts board) ---- */
+.workbench{
+  position:relative;border-radius:22px;overflow:hidden;margin:18px 0;padding:22px 14px 30px;
+  background:linear-gradient(180deg,#f4e3c4 0%,#fbf1de 60%,#f4e3c4 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.6);
+}
+.bench-label{font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--primary-deep);margin:0 0 6px 4px;opacity:.75;}
+.pile-labels{position:relative;height:0;}
+.pile-label{
+  position:absolute;top:-4px;transform:translateX(-50%);
+  font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:20px;white-space:nowrap;
+  opacity:0;transition:opacity .35s;pointer-events:none;z-index:5;
+}
+.pile-label.show{opacity:1;}
+.pile-label.pile-left{background:rgba(8,145,178,.14);color:#0d6b82;border:1.5px solid rgba(8,145,178,.4);}
+.pile-label.pile-match{background:rgba(34,197,94,.16);color:#177a41;border:1.5px solid var(--green);}
+.pile-label.pile-right{background:rgba(217,119,6,.14);color:var(--primary-deep);border:1.5px solid rgba(217,119,6,.4);}
+.pile-count{display:inline-block;min-width:15px;height:15px;line-height:15px;text-align:center;
+  color:#fff;border-radius:50%;font-size:9px;margin-left:4px;}
+.pile-label.pile-left .pile-count{background:#0d6b82;}
+.pile-label.pile-match .pile-count{background:#177a41;}
+.pile-label.pile-right .pile-count{background:var(--primary-deep);}
+.nb-track{position:relative;height:104px;margin-bottom:30px;}
+.nb-slot-bg{position:absolute;top:8px;height:88px;border-radius:12px;background:rgba(255,255,255,.35);
+  border:1.5px dashed rgba(180,83,9,.18);}
+.nb-slot-bg.active-range{background:rgba(8,145,178,.10);border-color:rgba(8,145,178,.4);}
+.nb-chip{
+  position:absolute;border-radius:14px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;font-size:20px;user-select:none;
+  transition:left .6s cubic-bezier(.4,0,.2,1), top .3s, width .3s, height .3s, background .25s, box-shadow .25s, transform .25s, opacity .3s;
+  box-shadow:0 8px 16px -8px rgba(120,70,10,.4);
+}
+
+.nb-chip .nb-ico{line-height:1;}
+.nb-chip.nb-bolt{background:linear-gradient(160deg,#e7edf3,#c7d2dc);border:2px solid #9aa7b5;color:#3a4550;}
+.nb-chip.nb-nut{background:linear-gradient(160deg,#fff3d6,#ffdf9e);border:2px solid #e0ac40;color:#7c3a0a;}
+.nb-chip.clickable{cursor:pointer;}
+.nb-chip.clickable:hover{transform:translateY(-4px);}
+.nb-chip.disabled{pointer-events:none;opacity:.55;}
+.nb-chip.selected{outline:3px solid var(--accent);outline-offset:2px;}
+.nb-chip.pivot{outline:3px solid var(--primary);outline-offset:2px;box-shadow:0 0 0 5px rgba(217,119,6,.25);}
+.nb-chip.went-left{outline:3px solid #0891b2;outline-offset:2px;}
+.nb-chip.went-right{outline:3px solid #d97706;outline-offset:2px;}
+.nb-chip.matched{outline:3px solid var(--green);outline-offset:2px;box-shadow:0 0 0 6px rgba(34,197,94,.28);}
+.nb-chip.finalized{outline:3px solid var(--green);outline-offset:2px;box-shadow:0 0 16px rgba(34,197,94,.5);}
+.nb-chip.solved-naive{opacity:.4;filter:grayscale(.4);}
+.nb-chip.shake{animation:shake .4s;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+
+.feedback-bubble{position:absolute;left:50%;top:-6px;translate:-50% 0;padding:8px 16px;border-radius:12px;
+  font-weight:800;font-size:13.5px;white-space:nowrap;pointer-events:none;opacity:0;z-index:40;
+  box-shadow:0 10px 20px -8px rgba(0,0,0,.3);}
+.feedback-bubble.show{animation:fbpop 1s ease-out forwards;}
+@keyframes fbpop{0%{opacity:0;transform:translate(-50%,6px) scale(.8);}
+  15%{opacity:1;transform:translate(-50%,-6px) scale(1);}
+  80%{opacity:1;transform:translate(-50%,-6px) scale(1);}
+  100%{opacity:0;transform:translate(-50%,-18px) scale(.9);}}
+.feedback-bubble.small{background:#fff0e0;color:#a8551d;border:1.5px solid #f0c896;}
+.feedback-bubble.large{background:#e0f6fb;color:#0d6b82;border:1.5px solid #a8e4f0;}
+.feedback-bubble.match{background:rgba(34,197,94,.18);color:#177a41;border:1.5px solid var(--green);}
+
+/* ---- instruction panel ---- */
+.instruction-panel{text-align:center;padding:16px 18px;border-radius:16px;
+  background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.2);margin-bottom:16px;}
+.instruction-panel .step-tag{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);}
+.instruction-panel p{margin:6px 0 0;color:var(--ink);font-size:14.5px;font-weight:600;}
+.game-action-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:6px;}
+
+/* ---- quiz panel ---- */
+.quiz-panel{display:none;margin-top:16px;text-align:center;padding:22px;border-radius:18px;
+  background:linear-gradient(135deg,rgba(8,145,178,.12),rgba(217,119,6,.1));border:1px solid var(--glass-border);}
+.quiz-panel.show{display:block;animation:fadein .3s;}
+.quiz-panel h3{margin:0 0 12px;font-size:18px;color:var(--primary-deep);}
+.quiz-options{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px;}
+.quiz-options button{border:none;border-radius:13px;padding:11px 20px;font-weight:700;font-size:14px;
+  background:#fff;border:1.5px solid #f0dcb8;color:var(--primary-dark);transition:.15s;}
+.quiz-options button:hover{transform:translateY(-2px);}
+.quiz-options button:disabled{cursor:default;}
+.quiz-options button.correct{background:rgba(34,197,94,.18);border-color:var(--green);color:#177a41;}
+.quiz-options button.wrong{background:rgba(239,90,90,.15);border-color:var(--red);color:#a12525;}
+.quiz-feedback{margin-top:14px;font-size:13.5px;font-weight:600;color:var(--ink);display:none;}
+.quiz-feedback.show{display:block;animation:fadein .3s;}
+
+/* ---- reveal ---- */
+.reveal{display:none;margin-top:22px;text-align:center;padding:26px;border-radius:18px;
+  background:linear-gradient(135deg,rgba(8,145,178,.12),rgba(217,119,6,.14));border:1px solid var(--glass-border);}
+.reveal.show{display:block;animation:fadein .4s;}
+.reveal h2{margin:4px 0 8px;font-size:clamp(24px,3.6vw,34px);
+  background:linear-gradient(135deg,var(--primary-dark),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.reveal ol{text-align:left;max-width:440px;margin:14px auto 0;font-size:14.5px;color:var(--ink);}
+.reveal ol li{margin-bottom:6px;}
+
+/* ---- reflection ---- */
+.qblock{margin-bottom:20px;}
+.qblock:last-of-type{margin-bottom:0;}
+.qblock label{font-weight:700;display:block;margin-bottom:8px;color:var(--ink);font-size:14.5px;}
+.reflect{width:100%;min-height:74px;border-radius:14px;border:1.5px solid #f0dcb8;padding:12px 14px;
+  font-family:inherit;font-size:14px;resize:vertical;background:#fffaf1;color:var(--ink);}
+.reflect:focus{outline:none;border-color:var(--primary);}
+.continue-hint{text-align:center;font-size:12.5px;color:var(--muted);margin-top:8px;}
+
+/* ---- workbook ---- */
+.wb-score{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-weight:700;
+  color:var(--primary-deep);font-size:13.5px;margin-bottom:16px;}
+.wb-question{margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid rgba(217,119,6,.15);}
+.wb-question:last-child{border-bottom:none;}
+.wb-q-text{font-weight:700;margin-bottom:10px;font-size:14.5px;}
+.quiz-options button.wb-opt{width:auto;}
+.wb-feedback{margin-top:10px;font-size:13.5px;font-weight:600;display:none;}
+.wb-feedback.show{display:block;animation:fadein .3s;}
+
+/* ---- final score popup ---- */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(60,35,10,0.55);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;z-index:950;padding:20px;
+}
+.modal-overlay.show{display:flex;animation:fadein .25s;}
+.modal-card{
+  background:#fff;border-radius:24px;max-width:460px;width:100%;padding:32px 28px;text-align:center;
+  box-shadow:0 30px 60px -20px rgba(120,70,10,0.5);animation:popin .35s cubic-bezier(.4,1.6,.4,1);
+  max-height:88vh;overflow-y:auto;
+}
+@keyframes popin{from{opacity:0;transform:scale(.85);}to{opacity:1;transform:scale(1);}}
+.modal-card .modal-emoji{font-size:48px;margin-bottom:4px;}
+.modal-card h2{margin:0 0 4px;font-size:24px;color:var(--primary-deep);}
+.modal-card .modal-score{font-size:36px;font-weight:800;color:var(--accent);margin:8px 0 2px;}
+.modal-card .modal-tag{font-weight:700;font-size:14.5px;color:var(--primary-dark);margin-bottom:14px;}
+.modal-card p{font-size:13.5px;margin:0 0 16px;}
+.modal-card .btn{width:100%;}
+
+footer{text-align:center;padding:20px;color:var(--muted);font-size:12.5px;}
+@media(max-width:600px){ .wrap{padding:26px 14px 50px;} }
+
+/* ---- problem section ---- */
+.concept-box{background:#fff;border:1.5px dashed #e0ac40;border-radius:16px;
+  padding:18px 20px;margin:18px 0;text-align:left;}
+.concept-box h3{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;color:var(--primary-deep);margin:0 0 8px;}
+.concept-box p{color:var(--muted);font-size:13.5px;margin-bottom:8px;}
+.concept-box p:last-child{margin-bottom:0;}
+.symptom-row{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px;}
+.symptom-chip{background:#fdf3e2;border:1px solid #e0ac40;color:var(--primary-deep);
+  font-weight:700;font-size:12px;padding:6px 12px;border-radius:20px;}
+
+/* ---- reflection summary ---- */
+.reflection-summary{display:none;margin-top:24px;padding-top:22px;border-top:1px dashed #f0dcb8;}
+.reflection-summary.show{display:block;animation:fadein .35s;}
+.reflection-summary h3{font-family:'Baloo 2',sans-serif;font-size:17px;color:var(--primary-deep);margin-bottom:14px;text-align:center;}
+.summary-block{background:#fffaf1;border:1px solid #f0dcb8;border-radius:12px;padding:14px 16px;margin-bottom:12px;}
+.summary-block:last-child{margin-bottom:0;}
+.summary-q{font-weight:700;font-size:13.5px;color:var(--ink);margin-bottom:9px;}
+.summary-your{font-size:13px;background:rgba(217,119,6,0.08);border-left:3px solid var(--primary);border-radius:0 6px 6px 0;
+  padding:8px 11px;margin-bottom:7px;color:var(--ink);}
+.summary-model{font-size:13px;background:rgba(8,145,178,0.08);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;
+  padding:8px 11px;color:var(--ink);}
+.summary-your b,.summary-model b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;
+  margin-bottom:3px;opacity:.7;}
+
+/* ---- chip value label ---- */
+.nb-chip .nb-label{font-size:10.5px;font-weight:800;letter-spacing:.02em;margin-top:1px;line-height:1;}
+
+/* ---- algorithm step tracker ---- */
+.algo-tracker{display:flex;justify-content:center;gap:4px;flex-wrap:wrap;margin:0 0 16px;}
+.algo-tracker .atk{display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:#c9b190;
+  background:#fff;border:1.5px solid #f0dcb8;padding:5px 10px 5px 6px;border-radius:20px;transition:.25s;}
+.algo-tracker .atk .atk-dot{width:16px;height:16px;border-radius:50%;background:#f0dcb8;color:#fff;font-size:9px;
+  display:flex;align-items:center;justify-content:center;font-weight:800;transition:.25s;}
+.algo-tracker .atk.active{color:var(--primary-deep);border-color:var(--primary);background:rgba(217,119,6,.08);}
+.algo-tracker .atk.active .atk-dot{background:var(--primary);}
+.algo-tracker .atk.done{color:#177a41;border-color:var(--green);}
+.algo-tracker .atk.done .atk-dot{background:var(--green);}
+
+/* ---- comparison beam: an animated connector between pivot and the item being tested ---- */
+.compare-beam{position:absolute;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent));
+  border-radius:3px;transform-origin:left center;opacity:0;pointer-events:none;z-index:30;
+  box-shadow:0 0 10px rgba(217,119,6,.6);}
+.compare-beam.show{animation:beamPulse .55s ease-out;}
+@keyframes beamPulse{0%{opacity:0;}20%{opacity:1;}80%{opacity:1;}100%{opacity:0;}}
+.compare-beam .beam-dot{position:absolute;top:50%;width:8px;height:8px;border-radius:50%;background:var(--accent);
+  transform:translate(-50%,-50%);animation:beamTravel .55s ease-out;}
+@keyframes beamTravel{0%{left:0%;}100%{left:100%;}}
+
+/* ---- partition zone tint bands (shown during partitioning) ---- */
+.zone-band{position:absolute;top:6px;bottom:6px;border-radius:10px;opacity:0;transition:opacity .3s, left .5s, width .5s;
+  pointer-events:none;z-index:1;}
+.zone-band.zone-left{background:rgba(8,145,178,.14);border:1.5px dashed rgba(8,145,178,.4);}
+.zone-band.zone-right{background:rgba(217,119,6,.14);border:1.5px dashed rgba(217,119,6,.4);}
+.zone-band.show{opacity:1;}
+
+/* ---- finalized lock-in celebration ---- */
+@keyframes lockPulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6);}70%{box-shadow:0 0 0 14px rgba(34,197,94,0);}100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}}
+.nb-chip.finalized.just-locked{animation:lockPulse 1s ease-out;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="wizard-nav">
+    <button class="btn secondary" id="wiz-back">← Back</button>
+    <div class="wizard-progress">
+      <span id="wiz-label">Introduction · The Problem</span>
+      <div class="wizard-dots" id="wiz-dots">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+    <button class="btn" id="wiz-next">See the Story →</button>
+  </div>
+
+  <!-- ================= SECTION 0: THE PROBLEM ================= -->
+  <section class="section active" id="sec-problem">
+    <div class="hero">
+      <span class="eyebrow">Introduction · The Problem</span>
+      <h1>🧩 Sorting Through Chaos, Efficiently</h1>
+      <p>Imagine you're handed a big, disorganized pile of things that need to be matched up, sorted, or arranged in the right order — but you're only allowed to compare items two at a time, and there are strict rules about which comparisons are even allowed.</p>
+      <p>If you just try pairs at random, checking every possible combination, the number of comparisons needed explodes as the pile grows. Ten items might take a few dozen checks — but a thousand items could take up to a million.</p>
+      <div class="concept-box">
+        <h3>🤔 What's really going on here?</h3>
+        <p>Random, brute-force checking runs into the same problems again and again:</p>
+        <div class="symptom-row">
+          <span class="symptom-chip">😩 Painfully slow at scale</span>
+          <span class="symptom-chip">🔁 Repeats work it's already done</span>
+          <span class="symptom-chip">🤷 No real strategy, just luck</span>
+        </div>
+        <p style="margin-top:10px;">There has to be a smarter way — some rule for picking a good starting point, and some way to make each comparison eliminate a big chunk of possibilities at once, instead of learning just one tiny fact per check.</p>
+      </div>
+      <p style="font-size:13.5px;color:var(--muted);">This exact challenge shows up everywhere — organizing files, matching people to compatible options, sorting through search results, or lining up a giant stack of mismatched parts on a workbench.</p>
+      <p style="margin-top:16px;">Let's see one clever strategy for solving it — starting with a story.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 1: THE STORY ================= -->
+  <section class="section" id="sec-intro">
+    <div class="hero">
+      <span class="eyebrow">Chapter 1 · The Story</span>
+      <h1>🔧 The Nuts &amp; Bolts Workshop</h1>
+      <p>A mechanic dropped a box of nuts and bolts and now they're all mixed up! Each bolt has exactly one matching nut somewhere in the pile — same size, different piece. Your job: pair every nut with its bolt.</p>
+      <p>But there's a catch. The mechanic's workbench only lets you test <b>one nut against one bolt at a time</b>.</p>
+      <div class="rule-row">
+        <span class="rule-chip no">❌ Nut vs Nut</span>
+        <span class="rule-chip no">❌ Bolt vs Bolt</span>
+        <span class="rule-chip yes">✅ Nut vs Bolt only</span>
+      </div>
+      <p style="margin-top:16px;">Every time you test a nut against a bolt, the workbench tells you one of three things:</p>
+      <div class="outcome-row">
+        <span class="outcome-chip">🔹 Too Small</span>
+        <span class="outcome-chip">🔸 Too Large</span>
+        <span class="outcome-chip">✅ Perfect Match</span>
+      </div>
+      <p style="margin-top:16px;">Sounds simple — but can you find a <i>clever</i> way to pair them all up, without wasting hundreds of comparisons?</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 2: THE WORKSHOP GAME ================= -->
+  <section class="section" id="sec-game">
+    <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">Chapter 2 · The Workshop</span>
+    <h2 class="section-title">Sort the Nuts &amp; Bolts</h2>
+    <p class="section-sub">Tap a nut, then a bolt (or drag a nut onto a bolt) to test them against each other.</p>
+
+    <div class="card">
+      <div class="hud">
+        <div class="hud-pill">🔍 Comparisons<span id="hud-comparisons">0</span></div>
+        <div class="hud-pill">💡 Hints used<span id="hud-hints">0</span></div>
+        <div class="hud-pill">✅ Pairs solved<span id="hud-solved">0</span>/6</div>
+      </div>
+      <div class="hud-actions">
+        <button class="btn secondary small" id="autoplay-btn">▶ Auto Play</button>
+        <div class="speed-wrap">
+          <label for="speed-slider">Speed</label>
+          <input type="range" id="speed-slider" min="0.5" max="2" step="0.5" value="1">
+          <span id="speed-label">1x</span>
+        </div>
+        <button class="icon-btn" id="hint-btn" title="Get a hint">💡</button>
+        <button class="icon-btn" id="restart-game-btn" title="Restart this chapter">🔄</button>
+      </div>
+      <p class="hint-line" id="mode-hint">Play manually by tapping/dragging, or turn on Auto Play to watch it happen — your choice!</p>
+
+      <div class="algo-tracker" id="algo-tracker">
+        <div class="atk" data-stage="explore"><span class="atk-dot">1</span>Explore</div>
+        <div class="atk" data-stage="pivot"><span class="atk-dot">2</span>Pick Pivot</div>
+        <div class="atk" data-stage="compare"><span class="atk-dot">3</span>Compare</div>
+        <div class="atk" data-stage="partition"><span class="atk-dot">4</span>Partition</div>
+        <div class="atk" data-stage="recurse"><span class="atk-dot">5</span>Recurse</div>
+        <div class="atk" data-stage="done"><span class="atk-dot">6</span>Sorted!</div>
+      </div>
+
+      <div class="instruction-panel">
+        <div class="step-tag" id="step-tag">Step</div>
+        <p id="instruction-text">Loading…</p>
+        <div class="game-action-row" id="game-action-row"></div>
+      </div>
+
+      <div class="workbench">
+        <div class="bench-label">🔩 Bolts</div>
+        <div class="pile-labels" id="bolt-pile-labels">
+          <div class="pile-label pile-left" id="bolt-pile-label-left">⬅️ Smaller Pile <span class="pile-count" id="bolt-pile-count-left">0</span></div>
+          <div class="pile-label pile-match" id="bolt-pile-label-match">✅ Pivot's Spot</div>
+          <div class="pile-label pile-right" id="bolt-pile-label-right">Larger Pile ➡️ <span class="pile-count" id="bolt-pile-count-right">0</span></div>
+        </div>
+        <div class="nb-track" id="bolts-track">
+          <div class="zone-band zone-left" id="zone-left"></div>
+          <div class="zone-band zone-right" id="zone-right"></div>
+        </div>
+        <div class="bench-label">🥜 Nuts</div>
+        <div class="pile-labels" id="nut-pile-labels">
+          <div class="pile-label pile-left" id="nut-pile-label-left">⬅️ Smaller Pile <span class="pile-count" id="nut-pile-count-left">0</span></div>
+          <div class="pile-label pile-match" id="nut-pile-label-match">✅ Matched Pair</div>
+          <div class="pile-label pile-right" id="nut-pile-label-right">Larger Pile ➡️ <span class="pile-count" id="nut-pile-count-right">0</span></div>
+        </div>
+        <div class="nb-track" id="nuts-track"></div>
+      </div>
+
+      <div class="quiz-panel" id="quiz-panel">
+        <h3 id="quiz-question"></h3>
+        <div class="quiz-options" id="quiz-options"></div>
+        <div class="quiz-feedback" id="quiz-feedback"></div>
+      </div>
+
+      <div class="reveal" id="reveal">
+        <div style="font-size:52px;">🎉🔧🎉</div>
+        <h2>This strategy is called Quick Sort!</h2>
+        <p>Here's exactly what you just discovered:</p>
+        <ol>
+          <li><b>Choose one bolt</b> — this is called the <b>pivot</b>.</li>
+          <li><b>Find its matching nut</b> by comparing it with every nut.</li>
+          <li><b>Partition</b> both the nuts and the bolts into "smaller" and "larger" groups around that pivot value.</li>
+          <li><b>Recursively repeat</b> the same trick — but only on the smaller left and right groups, never the whole pile again.</li>
+        </ol>
+        <p style="margin-top:14px;">That's the full Quick Sort algorithm — you just built it with your own hands. 🛠️</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 3: REFLECTION CORNER ================= -->
+  <section class="section" id="sec-reflect">
+    <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">Chapter 3 · Reflection Corner</span>
+    <h2 class="section-title">What did you discover?</h2>
+    <p class="section-sub">Write your own thoughts in each box below — there's no right or wrong length here. Once all four are filled in, you'll see a full recap of your answers together with the answer for comparison.</p>
+    <div class="card">
+      <div class="qblock">
+        <label>1. Why does QuickSort begin by selecting a pivot instead of trying to sort all elements at once?</label>
+        <textarea class="reflect" id="rf1" placeholder="Type your answer…"></textarea>
+      </div>
+      <div class="qblock">
+        <label>2. What is the purpose of comparing every element with the pivot?</label>
+        <textarea class="reflect" id="rf2" placeholder="Type your answer…"></textarea>
+      </div>
+      <div class="qblock">
+        <label>3. Why does QuickSort repeat the same process on the smaller partitions instead of sorting them differently?</label>
+        <textarea class="reflect" id="rf3" placeholder="Type your answer…"></textarea>
+      </div>
+      <div class="qblock">
+        <label>4. How does placing each pivot in its correct position help complete the sorting process?</label>
+        <textarea class="reflect" id="rf4" placeholder="Type your answer…"></textarea>
+      </div>
+
+      <div class="reflection-summary" id="reflection-summary">
+        <h3>📋 Your Reflection Summary</h3>
+        <div id="reflection-summary-body"></div>
+      </div>
+
+      <p class="continue-hint" id="reflect-continue-hint">Answer all 4 questions above to see your summary and unlock the workbook.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 4: EXERCISE WORKBOOK ================= -->
+  <section class="section" id="sec-workbook">
+    <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">Chapter 4 · Exercise Workbook</span>
+    <h2 class="section-title">Test what you saw</h2>
+    <p class="section-sub">These questions are generated from your own workshop session.</p>
+    <div class="card">
+      <div class="wb-score">
+        <span>🏆 Score: <span id="wb-score">0</span></span>
+        <span>🔁 New attempt: replay Chapter 2 to refresh these questions</span>
+      </div>
+      <div id="wb-questions"></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="modal-overlay" id="score-modal">
+  <div class="modal-card">
+    <div class="modal-emoji" id="score-modal-emoji">🏆</div>
+    <h2>Workshop Complete!</h2>
+    <div class="modal-score"><span id="score-modal-value">0</span> / <span id="score-modal-max">50</span></div>
+    <div class="modal-tag" id="score-modal-tag">Great job!</div>
+    <p id="score-modal-msg">You've finished every chapter of the Nuts &amp; Bolts Workshop.</p>
+    <button class="btn" id="score-modal-close">Nice!</button>
+  </div>
+</div>
+
+<footer>Made for curious minds · Discover algorithms, don't just memorise them.</footer>
+
+<script>
+(function(){
+
+/* =========================================================================
+   DATA MODEL
+   6 nuts and 6 bolts, values 1..6. Nuts and bolts are shuffled independently.
+   Both arrays are physically reordered in place as the student (or the
+   auto-recursion) partitions them — exactly like an in-place Quick Sort.
+========================================================================= */
+const N = 6;
+function shuffledValues(){
+  const a = [1,2,3,4,5,6];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+let boltsArr = [];   // array of {val} in current slot order
+let nutsArr = [];
+let finalized = [];  // boolean per slot index
+let stack = [];       // groups still to be partitioned: {lo,hi}
+let chipEls = { bolt:{}, nut:{} };
+
+/* game/session stats */
+let comparisons = 0;
+let hintsUsed = 0;
+let quizCorrect = 0, quizTotal = 0, wrongAttempts = 0;
+let naiveComparisons = 0;
+let smartComparisons = 0;
+let firstPivotVal = null;
+let gameFinished = false;
+
+/* interaction state */
+let phase = 'naive';           // naive | explore-quiz | pick-pivot | why-pivot-quiz | compare-nuts |
+                                // pattern-quiz | decision-quiz | partitioning | is-final-quiz |
+                                // recursion-quiz | auto-recursion | reveal
+let pendingSelect = null;       // {type,val} during naive phase
+let naiveSolved = new Set();    // vals solved during naive phase
+let manualLo = 0, manualHi = N-1;
+let manualPivotVal = null;
+let manualLeft = [], manualRight = [], manualMatched = null;
+let manualComparedNuts = new Set();
+let partitionComparedBolts = new Set(); // bolts already classified into a pile during the current partition round
+
+/* auto-play state: student can freely toggle between manual play and
+   watching the workshop play itself out, at an adjustable speed */
+let autoPlayOn = false;
+let autoSpeed = 1;
+
+/* ================================ helpers ================================ */
+function $(id){ return document.getElementById(id); }
+function delay(ms){ return new Promise(res=>setTimeout(res,ms)); }
+function d(ms){ return delay(ms/autoSpeed); }  // speed-adjusted delay, used everywhere animations pause
+function updateHud(){
+  $("hud-comparisons").textContent = comparisons;
+  $("hud-hints").textContent = hintsUsed;
+  $("hud-solved").textContent = finalized.filter(Boolean).length + (phase==='naive'? naiveSolved.size : 0);
+}
+
+/* ============================== board build =============================== */
+function buildBoard(){
+  boltsArr = shuffledValues().map(v=>({val:v}));
+  nutsArr = shuffledValues().map(v=>({val:v}));
+  finalized = new Array(N).fill(false);
+  stack = [];
+  chipEls = { bolt:{}, nut:{} };
+  naiveSolved = new Set();
+  pendingSelect = null;
+
+  const boltsTrack = $("bolts-track"), nutsTrack = $("nuts-track");
+  const zoneLeft = $("zone-left"), zoneRight = $("zone-right");
+  boltsTrack.innerHTML = ""; nutsTrack.innerHTML = "";
+  boltsTrack.appendChild(zoneLeft); boltsTrack.appendChild(zoneRight);
+
+  // background slot placeholders
+  for(let i=0;i<N;i++){
+    const bg1 = document.createElement("div"); bg1.className="nb-slot-bg"; bg1.dataset.idx=i;
+    boltsTrack.appendChild(bg1);
+    const bg2 = document.createElement("div"); bg2.className="nb-slot-bg"; bg2.dataset.idx=i;
+    nutsTrack.appendChild(bg2);
+  }
+  // chips (created once, repositioned via layout())
+  for(let v=1; v<=N; v++){
+    const b = document.createElement("div");
+    b.className = "nb-chip nb-bolt"; b.dataset.val = v;
+    b.innerHTML = `<span class="nb-ico">🔩</span><span class="nb-label">B${v}</span>`;
+    boltsTrack.appendChild(b);
+    chipEls.bolt[v] = b;
+    b.addEventListener("click", ()=> onChipClick("bolt", v));
+    b.addEventListener("dragover", e=>{ if(phase==='naive') e.preventDefault(); });
+    b.addEventListener("drop", e=>{
+      e.preventDefault();
+      if(phase!=='naive') return;
+      const nv = Number(e.dataTransfer.getData("text/plain"));
+      if(nv) naiveCompare({type:"nut",val:nv},{type:"bolt",val:v});
+    });
+
+    const n = document.createElement("div");
+    n.className = "nb-chip nb-nut"; n.dataset.val = v;
+    n.innerHTML = `<span class="nb-ico">🥜</span><span class="nb-label">N${v}</span>`;
+    nutsTrack.appendChild(n);
+    chipEls.nut[v] = n;
+    n.addEventListener("click", ()=> onChipClick("nut", v));
+    n.setAttribute("draggable", "true");
+    n.addEventListener("dragstart", e=>{
+      if(phase!=='naive'){ e.preventDefault(); return; }
+      e.dataTransfer.setData("text/plain", String(v));
+    });
+  }
+  layout();
+}
+
+/* ============================== pile animation helpers ============================== */
+// Live "fly into a pile" animation used during the compare-nuts and
+// partitioning phases: as each item is classified, it's moved directly to
+// its pile slot (with a small stagger/jitter so items visibly stack up)
+// instead of waiting for a single batch reflow at the end.
+const PILE_ZONE_FRAC = {left:0.15, matched:0.5, right:0.85};
+function getPileSlot(trackId, pileType, indexInPile, chipW, chipH){
+  const track = $(trackId);
+  const trackW = track.clientWidth || 600;
+  const trackH = 104;
+  const baseX = PILE_ZONE_FRAC[pileType]*trackW;
+  const stagger = Math.min(indexInPile, 4) * 13;
+  const jitterY = indexInPile===0 ? 0 : (indexInPile%2===0 ? -1:1) * Math.min(16, 5+indexInPile*3);
+  return {
+    left: Math.max(4, baseX + stagger - chipW/2),
+    top: Math.max(2, (trackH-chipH)/2 + jitterY)
+  };
+}
+function moveChipToPile(type, val, pileType, indexInPile){
+  const el = chipEls[type][val];
+  const w = parseFloat(el.style.width) || 60, h = parseFloat(el.style.height) || 60;
+  const trackId = type==='nut' ? "nuts-track" : "bolts-track";
+  const pos = getPileSlot(trackId, pileType, indexInPile, w, h);
+  el.style.left = pos.left+"px";
+  el.style.top = pos.top+"px";
+  el.classList.remove("went-left","went-right","matched");
+  if(pileType==='left') el.classList.add("went-left");
+  else if(pileType==='right') el.classList.add("went-right");
+  else el.classList.add("matched");
+}
+function positionPileLabels(trackId, prefix){
+  const track = $(trackId);
+  const trackW = track.clientWidth || 600;
+  ["left","match","right"].forEach(p=>{
+    const el = $(prefix+"-pile-label-"+p);
+    if(el) el.style.left = (PILE_ZONE_FRAC[p==='match'?'matched':p]*trackW)+"px";
+  });
+}
+function updatePileLabels(prefix, leftCount, rightCount, show){
+  ["left","match","right"].forEach(p=>{
+    const el = $(prefix+"-pile-label-"+p);
+    if(el) el.classList.toggle("show", show);
+  });
+  const lc = $(prefix+"-pile-count-left"), rc = $(prefix+"-pile-count-right");
+  if(lc) lc.textContent = leftCount;
+  if(rc) rc.textContent = rightCount;
+}
+/* position every chip based on current array order + apply state classes */
+function layout(){
+  const track = $("bolts-track");
+  const trackW = track.clientWidth || 600;
+  const trackH = 104;
+  const SLOT_W = trackW / N;
+  const W_MIN = 54, W_STEP = 15;   // width range across values 1..6: 69px .. 144px
+  const H_MIN = 46, H_STEP = 7;    // height range across values 1..6: 53px .. 88px
+
+  function place(trackEl, arr, type){
+    for(let i=0;i<arr.length;i++){
+      const val = arr[i].val;
+      const el = chipEls[type][val];
+      const w = W_MIN + val*W_STEP;
+      const h = H_MIN + val*H_STEP;
+      el.style.width = w+"px";
+      el.style.height = h+"px";
+      // Chips currently sitting in a pile (during compare-nuts / partitioning)
+      // keep their pile position — layout() shouldn't snap them back into
+      // the row until the pile is explicitly consolidated.
+      const isPiledNut = type==='nut' && phase==='compare-nuts' && manualComparedNuts.has(val);
+      const isPiledBolt = type==='bolt' && phase==='partitioning' && partitionComparedBolts.has(val);
+      if(isPiledNut || isPiledBolt) continue;
+      el.style.left = (i*SLOT_W + (SLOT_W-w)/2) + "px";
+      el.style.top = ((trackH-h)/2) + "px";
+    }
+    // background slot placeholders width/position + active-range highlight
+    [...trackEl.querySelectorAll(".nb-slot-bg")].forEach((bg,i)=>{
+      bg.style.width = (SLOT_W-10)+"px";
+      bg.style.left = (i*SLOT_W+5)+"px";
+      const inRange = (phase==='pick-pivot'||phase==='compare-nuts'||phase==='partitioning'||phase==='auto-recursion')
+        && i>=manualLo && i<=manualHi && !finalized[i];
+      bg.classList.toggle("active-range", !!inRange);
+    });
+  }
+  place($("bolts-track"), boltsArr, "bolt");
+  place($("nuts-track"), nutsArr, "nut");
+  positionPileLabels("bolts-track", "bolt");
+  positionPileLabels("nuts-track", "nut");
+
+  // reset + apply per-chip classes
+  for(let v=1; v<=N; v++){
+    ["bolt","nut"].forEach(type=>{
+      const el = chipEls[type][v];
+      el.classList.remove("clickable","disabled","selected","pivot","went-left","went-right","matched","finalized","solved-naive");
+    });
+  }
+  const boltIdx = {}, nutIdx = {};
+  boltsArr.forEach((b,i)=> boltIdx[b.val]=i);
+  nutsArr.forEach((n,i)=> nutIdx[n.val]=i);
+  for(let i=0;i<N;i++){
+    if(finalized[i]){
+      chipEls.bolt[boltsArr[i].val].classList.add("finalized");
+      chipEls.nut[nutsArr[i].val].classList.add("finalized");
+    }
+  }
+  if(phase==='naive'){
+    for(let v=1; v<=N; v++){
+      if(naiveSolved.has(v)){
+        chipEls.bolt[v].classList.add("solved-naive");
+        chipEls.nut[v].classList.add("solved-naive");
+      } else {
+        chipEls.bolt[v].classList.add("clickable");
+        chipEls.nut[v].classList.add("clickable");
+        if(pendingSelect && pendingSelect.type==='bolt' && pendingSelect.val===v) chipEls.bolt[v].classList.add("selected");
+        if(pendingSelect && pendingSelect.type==='nut' && pendingSelect.val===v) chipEls.nut[v].classList.add("selected");
+      }
+    }
+  } else if(phase==='pick-pivot'){
+    for(let i=manualLo;i<=manualHi;i++){
+      if(!finalized[i]) chipEls.bolt[boltsArr[i].val].classList.add("clickable");
+    }
+  } else if(phase==='compare-nuts'){
+    if(manualPivotVal!=null) chipEls.bolt[manualPivotVal].classList.add("pivot");
+    for(let i=manualLo;i<=manualHi;i++){
+      const v = nutsArr[i].val;
+      if(manualComparedNuts.has(v)){
+        if(manualMatched && manualMatched.val===v) chipEls.nut[v].classList.add("matched");
+        else if(manualLeft.some(x=>x.val===v)) chipEls.nut[v].classList.add("went-left");
+        else if(manualRight.some(x=>x.val===v)) chipEls.nut[v].classList.add("went-right");
+      } else {
+        chipEls.nut[v].classList.add("clickable");
+      }
+    }
+  } else if(phase==='partitioning' || phase==='auto-recursion'){
+    if(manualPivotVal!=null) chipEls.bolt[manualPivotVal].classList.add("pivot");
+    if(phase==='partitioning'){
+      partitionComparedBolts.forEach(v=>{
+        if(v < manualPivotVal) chipEls.bolt[v].classList.add("went-left");
+        else if(v > manualPivotVal) chipEls.bolt[v].classList.add("went-right");
+      });
+    }
+  }
+  updateHud();
+  updateAlgoTracker();
+}
+
+/* ============================== algorithm step tracker ============================== */
+const ALGO_STAGE_MAP = {
+  'naive':'explore', 'explore-quiz':'explore',
+  'pick-pivot':'pivot', 'why-pivot-quiz':'pivot',
+  'compare-nuts':'compare', 'pattern-quiz':'compare',
+  'decision-quiz':'partition', 'partitioning':'partition', 'is-final-quiz':'partition',
+  'recursion-quiz':'recurse', 'auto-recursion':'recurse',
+  'reveal':'done'
+};
+const ALGO_STAGE_ORDER = ['explore','pivot','compare','partition','recurse','done'];
+function updateAlgoTracker(){
+  const stage = ALGO_STAGE_MAP[phase] || 'explore';
+  const idx = ALGO_STAGE_ORDER.indexOf(stage);
+  document.querySelectorAll("#algo-tracker .atk").forEach(el=>{
+    const i = ALGO_STAGE_ORDER.indexOf(el.dataset.stage);
+    el.classList.remove("active","done");
+    if(i < idx) el.classList.add("done");
+    else if(i === idx) el.classList.add("active");
+  });
+}
+
+/* ============================== comparison beam ============================== */
+// A brief animated connector line between the two chips being compared, so
+// students can clearly see *which* nut is being tested against *which* bolt.
+function showCompareBeam(elA, elB){
+  if(!elA || !elB) return;
+  const bench = $("bolts-track").closest ? $("bolts-track") : null;
+  const workbench = document.querySelector(".workbench");
+  if(!workbench) return;
+  const wbRect = workbench.getBoundingClientRect();
+  const rA = elA.getBoundingClientRect(), rB = elB.getBoundingClientRect();
+  const x1 = rA.left + rA.width/2 - wbRect.left, y1 = rA.top + rA.height/2 - wbRect.top;
+  const x2 = rB.left + rB.width/2 - wbRect.left, y2 = rB.top + rB.height/2 - wbRect.top;
+  const dx = x2-x1, dy = y2-y1;
+  const dist = Math.sqrt(dx*dx + dy*dy);
+  const angle = Math.atan2(dy,dx) * 180/Math.PI;
+  const beam = document.createElement("div");
+  beam.className = "compare-beam show";
+  beam.style.left = x1+"px";
+  beam.style.top = y1+"px";
+  beam.style.width = dist+"px";
+  beam.style.transform = `rotate(${angle}deg)`;
+  beam.innerHTML = `<span class="beam-dot"></span>`;
+  workbench.appendChild(beam);
+  setTimeout(()=> beam.remove(), 600);
+}
+
+/* ============================== partition zone bands ============================== */
+// Briefly tints the "smaller" and "larger" halves of the active range so the
+// left/right split created by partitioning is visually unmistakable.
+function showZoneBands(lo, m, hi){
+  const track = $("bolts-track");
+  const trackW = track.clientWidth || 600;
+  const SLOT_W = trackW / N;
+  const leftBand = $("zone-left"), rightBand = $("zone-right");
+  if(m - 1 >= lo){
+    leftBand.style.left = (lo*SLOT_W)+"px";
+    leftBand.style.width = ((m-lo)*SLOT_W)+"px";
+    leftBand.classList.add("show");
+  } else { leftBand.classList.remove("show"); }
+  if(m + 1 <= hi){
+    rightBand.style.left = ((m+1)*SLOT_W)+"px";
+    rightBand.style.width = ((hi-m)*SLOT_W)+"px";
+    rightBand.classList.add("show");
+  } else { rightBand.classList.remove("show"); }
+}
+function hideZoneBands(){
+  $("zone-left").classList.remove("show");
+  $("zone-right").classList.remove("show");
+}
+
+/* ============================== feedback bubble ============================== */
+function showFeedback(kind, text){
+  const bench = document.querySelector(".workbench");
+  const b = document.createElement("div");
+  b.className = "feedback-bubble show " + kind;
+  b.textContent = text;
+  bench.appendChild(b);
+  setTimeout(()=> b.remove(), 1000);
+}
+
+/* ============================== naive matching phase ============================== */
+function onChipClick(type, val){
+  if(autoPlayOn) return; // student is watching Auto Play — pause it to take manual control
+  if(phase==='naive') return onNaiveClick(type,val);
+  if(phase==='pick-pivot' && type==='bolt') return onPivotChosen(val);
+  if(phase==='compare-nuts' && type==='nut') return onNutClicked(val);
+}
+function onNaiveClick(type,val){
+  if(naiveSolved.has(val)) return;
+  if(!pendingSelect){ pendingSelect = {type,val}; layout(); return; }
+  if(pendingSelect.type===type){
+    if(pendingSelect.val===val){ pendingSelect=null; layout(); return; }
+    pendingSelect = {type,val}; layout(); return;
+  }
+  const a = pendingSelect, b = {type,val};
+  pendingSelect = null;
+  naiveCompare(a,b);
+}
+function naiveCompare(a,b){
+  const nut = a.type==='nut'? a : b;
+  const bolt = a.type==='bolt'? a : b;
+  comparisons++; naiveComparisons++;
+  showCompareBeam(chipEls.bolt[bolt.val], chipEls.nut[nut.val]);
+  if(nut.val === bolt.val){
+    naiveSolved.add(nut.val);
+    showFeedback("match", "✅ Perfect Match!");
+    layout();
+    if(naiveSolved.size === N){ setTimeout(startExploreQuiz, 700); }
+  } else if(nut.val < bolt.val){
+    showFeedback("small", "🔹 Too Small!");
+    chipEls.nut[nut.val].classList.add("shake"); chipEls.bolt[bolt.val].classList.add("shake");
+    setTimeout(()=>{ chipEls.nut[nut.val].classList.remove("shake"); chipEls.bolt[bolt.val].classList.remove("shake"); }, 400);
+  } else {
+    showFeedback("large", "🔸 Too Large!");
+    chipEls.nut[nut.val].classList.add("shake"); chipEls.bolt[bolt.val].classList.add("shake");
+    setTimeout(()=>{ chipEls.nut[nut.val].classList.remove("shake"); chipEls.bolt[bolt.val].classList.remove("shake"); }, 400);
+  }
+  updateHud();
+}
+
+/* ============================== auto-play driver ============================== */
+// Auto Play automates the manual/interactive steps (naive matching, picking a
+// pivot, comparing nuts) so a student can just watch. Quizzes always pause
+// for a real answer, in either mode, since that's where the learning happens.
+async function autoRunNaive(){
+  while(autoPlayOn && phase==='naive' && naiveSolved.size < N){
+    const boltObj = boltsArr.find(b=>!naiveSolved.has(b.val));
+    if(!boltObj) break;
+    let solvedThisBolt = false;
+    for(const nutObj of nutsArr){
+      if(!autoPlayOn || phase!=='naive') return;
+      if(naiveSolved.has(nutObj.val)) continue;
+      naiveCompare({type:'nut',val:nutObj.val},{type:'bolt',val:boltObj.val});
+      await d(650);
+      if(naiveSolved.has(boltObj.val)){ solvedThisBolt = true; break; }
+    }
+    if(!solvedThisBolt) break;
+  }
+}
+async function autoRunCompareNuts(){
+  while(autoPlayOn && phase==='compare-nuts'){
+    let target = null;
+    for(let i=manualLo;i<=manualHi;i++){
+      const v = nutsArr[i].val;
+      if(!manualComparedNuts.has(v)){ target = v; break; }
+    }
+    if(target===null) return;
+    onNutClicked(target);
+    await d(550);
+  }
+}
+async function autoAdvanceIfNeeded(){
+  if(!autoPlayOn) return;
+  if(phase==='naive'){ autoRunNaive(); return; }
+  if(phase==='pick-pivot'){
+    await d(600);
+    if(autoPlayOn && phase==='pick-pivot'){
+      const candidates = [];
+      for(let i=manualLo;i<=manualHi;i++) if(!finalized[i]) candidates.push(boltsArr[i]);
+      const choice = candidates[Math.floor(candidates.length/2)] || candidates[0];
+      if(choice) onPivotChosen(choice.val);
+    }
+    return;
+  }
+  if(phase==='compare-nuts'){ autoRunCompareNuts(); return; }
+}
+$("autoplay-btn").addEventListener("click", ()=>{
+  autoPlayOn = !autoPlayOn;
+  const btn = $("autoplay-btn");
+  btn.textContent = autoPlayOn ? "⏸ Pause Auto Play" : "▶ Auto Play";
+  btn.classList.toggle("active-auto", autoPlayOn);
+  $("mode-hint").textContent = autoPlayOn
+    ? "Auto Play is on — sit back and watch, or pause anytime to try it yourself."
+    : "Play manually by tapping/dragging, or turn on Auto Play to watch it happen — your choice!";
+  if(autoPlayOn) autoAdvanceIfNeeded();
+});
+$("speed-slider").addEventListener("input", (e)=>{
+  autoSpeed = parseFloat(e.target.value);
+  $("speed-label").textContent = autoSpeed + "x";
+});
+function setInstruction(tag, text, actionsHTML){
+  $("step-tag").textContent = tag;
+  $("instruction-text").textContent = text;
+  $("game-action-row").innerHTML = actionsHTML || "";
+}
+function hideQuiz(){ $("quiz-panel").classList.remove("show"); }
+
+/* ============================== quiz engine ============================== */
+function askQuiz(question, options, correctIdx, explain, onDone){
+  quizTotal++;
+  $("quiz-question").textContent = question;
+  const optsEl = $("quiz-options");
+  optsEl.innerHTML = "";
+  const fb = $("quiz-feedback");
+  fb.classList.remove("show"); fb.textContent = "";
+  options.forEach((opt,i)=>{
+    const btn = document.createElement("button");
+    btn.textContent = opt;
+    btn.addEventListener("click", ()=>{
+      [...optsEl.children].forEach(x=>x.disabled=true);
+      if(i===correctIdx){
+        btn.classList.add("correct"); quizCorrect++;
+        fb.textContent = "✅ " + explain;
+      } else {
+        btn.classList.add("wrong"); wrongAttempts++;
+        optsEl.children[correctIdx].classList.add("correct");
+        fb.textContent = "Not quite. " + explain;
+      }
+      fb.classList.add("show");
+      setTimeout(()=>{ hideQuiz(); onDone(); }, 1600);
+    });
+    optsEl.appendChild(btn);
+  });
+  $("quiz-panel").classList.add("show");
+}
+
+/* ============================== phase: explore-quiz (Level 2) ============================== */
+function startExploreQuiz(){
+  phase = 'explore-quiz';
+  setInstruction("Chapter 2 · Check-in", "You just matched all 6 pairs by trial and error. Let's think about that for a second…", "");
+  askQuiz(
+    "🤔 If there were 1000 nuts and 1000 bolts instead of 6, would this trial-and-error approach still work well?",
+    ["Yes, it'd be just as fast","No, it would take a very long time","It wouldn't matter either way"],
+    1,
+    "Testing pairs randomly can take up to n² comparisons in the worst case — with 1000 pairs that's up to a million tests! We need a smarter strategy.",
+    startSmartPhase
+  );
+}
+
+/* ============================== phase: smart quicksort discovery ============================== */
+function startSmartPhase(){
+  buildBoard(); // fresh shuffle for the guided discovery
+  manualLo = 0; manualHi = N-1;
+  stack = [];
+  phase = 'pick-pivot';
+  setInstruction("Chapter 2 · Step 1", "Let's try something smarter. Tap any bolt below to use as our reference point.", "");
+  layout();
+  autoAdvanceIfNeeded();
+}
+function onPivotChosen(val){
+  manualPivotVal = val;
+  if(firstPivotVal===null) firstPivotVal = val;
+  phase = 'why-pivot-quiz';
+  layout();
+  askQuiz(
+    "🤔 Why do you think we picked just one bolt first, instead of comparing bolts to each other?",
+    ["Because bolt-vs-bolt comparisons aren't allowed — one bolt lets us sort nuts using only nut-vs-bolt tests","Because it looks nicer","Because bolts are always already sorted"],
+    0,
+    "Right! Since we can't compare bolts directly, picking one bolt and testing every nut against it is the only way forward.",
+    startCompareNuts
+  );
+}
+function startCompareNuts(){
+  phase = 'compare-nuts';
+  manualLeft = []; manualRight = []; manualMatched = null;
+  manualComparedNuts = new Set();
+  updatePileLabels("nut", 0, 0, false);
+  setInstruction("Chapter 2 · Step 2", `Now tap each nut to compare it with the pivot bolt (size of bolt ${manualPivotVal}). Watch them fly into piles!`, "");
+  layout();
+  autoAdvanceIfNeeded();
+}
+function onNutClicked(val){
+  if(manualComparedNuts.has(val)) return;
+  comparisons++; smartComparisons++;
+  manualComparedNuts.add(val);
+  showCompareBeam(chipEls.bolt[manualPivotVal], chipEls.nut[val]);
+  let pileType;
+  if(val < manualPivotVal){ manualLeft.push({val}); pileType='left'; showFeedback("small","🔹 Too Small!"); }
+  else if(val > manualPivotVal){ manualRight.push({val}); pileType='right'; showFeedback("large","🔸 Too Large!"); }
+  else { manualMatched = {val}; pileType='matched'; showFeedback("match","✅ Perfect Match!"); }
+  chipEls.nut[val].classList.add("shake");
+  updatePileLabels("nut", manualLeft.length, manualRight.length, true);
+  // Let the "shake" comparison feedback land first, then fly the nut into
+  // its pile — this is the "moving as comparisons happen" animation,
+  // rather than one big reflow at the very end.
+  setTimeout(()=>{
+    if(!chipEls.nut[val]) return;
+    chipEls.nut[val].classList.remove("shake");
+    const idx = pileType==='left' ? manualLeft.length-1 : pileType==='right' ? manualRight.length-1 : 0;
+    moveChipToPile("nut", val, pileType, idx);
+  }, 320);
+  const rangeSize = manualHi - manualLo + 1;
+  if(manualComparedNuts.size === rangeSize){
+    // Pause here with all three piles fully visible — "show three piles
+    // after one full iteration" — before consolidating back into a row.
+    setTimeout(reflowNutsAndAskPattern, 1500);
+  }
+}
+function reflowNutsAndAskPattern(){
+  setInstruction("Chapter 2 · Step 2", "Three piles formed: smaller, matched, and larger. Now let's line them back up in order…", "");
+  setTimeout(()=>{
+    updatePileLabels("nut", 0, 0, false);
+    const newSlice = [...manualLeft, manualMatched, ...manualRight];
+    for(let k=0;k<newSlice.length;k++) nutsArr[manualLo+k] = newSlice[k];
+    layout();
+    setTimeout(()=>{
+      phase = 'pattern-quiz';
+      askQuiz(
+        "🤔 What pattern do you notice in the nuts now?",
+        ["They're randomly mixed up, same as before","Smaller nuts moved to one side, larger nuts to the other, with one nut in the middle","All nuts became bolts"],
+        1,
+        "Exactly! The nuts formed three piles: smaller ones, the matching nut, and larger ones — and now they're lined up in that same order.",
+        startDecisionQuiz
+      );
+    }, 600);
+  }, 900);
+}
+function startDecisionQuiz(){
+  phase = 'decision-quiz';
+  askQuiz(
+    "🤔 What should we do next?",
+    ["Pick another random nut and start over","Use the matching nut to organize the bolts the same way","Restart the whole puzzle"],
+    1,
+    "We already know the matching nut's size — we can use it to split the remaining bolts into smaller and larger groups too!",
+    startPartitionBolts
+  );
+}
+async function startPartitionBolts(){
+  phase = 'partitioning';
+  updateWizardNav();
+  setInstruction("Chapter 2 · Step 3", "Watch closely: we're using the matching nut to sort the bolts the same way.", "");
+  layout();
+  await d(500);
+  let bleft=[], bright=[], pivotBoltItem=null;
+  for(let i=manualLo;i<=manualHi;i++){
+    const bolt = boltsArr[i];
+    if(bolt.val === manualPivotVal){ pivotBoltItem = bolt; continue; }
+    comparisons++; smartComparisons++;
+    showCompareBeam(chipEls.nut[manualPivotVal], chipEls.bolt[bolt.val]);
+    if(bolt.val < manualPivotVal){ bleft.push(bolt); chipEls.bolt[bolt.val].classList.add("went-left"); showFeedback("small","🔹 Too Small!"); }
+    else { bright.push(bolt); chipEls.bolt[bolt.val].classList.add("went-right"); showFeedback("large","🔸 Too Large!"); }
+    updateHud();
+    await d(450);
+  }
+  const newSlice = [...bleft, pivotBoltItem, ...bright];
+  for(let k=0;k<newSlice.length;k++) boltsArr[manualLo+k] = newSlice[k];
+  const m = manualLo + bleft.length;
+  layout();
+  await d(550);
+  showZoneBands(manualLo, m, manualHi);
+  await d(600);
+  finalized[m] = true;
+  layout();
+  chipEls.bolt[pivotBoltItem.val].classList.add("just-locked");
+  chipEls.nut[pivotBoltItem.val].classList.add("just-locked");
+  setTimeout(()=>{
+    chipEls.bolt[pivotBoltItem.val] && chipEls.bolt[pivotBoltItem.val].classList.remove("just-locked");
+    chipEls.nut[pivotBoltItem.val] && chipEls.nut[pivotBoltItem.val].classList.remove("just-locked");
+  }, 1000);
+  hideZoneBands();
+  await d(400);
+  phase = 'is-final-quiz';
+  askQuiz(
+    "🤔 Is the middle nut-bolt pair now in its final, correct position?",
+    ["Yes — it never needs to move again","No, it will move again later"],
+    0,
+    "Correct! That pair is permanently placed. Every future step only touches the groups on either side of it.",
+    ()=> afterPartitionFinalized(m)
+  );
+}
+function afterPartitionFinalized(m){
+  if(m-1 >= manualLo) stack.push({lo:manualLo, hi:m-1});
+  if(m+1 <= manualHi) stack.push({lo:m+1, hi:manualHi});
+  phase = 'recursion-quiz';
+  askQuiz(
+    "🤔 Should we solve everything again from scratch?",
+    ["Yes, redo the whole pile","No, only the smaller left and right groups"],
+    1,
+    "Exactly! The pivot pair is already sorted, so we only ever need to repeat this trick on the smaller groups. That's divide and conquer!",
+    startAutoRecursion
+  );
+}
+
+/* ============================== auto-animated recursion ============================== */
+async function startAutoRecursion(){
+  phase = 'auto-recursion';
+  updateWizardNav();
+  setInstruction("Chapter 2 · Recursion", "Now watch the same trick play out automatically on the remaining groups…", "");
+  while(stack.length){
+    const {lo,hi} = stack.pop();
+    manualLo = lo; manualHi = hi;
+    layout();
+    if(lo >= hi){
+      if(lo === hi) finalized[lo] = true;
+      layout();
+      await d(300);
+      continue;
+    }
+    await autoProcessGroup(lo,hi);
+  }
+  onAllSorted();
+}
+async function autoProcessGroup(lo,hi){
+  const pivotBoltItem = boltsArr[lo];
+  manualPivotVal = pivotBoltItem.val;
+  layout();
+  await d(450);
+  let left=[], right=[], matched=null;
+  for(let i=lo;i<=hi;i++){
+    const nut = nutsArr[i];
+    comparisons++; smartComparisons++;
+    showCompareBeam(chipEls.bolt[pivotBoltItem.val], chipEls.nut[nut.val]);
+    if(nut.val < pivotBoltItem.val){ left.push(nut); chipEls.nut[nut.val].classList.add("went-left"); }
+    else if(nut.val > pivotBoltItem.val){ right.push(nut); chipEls.nut[nut.val].classList.add("went-right"); }
+    else { matched = nut; chipEls.nut[nut.val].classList.add("matched"); }
+    updateHud();
+    await d(260);
+  }
+  const newNutSlice = [...left, matched, ...right];
+  for(let k=0;k<newNutSlice.length;k++) nutsArr[lo+k] = newNutSlice[k];
+  const m = lo + left.length;
+  layout();
+  await d(400);
+  let bleft=[], bright=[];
+  for(let i=lo;i<=hi;i++){
+    const bolt = boltsArr[i];
+    if(bolt.val === pivotBoltItem.val) continue;
+    comparisons++; smartComparisons++;
+    showCompareBeam(chipEls.nut[pivotBoltItem.val], chipEls.bolt[bolt.val]);
+    if(bolt.val < pivotBoltItem.val) bleft.push(bolt); else bright.push(bolt);
+    updateHud();
+    await d(220);
+  }
+  const newBoltSlice = [...bleft, pivotBoltItem, ...bright];
+  for(let k=0;k<newBoltSlice.length;k++) boltsArr[lo+k] = newBoltSlice[k];
+  layout();
+  await d(400);
+  showZoneBands(lo, m, hi);
+  await d(450);
+  finalized[m] = true;
+  layout();
+  chipEls.bolt[pivotBoltItem.val].classList.add("just-locked");
+  chipEls.nut[pivotBoltItem.val].classList.add("just-locked");
+  setTimeout(()=>{
+    chipEls.bolt[pivotBoltItem.val] && chipEls.bolt[pivotBoltItem.val].classList.remove("just-locked");
+    chipEls.nut[pivotBoltItem.val] && chipEls.nut[pivotBoltItem.val].classList.remove("just-locked");
+  }, 1000);
+  hideZoneBands();
+  await d(300);
+  if(m-1>=lo) stack.push({lo,hi:m-1});
+  if(m+1<=hi) stack.push({lo:m+1,hi});
+}
+function onAllSorted(){
+  phase = 'reveal';
+  gameFinished = true;
+  manualLo = 0; manualHi = -1;
+  layout();
+  setInstruction("Chapter 2 · Complete!", "Every nut and bolt is now perfectly paired and sorted.", "");
+  $("reveal").classList.add("show");
+  generateWorkbook();
+  updateWizardNav();
+}
+
+/* ============================== hint button ============================== */
+$("hint-btn").addEventListener("click", ()=>{
+  hintsUsed++; updateHud();
+  const hints = {
+    'naive': "💡 Tip: tap a nut, then tap a bolt (or drag a nut onto a bolt) to test them.",
+    'explore-quiz': "💡 Tip: think about how many comparisons trial-and-error would need for a much bigger pile.",
+    'pick-pivot': "💡 Tip: any bolt works — try one near the middle of the row.",
+    'why-pivot-quiz': "💡 Tip: remember, bolt-vs-bolt comparisons are against the rules.",
+    'compare-nuts': "💡 Tip: tap every nut in the highlighted range, one at a time.",
+    'pattern-quiz': "💡 Tip: look at where the smaller and larger nuts ended up.",
+    'decision-quiz': "💡 Tip: we already know the matching nut's size — could that help sort the bolts too?",
+    'partitioning': "💡 Tip: watch which bolts move left and which move right.",
+    'is-final-quiz': "💡 Tip: that pair matched — does it ever need to be compared again?",
+    'recursion-quiz': "💡 Tip: the pivot pair is already sorted — only the leftovers need work.",
+    'auto-recursion': "💡 Tip: watch closely — the exact same trick repeats on each smaller group.",
+    'reveal': "💡 Tip: scroll up to re-read the recap, then hit Next!"
+  };
+  alert(hints[phase] || "💡 Tip: keep going, you're doing great!");
+});
+$("restart-game-btn").addEventListener("click", ()=> resetChapter2());
+
+/* ============================== Chapter 3: Reflection Corner ============================== */
+// No correctness validation here on purpose — every student's own wording is
+// accepted as-is. Once all 4 boxes have something in them, a structured
+// summary appears showing their answer next to the answer for comparison.
+const REFLECT_CONFIG = [
+  { id:"rf1",
+    question:"Why does QuickSort begin by selecting a pivot instead of trying to sort all elements at once?",
+    answer:"The pivot acts as a reference point that helps divide the collection into smaller and larger groups. Solving smaller problems is easier than sorting the entire collection at once, making the algorithm more efficient." },
+  { id:"rf2",
+    question:"What is the purpose of comparing every element with the pivot?",
+    answer:"Comparing each element with the pivot determines whether it belongs to the left (smaller) or right (larger) partition. These comparisons create organized groups that can be sorted independently." },
+  { id:"rf3",
+    question:"Why does QuickSort repeat the same process on the smaller partitions instead of sorting them differently?",
+    answer:"Each partition is simply a smaller version of the original problem. Applying the same strategy recursively ensures that every partition becomes sorted, eventually leading to the entire collection being sorted." },
+  { id:"rf4",
+    question:"How does placing each pivot in its correct position help complete the sorting process?",
+    answer:"Once a pivot reaches its correct position, it never needs to be moved again. As every recursive step fixes another pivot, the entire collection gradually becomes completely sorted." }
+];
+const REFLECT_IDS = REFLECT_CONFIG.map(c=>c.id);
+
+function reflectComplete(){
+  return REFLECT_CONFIG.every(cfg => $(cfg.id).value.trim().length > 0);
+}
+function escapeHtml(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function renderReflectionSummary(){
+  const panel = $("reflection-summary");
+  if(!reflectComplete()){ panel.classList.remove("show"); return; }
+  const body = $("reflection-summary-body");
+  body.innerHTML = REFLECT_CONFIG.map((cfg,i)=>`
+    <div class="summary-block">
+      <div class="summary-q">${i+1}. ${escapeHtml(cfg.question)}</div>
+      <div class="summary-your"><b>Your answer</b>${escapeHtml($(cfg.id).value.trim())}</div>
+      <div class="summary-model"><b>Answer</b>${escapeHtml(cfg.answer)}</div>
+    </div>`).join("");
+  panel.classList.add("show");
+}
+function wireReflection(){
+  REFLECT_CONFIG.forEach(cfg=>{
+    const ta = $(cfg.id);
+    ta.addEventListener("input", ()=>{
+      $("reflect-continue-hint").style.display = reflectComplete() ? "none" : "block";
+      renderReflectionSummary();
+      updateWizardNav();
+    });
+    ta.addEventListener("blur", ()=>{
+      renderReflectionSummary();
+      updateWizardNav();
+    });
+  });
+}
+wireReflection();
+
+/* ============================== Chapter 4: Exercise Workbook ============================== */
+const WB_TOTAL_QUESTIONS = 5;
+let wbScore = 0, wbAnswered = 0;
+function addWbScore(n){ wbScore = Math.max(0, wbScore+n); $("wb-score").textContent = wbScore; }
+function buildMCQ(container, questionText, options, correctIdx, explain){
+  const block = document.createElement("div");
+  block.className = "wb-question";
+  block.innerHTML = `<div class="wb-q-text">${questionText}</div><div class="quiz-options"></div><div class="wb-feedback"></div>`;
+  const optsEl = block.querySelector(".quiz-options");
+  const fbEl = block.querySelector(".wb-feedback");
+  options.forEach((opt,i)=>{
+    const b = document.createElement("button");
+    b.className = "wb-opt";
+    b.textContent = opt;
+    b.addEventListener("click", ()=>{
+      [...optsEl.children].forEach(x=>x.disabled=true);
+      if(i===correctIdx){ b.classList.add("correct"); addWbScore(10); fbEl.textContent = "✅ Correct! " + explain; }
+      else { b.classList.add("wrong"); addWbScore(-2); optsEl.children[correctIdx].classList.add("correct"); fbEl.textContent = "Not quite. " + explain; }
+      fbEl.classList.add("show");
+      wbAnswered++;
+      if(wbAnswered >= WB_TOTAL_QUESTIONS) setTimeout(showScorePopup, 500);
+    });
+    optsEl.appendChild(b);
+  });
+  container.appendChild(block);
+}
+function shuffleArr(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function generateWorkbook(){
+  const wrap = $("wb-questions");
+  wrap.innerHTML = "";
+  wbScore = 0; wbAnswered = 0; $("wb-score").textContent = 0;
+
+  buildMCQ(wrap, "1️⃣ Which step is performed first in QuickSort?",
+    ["Merge two sorted groups","Choose a pivot element","Compare all elements with each other","Find the smallest element"], 1,
+    "QuickSort always starts by choosing a pivot element — everything else builds on that choice.");
+
+  buildMCQ(wrap, "2️⃣ Why are elements compared with the pivot?",
+    ["To calculate the average value","To count duplicate elements","To decide whether they belong to the left or right partition","To reverse the array"], 2,
+    "Each comparison with the pivot decides whether an element belongs in the smaller (left) or larger (right) partition.");
+
+  buildMCQ(wrap, "3️⃣ After partitioning around a pivot, what does QuickSort do next?",
+    ["Stops immediately","Merges the partitions","Recursively applies the same process to each partition","Searches for duplicate elements"], 2,
+    "QuickSort recursively repeats the exact same pivot-and-partition process on each smaller partition.");
+
+  buildMCQ(wrap, "4️⃣ What happens to a pivot after it is placed in its correct position?",
+    ["It is compared again with every element","It remains fixed and does not need to move again","It is removed from the array","It becomes the largest element"], 1,
+    "Once a pivot lands in its correct position, it's permanently sorted — future steps only touch the groups on either side of it.");
+
+  buildMCQ(wrap, "5️⃣ Which sequence correctly represents the Divide-and-Conquer process in QuickSort?",
+    ["Compare → Merge → Divide → Repeat","Select Pivot → Compare → Partition → Recursively Sort → Complete","Divide → Merge → Compare → Sort","Search → Compare → Delete → Repeat"], 1,
+    "That's the full QuickSort cycle: pick a pivot, compare everything to it, partition around it, then recursively repeat on the smaller pieces.");
+}
+function showScorePopup(){
+  const maxScore = WB_TOTAL_QUESTIONS * 10;
+  const pct = Math.max(0, wbScore) / maxScore;
+  let emoji, tag, msg;
+  if(pct >= 0.8){ emoji="🏆"; tag="Excellent work!"; msg="You really understand how Quick Sort's partitioning works — nice job!"; }
+  else if(pct >= 0.5){ emoji="🎉"; tag="Good job!"; msg="Solid understanding — replay the workshop and try the exercises again to sharpen it further."; }
+  else { emoji="💪"; tag="Keep practicing!"; msg="Replay Chapter 2 and try the workbook again to improve your score."; }
+  $("score-modal-emoji").textContent = emoji;
+  $("score-modal-tag").textContent = tag;
+  $("score-modal-msg").textContent = msg;
+  $("score-modal-value").textContent = Math.max(0, wbScore);
+  $("score-modal-max").textContent = maxScore;
+  $("score-modal").classList.add("show");
+}
+
+/* ============================== wizard navigation ============================== */
+const SECTIONS = ["sec-problem","sec-intro","sec-game","sec-reflect","sec-workbook"];
+const WIZ_LABELS = [
+  "Introduction · The Problem",
+  "Chapter 1 of 4 · The Story",
+  "Chapter 2 of 4 · The Workshop",
+  "Chapter 3 of 4 · Reflection Corner",
+  "Chapter 4 of 4 · Exercise Workbook"
+];
+const NEXT_LABELS = ["See the Story →","Let's get started →","Continue to Reflection →","Continue to Workbook →",""];
+let sectionIdx = 0;
+
+function canGoNext(){
+  const sec = SECTIONS[sectionIdx];
+  if(sec==="sec-problem" || sec==="sec-intro") return true;
+  if(sec==="sec-game") return gameFinished;
+  if(sec==="sec-reflect") return reflectComplete();
+  return false;
+}
+function updateWizardNav(){
+  const backBtn = $("wiz-back"), nextBtn = $("wiz-next");
+  $("wiz-label").textContent = WIZ_LABELS[sectionIdx];
+  const dots = document.querySelectorAll("#wiz-dots span");
+  dots.forEach((d,i)=>{
+    d.classList.remove("done","current");
+    if(i<sectionIdx) d.classList.add("done");
+    else if(i===sectionIdx) d.classList.add("current");
+  });
+  const busy = phase==='partitioning' || phase==='auto-recursion';
+  backBtn.disabled = (sectionIdx===0) || busy;
+  const isLast = sectionIdx===SECTIONS.length-1;
+  nextBtn.style.display = isLast ? "none" : "inline-flex";
+  nextBtn.textContent = NEXT_LABELS[sectionIdx];
+  nextBtn.disabled = !canGoNext() || busy;
+}
+function showSection(i){
+  SECTIONS.forEach((id,k)=> $(id).classList.toggle("active", k===i));
+  sectionIdx = i;
+  updateWizardNav();
+  window.scrollTo({top:0, behavior:"smooth"});
+  if(SECTIONS[i]==="sec-game") layout();
+}
+function goNext(){
+  if(!canGoNext() || sectionIdx>=SECTIONS.length-1) return;
+  showSection(sectionIdx+1);
+}
+function goBack(){
+  const busy = phase==='partitioning' || phase==='auto-recursion';
+  if(sectionIdx<=0 || busy) return;
+  const targetSection = SECTIONS[sectionIdx-1];
+  if(targetSection==="sec-game" && gameFinished){
+    // Moving back into the workshop wipes every answer earned from it —
+    // the student has to sort and answer it all again.
+    resetChapter2();
+  }
+  showSection(sectionIdx-1);
+}
+function relockPostGameSections(){
+  REFLECT_IDS.forEach(qid=>{ $(qid).value = ""; });
+  $("reflect-continue-hint").style.display = "block";
+  $("reflection-summary").classList.remove("show");
+  $("reflection-summary-body").innerHTML = "";
+  $("wb-questions").innerHTML = "";
+  wbScore = 0; wbAnswered = 0;
+  $("wb-score").textContent = 0;
+  $("score-modal").classList.remove("show");
+}
+function resetChapter2(){
+  comparisons = 0; hintsUsed = 0; quizCorrect = 0; quizTotal = 0; wrongAttempts = 0;
+  naiveComparisons = 0; smartComparisons = 0; firstPivotVal = null; gameFinished = false;
+  phase = 'naive';
+  manualPivotVal = null; manualLeft = []; manualRight = []; manualMatched = null; manualComparedNuts = new Set();
+  $("reveal").classList.remove("show");
+  hideQuiz();
+  hideZoneBands();
+  relockPostGameSections();
+  buildBoard();
+  setInstruction("Chapter 2 · Step 1", "Tap a nut, then a bolt (or drag a nut onto a bolt) to test if they match.", "");
+  updateHud();
+  updateWizardNav();
+  autoAdvanceIfNeeded();
+}
+$("wiz-back").addEventListener("click", goBack);
+$("wiz-next").addEventListener("click", goNext);
+$("score-modal-close").addEventListener("click", ()=>{
+  $("score-modal").classList.remove("show");
+  resetChapter2();
+  showSection(0);
+});
+window.addEventListener("resize", ()=>{ if(SECTIONS[sectionIdx]==="sec-game") layout(); });
+
+/* ============================== init ============================== */
+buildBoard();
+setInstruction("Chapter 2 · Step 1", "Tap a nut, then a bolt (or drag a nut onto a bolt) to test if they match.", "");
+showSection(0);
+
+})();
+</script>
+</body>
+</html>
