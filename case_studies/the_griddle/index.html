@@ -53,6 +53,10 @@
     display:flex;
     flex-direction:column;
     padding:20px 20px 32px;
+    transition:max-width .2s ease;
+  }
+  .app.wide-page{
+    max-width:1120px;
   }
 
   /* ---------- Header / Rail ---------- */
@@ -185,6 +189,12 @@
     grid-template-columns:1fr;
     gap:18px;
     margin-top:18px;
+  }
+  .scene.three-col{
+    grid-template-columns:repeat(3, 1fr);
+  }
+  @media (max-width:700px){
+    .scene.three-col{grid-template-columns:1fr;}
   }
   .scene-card{
     background:var(--tint);
@@ -615,6 +625,12 @@
     font-size:13px;
     flex:1;
   }
+  .question-grid.exercise-grid{
+    grid-template-columns:repeat(2, 1fr);
+    gap:20px;
+  }
+  .exercise-grid .question-card{padding:22px;}
+  .exercise-grid .question-card .qtext{font-size:15px;}
   @media (max-width:820px){
     .question-grid{grid-template-columns:repeat(2, 1fr);}
   }
@@ -920,6 +936,7 @@
         { id:'intro' },
         { id:'game', data: defaultGameData() },
         { id:'reflect', data: defaultReflectData() },
+        { id:'concept' },
         { id:'quiz', data: defaultQuizData() }
       ]
     };
@@ -927,7 +944,7 @@
 
   var state = buildInitialState();
 
-  var pageLabels = ['Introduction','The Setup','Rush Hour','Debrief','Quick Check'];
+  var pageLabels = ['Introduction','The Setup','Rush Hour','Debrief','Concept','Quick Check'];
 
   function isPageComplete(idx){
     return true;
@@ -936,7 +953,7 @@
   function resetPage(idx){
     if(idx === 2) state.pages[2].data = defaultGameData();
     if(idx === 3) state.pages[3].data = defaultReflectData();
-    if(idx === 4) state.pages[4].data = defaultQuizData();
+    if(idx === 5) state.pages[5].data = defaultQuizData();
   }
 
   // ---------------------------------------------------------
@@ -945,7 +962,7 @@
   function renderRail(){
     var rail = document.getElementById('rail');
     var html = '';
-    for(var i=0;i<5;i++){
+    for(var i=0;i<6;i++){
       var cls = 'rail-step';
       if(i === state.current) cls += ' active';
       else if(i < state.current) cls += ' done';
@@ -954,7 +971,7 @@
       html += '<div class="rail-dot">'+ (i < state.current ? '✓' : (i>state.current ? '🔒' : (i+1))) +'</div>';
       html += '<div class="rail-label">'+pageLabels[i]+'</div>';
       html += '</div>';
-      if(i < 4) html += '<div class="rail-connector"></div>';
+      if(i < 5) html += '<div class="rail-connector"></div>';
     }
     rail.innerHTML = html;
   }
@@ -969,12 +986,13 @@
     if(id === 'intro') stage.innerHTML = introHTML();
     if(id === 'game') stage.innerHTML = gameHTML();
     if(id === 'reflect') stage.innerHTML = reflectHTML();
+    if(id === 'concept') stage.innerHTML = conceptHTML();
     if(id === 'quiz') stage.innerHTML = quizHTML();
   }
 
   function problemHTML(){
     return ''+
-    '<span class="kicker">Step 1 of 5 — Introduction</span>'+
+    '<span class="kicker">Step 1 of 6 — Introduction</span>'+
     '<h2 class="page-title">Introduction</h2>'+
     '<p class="lead">Some things get used far more than others, and reaching them quickly matters. A mechanic keeps everyday tools by the workbench, not the storeroom. A shopkeeper keeps fast-sellers near the counter, not the back shelves.</p>'+
     '<div class="goal-box">'+
@@ -988,7 +1006,7 @@
 
   function introHTML(){
     return ''+
-    '<span class="kicker">Step 2 of 5 — The Setup</span>'+
+    '<span class="kicker">Step 2 of 6 — The Setup</span>'+
     '<h2 class="page-title">Meet Chef Wren</h2>'+
     '<p class="lead">Chef Wren runs the counter alone during the rush — and is about to put your thinking to the test.</p>'+
     '<div class="goal-box">'+
@@ -1059,7 +1077,7 @@
 
   function gameHTML(){
     var g = state.pages[2].data;
-    var html = '<span class="kicker">Step 3 of 5 — Rush Hour</span>';
+    var html = '<span class="kicker">Step 3 of 6 — Rush Hour</span>';
     html += '<h2 class="page-title">Serve the Line</h2>';
 
     if(!g.rushStarted){
@@ -1160,7 +1178,7 @@
   }
 
   function reflectHTML(){
-    var html = '<span class="kicker">Step 4 of 5 — Debrief</span>';
+    var html = '<span class="kicker">Step 4 of 6 — Debrief</span>';
     html += '<h2 class="page-title">Back of House</h2>';
     html += '<p class="lead">The rush is over. Take a moment on each of these before moving on.</p>';
 
@@ -1175,14 +1193,63 @@
     return html;
   }
 
+  function conceptHTML(){
+    var html = '<span class="kicker">Step 5 of 6 — Concept</span>';
+    html += '<h2 class="page-title">Naming the Pattern</h2>';
+    html += '<p class="lead">What you just practiced has a name: a <strong>Priority Queue</strong>.</p>';
+
+    html += '<div class="goal-box">';
+    html += '<strong>Definition:</strong> a Priority Queue is a collection where every item holds a priority, and the item removed next is always the one with the <strong>highest priority</strong> — not simply the one that arrived first.';
+    html += '</div>';
+
+    html += concept_diagramSVG();
+
+    html += '<div class="scene three-col">';
+    html += '<div class="scene-card"><h3>Insert</h3><p>Add a new item along with its priority. It can join the queue anywhere — order is decided by priority, not arrival.</p></div>';
+    html += '<div class="scene-card"><h3>Peek</h3><p>Look at the highest-priority item without removing it — like checking the shelf before serving.</p></div>';
+    html += '<div class="scene-card"><h3>Extract</h3><p>Remove and return the highest-priority item — the one served next.</p></div>';
+    html += '</div>';
+
+    html += '<p class="muted" style="margin-top:18px;">A regular queue is strictly first-in, first-out. A Priority Queue lets a more urgent item jump ahead — exactly like a shelf that always keeps the busiest order within reach.</p>';
+
+    return html;
+  }
+
+  function concept_diagramSVG(){
+    var items = [
+      {label:'Item A', pr:3},
+      {label:'Item B', pr:9},
+      {label:'Item C', pr:5},
+      {label:'Item D', pr:1}
+    ];
+    var w = 700, h = 150, boxW = 130, gap = 20, startX = 20;
+    var svg = '<div style="margin:20px 0; overflow-x:auto;">';
+    svg += '<svg viewBox="0 0 '+w+' '+h+'" width="100%" style="max-width:700px; display:block; margin:0 auto;" xmlns="http://www.w3.org/2000/svg">';
+    for(var i=0;i<items.length;i++){
+      var x = startX + i*(boxW+gap);
+      var isTop = items[i].pr === 9;
+      var fill = isTop ? 'var(--orange)' : 'var(--blue-light)';
+      var textColor = isTop ? '#fff' : 'var(--ink)';
+      svg += '<rect x="'+x+'" y="40" width="'+boxW+'" height="60" rx="12" fill="'+fill+'" stroke="var(--border)"/>';
+      svg += '<text x="'+(x+boxW/2)+'" y="65" text-anchor="middle" font-family="Poppins, sans-serif" font-weight="600" font-size="13" fill="'+textColor+'">'+items[i].label+'</text>';
+      svg += '<text x="'+(x+boxW/2)+'" y="84" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="'+textColor+'">Priority: '+items[i].pr+'</text>';
+      if(isTop){
+        svg += '<text x="'+(x+boxW/2)+'" y="28" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="var(--orange-dark)">SERVED NEXT ▾</text>';
+      }
+    }
+    svg += '</svg>';
+    svg += '</div>';
+    return svg;
+  }
+
   function quizHTML(){
-    var qd = state.pages[4].data;
-    var html = '<span class="kicker">Step 5 of 5 — Quick Check</span>';
+    var qd = state.pages[5].data;
+    var html = '<span class="kicker">Step 6 of 6 — Quick Check</span>';
     html += '<h2 class="page-title">Would It Work Anywhere Else?</h2>';
     html += '<p class="lead">Same idea, different settings. Work through these.</p>';
 
     if(!qd.finished){
-      html += '<div class="question-grid">';
+      html += '<div class="question-grid exercise-grid">';
       for(var i=0;i<EXERCISE_QUESTIONS.length;i++){
         var item = EXERCISE_QUESTIONS[i];
         html += '<div class="question-card">';
@@ -1221,7 +1288,7 @@
 
     backBtn.style.visibility = state.current === 0 ? 'hidden' : 'visible';
 
-    if(state.current === 4){
+    if(state.current === 5){
       nextBtn.style.visibility = 'hidden';
     } else {
       nextBtn.style.visibility = 'visible';
@@ -1229,13 +1296,17 @@
       nextBtn.textContent = isPageComplete(state.current) ? 'Next →' : 'Complete this step →';
     }
 
-    status.textContent = 'Step ' + (state.current+1) + ' of 5';
+    status.textContent = 'Step ' + (state.current+1) + ' of 6';
   }
 
   function render(){
     renderRail();
     renderStage();
     renderNav();
+    var appEl = document.querySelector('.app');
+    if(appEl){
+      appEl.classList.toggle('wide-page', state.pages[state.current].id === 'quiz');
+    }
   }
 
   // ---------------------------------------------------------
@@ -1265,7 +1336,7 @@
 
   document.getElementById('nextBtn').addEventListener('click', function(){
     if(!isPageComplete(state.current)) return;
-    if(state.current >= 4) return;
+    if(state.current >= 5) return;
     state.current++;
     state.maxUnlocked = Math.max(state.maxUnlocked, state.current);
     render();
@@ -1389,7 +1460,7 @@
       render();
     }
     if(action === 'quiz-finish'){
-      state.pages[4].data.finished = true;
+      state.pages[5].data.finished = true;
       render();
     }
     if(action === 'restart-app'){
