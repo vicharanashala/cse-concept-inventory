@@ -586,6 +586,42 @@
     color:var(--blue-dark);
   }
 
+  /* ---------- Question Cards (Reflection & Exercise) ---------- */
+  .question-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:16px;
+    margin-top:18px;
+  }
+  .question-card{
+    background:var(--white);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:16px;
+    box-shadow:0 4px 14px var(--shadow-card);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .question-card .qtext{
+    font-size:13.5px;
+    font-weight:600;
+    line-height:1.5;
+    color:var(--ink);
+  }
+  .question-card .level-badge{margin-left:0; align-self:flex-start;}
+  .question-card textarea{
+    min-height:70px;
+    font-size:13px;
+    flex:1;
+  }
+  @media (max-width:820px){
+    .question-grid{grid-template-columns:repeat(2, 1fr);}
+  }
+  @media (max-width:600px){
+    .question-grid{grid-template-columns:1fr;}
+  }
+
   /* ---------- Quiz page ---------- */
   .quiz-q{
     margin-bottom:22px;
@@ -805,66 +841,42 @@
   var FACES = ['🧑','👩','🧔','👨','🧕','👵','👴','🧑\u200d🦱'];
   var BASELINE_TIME = ORDER_QUEUE.length * PANTRY_COST;
 
-  var QUIZ = [
+  var REFLECT_QUESTIONS = [
+    "When several tasks were waiting, what helped you decide which one to handle first?",
+    "Why was choosing the most important task first more useful than simply following the arrival order?",
+    "As more tasks were added, how did you keep track of which task deserved attention next?",
+    "What would happen if you had to search through every waiting task each time? How might that affect your work as the number of tasks grows?",
+    "Looking at the activity as a whole, what pattern made it possible to handle changing priorities efficiently?"
+  ];
+
+  var EXERCISE_QUESTIONS = [
     {
-      level: "Create",
-      q: "Chef Wren notices the lunch rush follows the order sequence: Burger → Pizza → Pasta → Burger → Pizza → Salad → Burger → Pizza. Which strategy would likely result in the fewest pantry trips?",
-      opts: [
-        "Replace dishes randomly whenever the shelf is full.",
-        "Keep dishes that are ordered repeatedly on the warming shelf.",
-        "Empty the warming shelf after every three orders.",
-        "Always keep the newest dishes only."
-      ],
-      correct: 1,
-      explain: "Burger and Pizza keep reappearing throughout the sequence, so keeping them on the shelf avoids repeated pantry trips — a random or fixed-schedule approach ignores what's actually being ordered."
+      level: "New Problem",
+      q: "A hospital has patients arriving at different times, but the most critical patient should always be treated first. How would you organize the waiting patients so the next patient can be chosen efficiently?"
     },
     {
-      level: "Evaluate",
-      q: "Two chefs use different strategies. Chef A removes the oldest dish from the shelf when it is full. Chef B removes the dish that has not been used for the longest time. For customers who frequently reorder the same dishes, whose strategy is generally better?",
-      opts: [
-        "Chef A, because older dishes should always be removed.",
-        "Chef B, because frequently reused dishes are more likely to stay available.",
-        "Both strategies always perform exactly the same.",
-        "Neither strategy affects performance."
-      ],
-      correct: 1,
-      explain: "Chef B's approach protects dishes that are still being reordered, while Chef A's approach can evict something the moment it arrives — even if it's about to be ordered again."
+      level: "Recognize Usefulness",
+      q: "A task manager allows a user to increase the importance of a task at any time. Why would a Priority Queue be useful here, and what operation would become important when a task's importance changes?"
     },
     {
-      level: "Analyze",
-      q: "The shelf initially contains Burger, Pizza, and Pasta. The next orders are: Pizza → Burger → Salad. Which statement is correct?",
-      opts: [
-        "All three orders require pantry trips.",
-        "Only the Salad order requires a pantry trip.",
-        "Burger and Salad require pantry trips.",
-        "Only Pizza requires a pantry trip."
-      ],
-      correct: 1,
-      explain: "Pizza and Burger are both already on the shelf, so only Salad — which isn't there — needs a trip to the pantry."
+      level: "Reason About a Design",
+      q: "Two systems manage the same jobs. System A keeps jobs in arrival order and searches through them to find the most urgent job. System B uses a Priority Queue. As the number of jobs becomes very large, how would you expect their performance to differ, and why?"
     },
     {
-      level: "Apply",
-      q: "The warming shelf currently contains: Soup, Rice, Curry. The next customer orders Rice. What should Chef Wren do?",
-      opts: [
-        "Go to the pantry to get Rice.",
-        "Remove Soup before serving Rice.",
-        "Serve Rice directly from the warming shelf.",
-        "Clear the shelf first."
-      ],
-      correct: 2,
-      explain: "Rice is already sitting on the shelf, so it can be served right away without a trip to the pantry or any swap."
+      level: "Challenge a Misconception",
+      q: "A student argues, \"If I need the highest-priority item quickly, I should keep the entire collection completely sorted at all times.\" Do you agree? Compare this approach with a Priority Queue and explain why maintaining a completely sorted collection may do unnecessary work."
     },
     {
-      level: "Understand",
-      q: "In the restaurant analogy, what does the warming shelf represent?",
-      opts: [
-        "Hard Disk",
-        "Main Memory (RAM)",
-        "Cache Memory",
-        "CPU"
-      ],
-      correct: 2,
-      explain: "The small, fast, limited-space shelf beside the grill mirrors cache memory — a small, fast layer that keeps frequently-needed items close at hand, separate from slower, larger storage."
+      level: "Changing Requirements",
+      q: "A system originally chooses the highest-priority task first. Now the requirement changes: among tasks with equal priority, the task that has waited the longest must be chosen first. How would this change the way you represent or compare tasks?"
+    },
+    {
+      level: "Efficiency & Scaling",
+      q: "A system handles 100 jobs today but may eventually handle 10 million. If each new job can have a different priority, what kind of operations would you want to remain efficient, and why does that matter more at the larger scale?"
+    },
+    {
+      level: "Real-World Reasoning",
+      q: "An emergency response system receives fire, medical, and police requests with different urgency levels. If priorities can change while requests are waiting, how would you design the system so that the next response is chosen appropriately without repeatedly examining every request?"
     }
   ];
 
@@ -893,10 +905,10 @@
     };
   }
   function defaultReflectData(){
-    return { q1:'', q2:'', revealed:false };
+    return {};
   }
   function defaultQuizData(){
-    return { answers:{}, checked:false, score:0, finished:false };
+    return { finished:false };
   }
 
   function buildInitialState(){
@@ -918,12 +930,7 @@
   var pageLabels = ['Introduction','The Setup','Rush Hour','Debrief','Quick Check'];
 
   function isPageComplete(idx){
-    if(idx === 0) return true;
-    if(idx === 1) return true;
-    if(idx === 2) return state.pages[2].data.done;
-    if(idx === 3) return state.pages[3].data.revealed;
-    if(idx === 4) return true;
-    return false;
+    return true;
   }
 
   function resetPage(idx){
@@ -963,24 +970,20 @@
     if(id === 'game') stage.innerHTML = gameHTML();
     if(id === 'reflect') stage.innerHTML = reflectHTML();
     if(id === 'quiz') stage.innerHTML = quizHTML();
-
-    if(id === 'reflect') bindReflectInputs();
   }
 
   function problemHTML(){
     return ''+
     '<span class="kicker">Step 1 of 5 — Introduction</span>'+
     '<h2 class="page-title">Introduction</h2>'+
-    '<p class="lead">In many everyday situations, some things get used far more often than others, and reaching them quickly matters. A mechanic keeps the tools used on almost every job hanging right above the workbench, instead of walking to the storeroom each time. A shopkeeper stacks the fast-selling items near the counter, while the rest stay on the back shelves. A student keeps the two or three textbooks opened every day on the desk, and puts the rest away in a cupboard across the room.</p>'+
-    '<p class="lead">In each case, walking to a larger, slower storage area every single time is wasteful — especially when it is usually the same handful of things being asked for again and again. But that space near at hand is always limited, so not everything can be kept there.</p>'+
+    '<p class="lead">Some things get used far more than others, and reaching them quickly matters. A mechanic keeps everyday tools by the workbench, not the storeroom. A shopkeeper keeps fast-sellers near the counter, not the back shelves.</p>'+
     '<div class="goal-box">'+
-      '<strong>This raises a question:</strong> how do you decide what stays within easy reach, and what gets sent back to storage, as the things people ask for keep changing over time? Solving this well means finding a strategy — not just picking at random.'+
+      '<strong>The question:</strong> space close at hand is always limited. How do you decide what stays within reach, and what gets sent back, as needs keep changing?'+
     '</div>'+
-    '<p class="lead" style="margin-top:18px;">Here is that exact situation, playing out at a lunch counter.</p>'+
-    '<div class="goal-box">'+
-      '<strong>The setup:</strong> Chef Wren has a warming shelf with just <strong>3 sections</strong> next to the grill. Everything else sits in the pantry down the hall — and every trip there costs time. With only 3 spots close by, what should stay on the shelf, and when should something get swapped out, to keep the line moving?'+
+    '<div class="goal-box" style="margin-top:14px;">'+
+      '<strong>The setup:</strong> Chef Wren\'s warming shelf has just <strong>3 sections</strong>. Everything else means a trip to the pantry. What stays on the shelf — and when do you swap something out?'+
     '</div>'+
-    '<p class="muted" style="margin-top:18px;">Tap <strong>Next</strong> to see how it plays out.</p>';
+    '<p class="muted" style="margin-top:18px;">Tap <strong>Next</strong> to find out.</p>';
   }
 
   function introHTML(){
@@ -1157,26 +1160,16 @@
   }
 
   function reflectHTML(){
-    var r = state.pages[3].data;
     var html = '<span class="kicker">Step 4 of 5 — Debrief</span>';
     html += '<h2 class="page-title">Back of House</h2>';
-    html += '<p class="lead">The rush is over. Before Chef Wren preps for dinner, jot down what you noticed.</p>';
+    html += '<p class="lead">The rush is over. Take a moment on each of these before moving on.</p>';
 
-    html += '<div class="q-block">';
-    html += '<label>Which dishes did you try to keep on the shelf, and why those ones?</label>';
-    html += '<textarea id="q1" placeholder="Type your answer here…">'+r.q1+'</textarea>';
-    html += '</div>';
-
-    html += '<div class="q-block">';
-    html += '<label>What pattern helped you serve orders faster as the rush went on?</label>';
-    html += '<textarea id="q2" placeholder="Type your answer here…">'+r.q2+'</textarea>';
-    html += '</div>';
-
-    html += '<button class="btn btn-primary" id="revealBtn" data-action="reveal" '+((r.q1.trim().length<10 || r.q2.trim().length<10) ? 'disabled' : '')+'>Reveal Chef Wren\'s Notebook</button>';
-
-    html += '<div class="reveal-box'+(r.revealed?' show':'')+'" id="revealBox">';
-    html += '<h4>Chef Wren\'s Notebook</h4>';
-    html += '<p>Keeping a few frequently-reordered dishes within arm\'s reach saved the most time. The trick was never remembering everything — it was remembering the right handful, and always knowing which one had gone the longest without being touched whenever a new dish needed a spot.</p>';
+    html += '<div class="question-grid">';
+    for(var i=0;i<REFLECT_QUESTIONS.length;i++){
+      html += '<div class="question-card">';
+      html += '<div class="qtext">'+REFLECT_QUESTIONS[i]+'</div>';
+      html += '</div>';
+    }
     html += '</div>';
 
     return html;
@@ -1186,58 +1179,32 @@
     var qd = state.pages[4].data;
     var html = '<span class="kicker">Step 5 of 5 — Quick Check</span>';
     html += '<h2 class="page-title">Would It Work Anywhere Else?</h2>';
-    html += '<p class="lead">Same idea, different counters. Give these a try.</p>';
+    html += '<p class="lead">Same idea, different settings. Work through these.</p>';
 
-    for(var i=0;i<QUIZ.length;i++){
-      var item = QUIZ[i];
-      var picked = qd.answers[i];
-      html += '<div class="quiz-q">';
-      html += '<span class="qnum">Question '+(i+1)+' <span class="level-badge">'+item.level+'</span></span>';
-      html += '<p class="qtext">'+item.q+'</p>';
-      for(var o=0;o<item.opts.length;o++){
-        var optCls = 'opt';
-        if(qd.checked){
-          if(o === item.correct) optCls += ' correct';
-          else if(picked === o) optCls += ' incorrect';
-        }
-        html += '<label class="'+optCls+'">';
-        html += '<input type="radio" name="q'+i+'" value="'+o+'" data-action="quiz-answer" data-q="'+i+'" '+(picked===o?'checked':'')+' '+(qd.checked?'disabled':'')+'>';
-        html += '<span>'+item.opts[o]+'</span>';
-        html += '</label>';
-      }
-      if(qd.checked){
-        html += '<div class="quiz-explain show">'+item.explain+'</div>';
+    if(!qd.finished){
+      html += '<div class="question-grid">';
+      for(var i=0;i<EXERCISE_QUESTIONS.length;i++){
+        var item = EXERCISE_QUESTIONS[i];
+        html += '<div class="question-card">';
+        html += '<span class="level-badge">'+item.level+'</span>';
+        html += '<div class="qtext">'+item.q+'</div>';
+        html += '</div>';
       }
       html += '</div>';
-    }
 
-    var answeredAll = Object.keys(qd.answers).length === QUIZ.length;
-
-    if(!qd.checked){
-      html += '<button class="btn btn-primary" data-action="quiz-check" '+(answeredAll?'':'disabled')+'>Check Answers</button>';
-    } else if(!qd.finished){
-      html += '<div class="score-panel"><h4>You got '+qd.score+' / '+QUIZ.length+' right</h4><p>'+quizFeedback(qd.score)+'</p></div>';
-      html += '<button class="btn btn-primary" data-action="quiz-finish" style="margin-top:14px;">See Case Study Summary</button>';
+      html += '<button class="btn btn-primary" id="exerciseFinishBtn" data-action="quiz-finish" style="margin-top:16px;">See Case Study Summary</button>';
     } else {
-      html += '<div class="score-panel"><h4>You got '+qd.score+' / '+QUIZ.length+' right</h4><p>'+quizFeedback(qd.score)+'</p></div>';
       html += finalPanelHTML();
     }
 
     return html;
   }
 
-  function quizFeedback(score){
-    if(score === QUIZ.length) return "You're spotting the pattern everywhere now.";
-    if(score >= 3) return "You've got the core idea down.";
-    return "Worth a re-read of Chef Wren's notebook before moving on.";
-  }
-
   function finalPanelHTML(){
     var g = state.pages[2].data;
-    var qd = state.pages[4].data;
     var html = '<div class="final-panel show">';
     html += '<h4>Case Study Complete</h4>';
-    html += '<p>Rush hour time: <strong>'+g.elapsed+'</strong> units (baseline was '+BASELINE_TIME+'). Quick check score: <strong>'+qd.score+' / '+QUIZ.length+'</strong>.</p>';
+    html += '<p>Rush hour time: <strong>'+g.elapsed+'</strong> units (baseline was '+BASELINE_TIME+').</p>';
     html += '<p style="opacity:0.85;">You just built a working instinct for cache memory — a small, fast layer that sits between you and slower storage, holding on to whatever is likely to be needed again soon.</p>';
     html += '<button class="btn btn-primary" data-action="restart-app" style="margin-top:14px;">↺ Start Over</button>';
     html += '</div>';
@@ -1403,44 +1370,6 @@
   }
 
   // ---------------------------------------------------------
-  // Reflection interactions
-  // ---------------------------------------------------------
-  function bindReflectInputs(){
-    var q1 = document.getElementById('q1');
-    var q2 = document.getElementById('q2');
-    var revealBtn = document.getElementById('revealBtn');
-    if(!q1) return;
-
-    function syncBtn(){
-      var r = state.pages[3].data;
-      revealBtn.disabled = (r.q1.trim().length < 10 || r.q2.trim().length < 10);
-    }
-
-    q1.addEventListener('input', function(){
-      state.pages[3].data.q1 = q1.value;
-      syncBtn();
-    });
-    q2.addEventListener('input', function(){
-      state.pages[3].data.q2 = q2.value;
-      syncBtn();
-    });
-  }
-
-  // ---------------------------------------------------------
-  // Quiz interactions
-  // ---------------------------------------------------------
-  function checkQuiz(){
-    var qd = state.pages[4].data;
-    var score = 0;
-    for(var i=0;i<QUIZ.length;i++){
-      if(qd.answers[i] === QUIZ[i].correct) score++;
-    }
-    qd.score = score;
-    qd.checked = true;
-    render();
-  }
-
-  // ---------------------------------------------------------
   // Delegated click / input handling on stage
   // ---------------------------------------------------------
   document.getElementById('stage').addEventListener('click', function(e){
@@ -1459,11 +1388,6 @@
       state.pages[2].data.rushStarted = true;
       render();
     }
-    if(action === 'reveal'){
-      state.pages[3].data.revealed = true;
-      render();
-    }
-    if(action === 'quiz-check') checkQuiz();
     if(action === 'quiz-finish'){
       state.pages[4].data.finished = true;
       render();
@@ -1472,15 +1396,6 @@
       state = buildInitialState();
       render();
     }
-  });
-
-  document.getElementById('stage').addEventListener('change', function(e){
-    var target = e.target.closest('[data-action="quiz-answer"]');
-    if(!target) return;
-    var qIdx = parseInt(target.getAttribute('data-q'),10);
-    var opt = parseInt(target.value,10);
-    state.pages[4].data.answers[qIdx] = opt;
-    render();
   });
 
   // ---------------------------------------------------------
