@@ -1244,7 +1244,7 @@ function updateNextButton(){
   if(state.current===4) complete = state.reflection.complete;
   if(state.current===5) complete = false; // last page uses restart, not next
 
-  btn.disabled = !complete;
+  btn.disabled = false;
   btn.classList.toggle('pulse', complete && state.current!==5);
 
   if(state.current===5){
