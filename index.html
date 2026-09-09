@@ -40,12 +40,12 @@ img{max-width:100%;}
 .brand-bar{
   position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;
   padding:6px 22px;z-index:500;
-  background:rgba(255,255,255,0.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  background:rgba(255,255,255,0.62);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);
   border-bottom:1px solid var(--border);box-shadow:0 4px 16px -8px var(--shadow-card);
 }
 .brand-badge{pointer-events:auto;display:flex;align-items:center;gap:8px;background:transparent;border:none;padding:0;}
-.brand-badge img{height:78px;width:auto;display:block;}
-.site-nav{pointer-events:auto;display:flex;gap:26px;padding:6px 0;}
+.brand-badge img{height:100px;width:auto;display:block;}
+.site-nav{pointer-events:auto;display:flex;align-items:center;gap:26px;padding:6px 0;}
 .site-nav a{
   position:relative;font-family:'Poppins',sans-serif;font-weight:600;font-size:13.5px;
   color:var(--muted);text-decoration:none;padding-bottom:6px;
@@ -56,18 +56,26 @@ img{max-width:100%;}
   content:"";position:absolute;left:0;right:0;bottom:0;height:2px;
   background:var(--amber);border-radius:2px;
 }
+.site-nav a.nav-cta{
+  margin-left:18px;padding:9px 18px;border-radius:8px;color:#fff;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  box-shadow:0 8px 16px -8px var(--shadow-btn);transition:transform .15s,box-shadow .15s;
+}
+.site-nav a.nav-cta:hover{color:#fff;transform:translateY(-2px);box-shadow:0 12px 22px -8px var(--shadow-btn);}
+.site-nav a.nav-cta.active{color:#fff;}
+.site-nav a.nav-cta.active::after{display:none;}
 @media(max-width:640px){
   .brand-bar{padding:6px 10px;}
-  .brand-badge img{height:48px;}
+  .brand-badge img{height:58px;}
   .site-nav{display:none;}
 }
 @media(max-width:980px){.site-nav{gap:15px;}}
 
 /* ---- shared layout helpers ---- */
 .wrap{max-width:var(--container);margin:0 auto;padding:0 24px;}
-.section{padding:88px 0;scroll-margin-top:104px;}
+.section{padding:88px 0;scroll-margin-top:126px;}
 .section:nth-of-type(even){background:var(--section-alt);}
-@media(max-width:640px){.section{scroll-margin-top:66px;padding:64px 0;}}
+@media(max-width:640px){.section{scroll-margin-top:76px;padding:64px 0;}}
 .section-label{
   font-family:'Poppins',sans-serif;font-weight:700;font-size:18px;color:var(--primary-dark);
   margin-bottom:12px;text-align:left;
@@ -76,7 +84,7 @@ img{max-width:100%;}
 .lede{color:var(--muted);font-size:17px;max-width:62ch;margin-top:16px;}
 
 /* ---- hero ---- */
-.hero{padding:128px 0 70px;text-align:center;}
+.hero{padding:150px 0 70px;text-align:center;}
 .hero h1{font-size:clamp(32px,5.4vw,46px);color:var(--ink);}
 .hero-tag{
   display:inline-block;margin-top:16px;padding:7px 18px;border-radius:999px;
@@ -84,7 +92,7 @@ img{max-width:100%;}
   font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;letter-spacing:0.02em;
 }
 .hero p{margin:18px auto 0;max-width:56ch;color:var(--muted);font-size:18px;}
-@media(max-width:640px){.hero{padding-top:90px;}}
+@media(max-width:640px){.hero{padding-top:100px;}}
 
 /* ---- vision section ---- */
 .vision-panel{
@@ -107,19 +115,22 @@ img{max-width:100%;}
 @media(max-width:640px){.vision-panel{padding:26px 22px;}}
 
 /* ---- journey steps ---- */
-.journey{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:0;margin:44px 0 8px;}
-.journey-step{display:flex;flex-direction:column;align-items:center;text-align:center;width:150px;}
+.journey{
+  display:flex;flex-wrap:nowrap;align-items:flex-start;justify-content:center;gap:0;
+  margin:44px 0 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px;
+}
+.journey-step{display:flex;flex-direction:column;align-items:center;text-align:center;width:112px;flex:0 0 auto;}
 .journey-step .dot{
-  width:44px;height:44px;border-radius:50%;background:var(--card-bg);border:2px solid var(--primary);
+  width:40px;height:40px;border-radius:50%;background:var(--card-bg);border:2px solid var(--primary);
   display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-weight:700;
-  color:var(--primary-dark);font-size:15px;
+  color:var(--primary-dark);font-size:14px;flex:0 0 auto;
 }
 .journey-step:nth-child(4n) .dot,.journey-step:nth-child(4n+1) .dot{border-color:var(--amber);color:var(--amber-dark);}
-.journey-step .label{margin-top:10px;font-weight:600;font-size:14.5px;color:var(--ink);}
-.journey-arrow{align-self:center;color:var(--faint);font-size:20px;margin:0 2px;padding-bottom:26px;}
-@media(max-width:720px){
-  .journey{flex-direction:column;gap:14px;}
-  .journey-arrow{transform:rotate(90deg);padding-bottom:0;}
+.journey-step .label{margin-top:9px;font-weight:600;font-size:13px;color:var(--ink);white-space:nowrap;}
+.journey-arrow{align-self:center;color:var(--faint);font-size:18px;margin:0 -2px;padding-bottom:24px;flex:0 0 auto;}
+@media(max-width:600px){
+  .journey-step{width:88px;}
+  .journey-step .label{font-size:11.5px;}
 }
 
 .area-pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px;}
@@ -235,7 +246,7 @@ footer::before{content:"";display:block;height:4px;background:linear-gradient(90
     <a href="#philosophy">Philosophy</a>
     <a href="#goal">Goal</a>
     <a href="#case-studies">Case Studies</a>
-    <a href="get-in-touch.html">Get in Touch</a>
+    <a href="get-in-touch.html" class="nav-cta">Get in Touch</a>
   </nav>
   <div class="brand-badge"><img src="assets/iitropar.png" alt="IIT Ropar logo"></div>
 </div>
@@ -354,35 +365,37 @@ footer::before{content:"";display:block;height:4px;background:linear-gradient(90
       <a class="case-row" href="case_studies/trapped_doors/">
         <span class="num">01</span><h3>Trapped Door</h3><span class="go">Open case study →</span>
       </a>
-      <a class="case-row" href="case_studies/birthday_gift/index.html">
-        <span class="num">02</span><h3>Birthday Gift</h3><span class="go">Open case study →</span>
-      </a>
-      <a class="case-row" href="case_studies/missing_homework/">
-        <span class="num">03</span><h3>Missing Homework</h3><span class="go">Open case study →</span>
+      <a class="case-row" href="case_studies/photo_day_lineup/">
+        <span class="num">05</span><h3>Photo Day Lineup</h3><span class="go">Open case study →</span>
       </a>
       <a class="case-row" href="case_studies/fake_coin/">
         <span class="num">04</span><h3>Fake Coin</h3><span class="go">Open case study →</span>
       </a>
-      <a class="case-row" href="case_studies/photo_day_lineup/">
-        <span class="num">05</span><h3>Photo Day Lineup</h3><span class="go">Open case study →</span>
-      </a>
-      <a class="case-row" href="case_studies/nuts-&-bolts/">
-        <span class="num">06</span><h3>Nuts-and-Bolts</h3><span class="go">Open case study →</span>
-      </a>
-      <a class="case-row" href="case_studies/junction__street/">
-        <span class="num">07</span><h3>Junction Street</h3><span class="go">Open case study →</span>
-      </a>
-      <a class="case-row" href="case_studies/the_blindfolded_archer/">
-        <span class="num">08</span><h3>The Blindfolded Archer</h3><span class="go">Open case study →</span>
+      <a class="case-row" href="case_studies/birthday_gift/index.html">
+        <span class="num">02</span><h3>Birthday Gift</h3><span class="go">Open case study →</span>
       </a>
       <a class="case-row" href="case_studies/operation_padlock/">
         <span class="num">10</span><h3>Operation Padlock</h3><span class="go">Open case study →</span>
+      <a class="case-row" href="case_studies/run_the_junction/">
+        <span class="num">09</span><h3>Run the Junction</h3><span class="go">Open case study →</span>
+      </a>
+      <a class="case-row" href="case_studies/missing_homework/">
+        <span class="num">03</span><h3>Missing Homework</h3><span class="go">Open case study →</span>
       </a>
       <a class="case-row" href="case_studies/the_griddle/">
         <span class="num">11</span><h3>The Griddle</h3><span class="go">Open case study →</span>
       </a>
+      <a class="case-row" href="case_studies/nuts-&-bolts/">
+        <span class="num">06</span><h3>Nuts-and-Bolts</h3><span class="go">Open case study →</span>
+      </a>
       <div class="case-row case-row--soon">
-        <span class="num">12</span><h3>Coming Soon</h3><span class="go">New case study in progress</span>
+        <span class="num">12</span><h3>Operation Padlock</h3><span class="go">Coming Soon...</span>
+      </div>
+      <div class="case-row case-row--soon">
+        <span class="num">12</span><h3>Junction Street</h3><span class="go">Coming Soon...</span>
+      </div>
+      <div class="case-row case-row--soon">
+        <span class="num">12</span><h3>The Blindfolded Archer</h3><span class="go">Coming Soon...</span>
       </div>
     </div>
   </div>
