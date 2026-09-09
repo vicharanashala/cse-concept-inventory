@@ -269,33 +269,38 @@ button{font-family:'Poppins',sans-serif;font-weight:600;cursor:pointer;}
 
 @media(max-width:600px){ .wrap{padding:74px 14px 50px;} }
 
-/* ---- top brand bar: institution logos ---- */
-.brand-bar{
-  position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;
-  padding:12px 22px;z-index:500;pointer-events:none;
+  /* ---- Back to CS Concept Inventory ---- */
+
+.cs-inventory-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  margin:0 auto 22px;
+  padding:9px 16px;
+  border:1.5px solid var(--border);
+  border-radius:999px;
+  background:#fff;
+  color:var(--primary-dark);
+  text-decoration:none;
+  font-size:13px;
+  font-weight:600;
+  box-shadow:0 6px 18px -12px rgba(23,50,77,.25);
+  transition:.18s ease;
 }
-.brand-badge{
-  pointer-events:auto;display:flex;align-items:center;gap:8px;
-  background:transparent;border:none;border-radius:0;padding:0;box-shadow:none;
+
+.cs-inventory-link:hover{
+  background:var(--primary);
+  border-color:var(--primary);
+  color:#fff;
+  transform:translateY(-1px);
 }
-.brand-badge img{height:100px;width:auto;display:block;}
-@media(max-width:640px){
-  .brand-bar{padding:8px 10px;}
-  .brand-badge img{height:55px;}
-}
+
+  
 </style>
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
-
-<div class="brand-bar">
-  <div class="brand-badge">
-    <img src="../../assets/iitropar.png" alt="IIT Ropar">
-  </div>
-  <div class="brand-badge">
-    <img src="../../assets/vicharanashala.png" alt="Vicharanashala LAB">
-  </div>
-</div>
 
 
 <div class="wrap">
@@ -466,7 +471,13 @@ button{font-family:'Poppins',sans-serif;font-weight:600;cursor:pointer;}
   </section>
 
   <!-- ================= SECTION 5: CONTACT SHEET (exercises) ================= -->
-  <section class="section" id="sec-workbook">
+  <section class="section" id="sec-problem">
+
+  <a href="index.html" class="cs-inventory-link">
+    ← Back to CS Concept Inventory
+  </a>
+
+  <div class="hero">
     <span class="eyebrow" style="display:block;text-align:center;margin:0 auto 6px;width:fit-content;">📝 Chapter 5 · Contact Sheet</span>
     <h2 class="section-title">Go Deeper</h2>
     <p class="section-sub">A proof sheet of harder questions to think through. Open-ended, no single right answer.</p>
