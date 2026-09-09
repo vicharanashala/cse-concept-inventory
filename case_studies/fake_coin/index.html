@@ -118,6 +118,7 @@ h3{font-family:var(--font-heading);font-weight:600;font-size:1.02rem;margin:0 0 
   color:#fff;border:none;border-radius:999px;
   padding:.6rem 1.15rem;cursor:pointer;transition:transform .15s ease, box-shadow .15s ease;
   box-shadow:0 6px 16px var(--shadow-btn);
+  display:inline-block;text-decoration:none;
 }
 .sim-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 20px var(--shadow-btn);}
 .sim-btn:active:not(:disabled){transform:translateY(1px);}
@@ -268,23 +269,21 @@ footer.tag{
   <section class="page active" data-page="1">
     <h2>Why This Matters</h2>
 
-    <p class="sec-note">In many real-life situations, people face problems too large to handle all at once — sorting a mountain of paperwork, finding a champion among dozens of teams, or narrowing down one item hidden inside a huge collection. Checking or comparing everything one piece at a time is slow, and it only gets worse as the pile grows. A far more effective approach is to split the problem into two smaller, roughly equal parts, deal with (or rule out) one part, and repeat the same splitting on whatever is left — cutting the effort down dramatically at every step.</p>
-
-    <p class="sec-note">A few everyday examples of this:</p>
+    <p class="sec-note">Big problems are slow to solve one piece at a time. A faster approach: split the problem in half, deal with one part, and repeat on what's left.</p>
 
     <ul class="reflect-list">
-      <li><b>Tournament brackets:</b> In a 64-team knockout tournament, nobody compares every team against every other team. Teams are paired up, half are eliminated each round, and the pool of contenders keeps shrinking until one champion remains.</li>
-      <li><b>Finding a page in a thick book:</b> Instead of flipping through page by page, you open the book somewhere near the middle, decide whether what you want is earlier or later, and repeat — narrowing it down fast.</li>
-      <li><b>Sorting a huge stack of files:</b> A librarian organizing thousands of documents splits the stack into two smaller stacks, sorts each one separately (splitting further if needed), then combines the sorted results.</li>
+      <li><b>Tournament brackets:</b> teams are paired up and half are eliminated each round until one champion remains.</li>
+      <li><b>Finding a page in a thick book:</b> open near the middle, decide earlier or later, and repeat.</li>
+      <li><b>Sorting a huge stack of files:</b> split into two, sort each half, then combine.</li>
     </ul>
 
-    <p class="sec-note">The common thread: a big, unwieldy problem gets solved efficiently by repeatedly cutting it down into a much smaller version of itself. <b>Keep that idea in mind as you work through the case study on the next page.</b></p>
+    <p class="sec-note"><b>Keep that idea in mind as you work through the case study next.</b></p>
   </section>
 
   <!-- ============ PAGE 2 — THE CASE STUDY ============ -->
   <section class="page" data-page="2">
     <h2>A treasury, a scale, and one fake coin</h2>
-    <p class="sec-note">Somewhere in a large pile of identical gold coins, exactly <b>one is fake</b> — a little lighter than the rest. You have a balance scale. It doesn't tell you a weight, only which side is heavier, or if both sides match. Your job: find the fake coin using as <b>few weighings as possible</b>.</p>
+    <p class="sec-note">Among a pile of identical gold coins, exactly <b>one is fake</b> — a little lighter. A balance scale only tells you which side is heavier, or if both sides match. Find the fake coin in as <b>few weighings as possible</b>.</p>
 
     <div class="scenario">
       <span>🪙 <b>20 – 1,024</b> coins, your choice</span>
@@ -292,7 +291,7 @@ footer.tag{
       <span>🎯 goal: fewest weighings</span>
     </div>
 
-    <p class="sec-note" style="margin-top:1rem;">Here's how the game works: pick how many coins you're starting with, then hit weigh. The coins split into two equal pans (and if you picked an odd number, one coin gets set aside instead of being weighed). Watch which side of the scale sinks — that side is heavier, so it's made entirely of real coins. Your job is to eliminate the correct half. Get it right and you keep going with a smaller pile; get it wrong and the fake coin is gone for good. If the pans ever balance exactly, neither one holds the fake — it has to be the coin you set aside. Keep repeating until only one coin is left.</p>
+    <p class="sec-note" style="margin-top:1rem;">Pick a coin count and weigh. The coins split into two equal pans (an odd count sets one coin aside). Whichever side sinks is heavier — all real coins — so eliminate it and keep the lighter side. If the pans balance, the fake is the coin set aside. Repeat until one coin remains.</p>
   </section>
 
   <!-- ============ PAGE 3 — GAME ============ -->
@@ -425,7 +424,10 @@ footer.tag{
 
     <div class="quiz-score" style="margin-top:1.4rem;">
       <p>You've reached the end of this study card.</p>
-      <button class="sim-btn" id="restartJourneyBtn">Restart from Beginning</button>
+      <div class="sim-actions">
+        <button class="sim-btn" id="restartJourneyBtn">Restart from Beginning</button>
+        <a class="sim-btn ghost" href="../../" id="homeBtn">Go to Home Page</a>
+      </div>
     </div>
   </section>
 
@@ -489,33 +491,24 @@ function renderPage(){
 }
 
 function goNext(){
-  const problem = validateBeforeNext();
-  const warnEl = document.getElementById('navWarning');
-  if(problem){
-    warnEl.textContent = problem;
-    warnEl.classList.remove('hidden');
-    return;
-  }
-  warnEl.classList.add('hidden');
+  document.getElementById('navWarning').classList.add('hidden');
   if(currentPage < TOTAL_PAGES){
     currentPage += 1;
     renderPage();
   }
 }
 
-function validateBeforeNext(){
-  if(currentPage === 3 && state2.weighings < 1){
-    return 'Do at least one weighing before moving on.';
-  }
-  return null;
-}
-
 let pendingLeavePage = null;
 
 function goPrev(){
   if(currentPage === 1) return;
-  pendingLeavePage = currentPage;
-  document.getElementById('warnOverlay').classList.remove('hidden');
+  if(currentPage === 3){
+    pendingLeavePage = currentPage;
+    document.getElementById('warnOverlay').classList.remove('hidden');
+    return;
+  }
+  currentPage -= 1;
+  renderPage();
 }
 
 document.getElementById('warnCancel').addEventListener('click', () => {
