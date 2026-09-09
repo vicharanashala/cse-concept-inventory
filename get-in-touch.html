@@ -142,13 +142,18 @@ footer::before{content:"";display:block;height:4px;background:linear-gradient(90
 }
 .footer-bottom{margin-top:24px;color:var(--footer-muted);font-size:13.5px;text-align:center;}
 @media(max-width:680px){.footer-grid{grid-template-columns:1fr;gap:32px;}}
+
+  .brand-badge img.logo-vsl{height:130px;}
+@media(max-width:640px){
+  .brand-badge img.logo-vsl{height:76px;}
+}
 </style>
 
 </head>
 <body>
 
 <div class="brand-bar">
-  <div class="brand-badge"><img src="assets/vicharanashala.png" alt="Vicharanshala logo"></div>
+  <div class="brand-badge"><img src="assets/vicharanashala.png" alt="Vicharanshala logo" class="logo-vsl"></div>
   <nav class="site-nav">
     <a href="index.html#vision">Vision</a>
     <a href="index.html#building">What We're Building</a>
