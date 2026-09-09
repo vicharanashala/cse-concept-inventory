@@ -109,13 +109,13 @@
   .btn-row{ display:flex; gap: 12px; flex-wrap: wrap; justify-content:center; }
 
   /* ---------- PAGE 1: PROBLEM ---------- */
-  #screen-problem .container{ text-align:center; max-width: 760px; }
-  .problem-card{ background: var(--panel); border: 1px solid var(--panel-border); border-radius: 16px; padding: 52px 44px; box-shadow: 0 10px 30px rgba(23,50,77,0.12); }
-  .problem-text{ font-size: clamp(19px, 2.6vw, 24px); line-height: 1.75; color: var(--parchment); font-style: normal; font-family: var(--font-body); }
+  #screen-problem .container{ text-align:center; max-width: 980px; }
+  .problem-card{ background: var(--panel); border: 1px solid var(--panel-border); border-radius: 16px; padding: 48px 44px; box-shadow: 0 10px 30px rgba(23,50,77,0.12); }
+  .problem-text{ font-size: clamp(16px, 2vw, 19px); line-height: 1.7; color: var(--parchment); font-style: normal; font-family: var(--font-body); }
   .problem-text strong{ font-style: normal; color: var(--gold-bright); font-weight:600; }
 
   /* ---------- PAGE 2: INTRO / RULES ---------- */
-  #screen-intro .container{ text-align: left; }
+  #screen-intro .container{ text-align: left; max-width: 1040px; }
   .intro-card{ background: var(--panel); border: 1px solid var(--panel-border); border-radius: 16px; padding: 44px 44px 36px; box-shadow: 0 10px 30px rgba(23,50,77,0.12); }
   .intro-title{ font-size: clamp(24px, 3.8vw, 38px); line-height: 1.15; color: var(--parchment); margin-bottom: 18px; }
   .intro-title .accent{ color: var(--danger-bright); }
@@ -583,7 +583,8 @@
       </div>
       </div>
 
-      <div class="reflect-actions">
+      <div class="reflect-actions btn-row">
+        <button class="btn-ghost" id="go-home">🏠 Go to Home Page</button>
         <button class="btn-primary" id="restart-journey">You've Made It — Restart the Whole Journey</button>
       </div>
     </div>
@@ -685,7 +686,13 @@
 
   document.getElementById('back-btn').addEventListener('click', function(){
     if(currentPage === 0) return;
-    document.getElementById('modal-back-warn').classList.add('show');
+    if(PAGES[currentPage] === 'screen-game'){
+      document.getElementById('modal-back-warn').classList.add('show');
+      return;
+    }
+    var target = currentPage - 1;
+    unlockedPage = target;
+    showPage(target);
   });
   document.getElementById('back-cancel').addEventListener('click', function(){
     document.getElementById('modal-back-warn').classList.remove('show');
@@ -1048,6 +1055,9 @@
   document.getElementById('restart-journey').addEventListener('click', function(){
     unlockedPage = 0;
     showPage(0);
+  });
+  document.getElementById('go-home').addEventListener('click', function(){
+    window.location.href = '../index.html';
   });
 
   // ---------- INIT ----------
