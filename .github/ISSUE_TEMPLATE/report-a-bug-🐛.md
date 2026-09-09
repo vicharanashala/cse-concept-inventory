@@ -2,8 +2,8 @@
 name: "Report a Bug \U0001F41B"
 about: Report a problem or unexpected behavior on the CSE Concept Inventory website.
 title: "[Bug]:"
-labels: bug
-assignees: ''
+labels: bug, enhancement
+assignees: Nakul03
 
 ---
 

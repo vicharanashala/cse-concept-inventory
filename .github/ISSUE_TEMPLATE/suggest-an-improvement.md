@@ -3,7 +3,7 @@ name: Suggest an Improvement
 about: Suggest an improvement or new idea for the CSE Concept Inventory.
 title: "[Suggestion]:"
 labels: enhancement
-assignees: ''
+assignees: Nakul03
 
 ---
 

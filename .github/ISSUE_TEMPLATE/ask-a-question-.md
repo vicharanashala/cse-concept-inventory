@@ -1,9 +1,9 @@
 ---
-name: Ask a Question
+name: 'Ask a Question '
 about: Ask a question about the CSE Concept Inventory.
 title: "[Question]:"
 labels: question
-assignees: ''
+assignees: Nakul03
 
 ---
 
