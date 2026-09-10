@@ -45,7 +45,7 @@ img{max-width:100%;}
 }
 .brand-badge{pointer-events:auto;display:flex;align-items:center;gap:8px;background:transparent;border:none;padding:0;height:100%;}
 .brand-badge img{max-height:80px;width:auto;display:block;}
-.brand-badge img.logo-vsl{max-height:105px;}
+.brand-badge img.logo-vsl{max-height:130px;}
 .site-nav{pointer-events:auto;display:flex;align-items:center;gap:26px;height:100%;}
 .site-nav a{
   position:relative;font-family:'Poppins',sans-serif;font-weight:600;font-size:13.5px;
@@ -213,6 +213,11 @@ img{max-width:100%;}
 }
 .back-link:hover{text-decoration:underline;}
 
+/* ---- contribute strip ---- */
+.contribute-strip{text-align:center;}
+.contribute-strip h2{max-width:38ch;margin:0 auto;}
+.contribute-strip .lede{margin-left:auto;margin-right:auto;text-align:center;}
+
 /* ---- footer ---- */
 footer{
   background:linear-gradient(160deg,var(--footer-bg),var(--footer-bg-2));
@@ -248,6 +253,7 @@ footer::before{content:"";display:block;height:4px;background:linear-gradient(90
     <a href="#philosophy">Philosophy</a>
     <a href="#goal">Goal</a>
     <a href="#case-studies">Case Studies</a>
+    <a href="contribute.html">Contribute</a>
     <a href="get-in-touch.html" class="nav-cta">Get in Touch</a>
   </nav>
   <div class="brand-badge"><img src="assets/iitropar.png" alt="IIT Ropar logo"></div>
@@ -376,25 +382,34 @@ footer::before{content:"";display:block;height:4px;background:linear-gradient(90
       <a class="case-row" href="case_studies/birthday_gift/index.html">
         <span class="num">04</span><h3>Birthday Gift</h3><span class="go">Open case study →</span>
       </a>
-      <a class="case-row" href="case_studies/missing_homework/">
-        <span class="num">05</span><h3>Missing Homework</h3><span class="go">Open case study →</span>
-      </a>
       <a class="case-row" href="case_studies/the_griddle/">
-        <span class="num">06</span><h3>The Griddle</h3><span class="go">Open case study →</span>
+        <span class="num">05</span><h3>The Griddle</h3><span class="go">Open case study →</span>
       </a>
-      <a class="case-row" href="case_studies/nuts-&-bolts/">
-        <span class="num">07</span><h3>Nuts-and-Bolts</h3><span class="go">Open case study →</span>
+      <a class="case-row" href="case_studies/missing_homework/">
+        <span class="num">06</span><h3>Missing Homework</h3><span class="go">Open case study →</span>
       </a>
       <div class="case-row case-row--soon">
-        <span class="num">07</span><h3>Operation Padlock</h3><span class="go">Coming Soon...</span>
+        <span class="num">07</span><h3>Nuts-and-Bolts</h3><span class="go">Coming Soon...</span>
       </div>
       <div class="case-row case-row--soon">
-        <span class="num">08</span><h3>Junction Street</h3><span class="go">Coming Soon...</span>
+        <span class="num">08</span><h3>Operation Padlock</h3><span class="go">Coming Soon...</span>
       </div>
       <div class="case-row case-row--soon">
-        <span class="num">09</span><h3>The Blindfolded Archer</h3><span class="go">Coming Soon...</span>
+        <span class="num">09</span><h3>Junction Street</h3><span class="go">Coming Soon...</span>
+      </div>
+      <div class="case-row case-row--soon">
+        <span class="num">10</span><h3>The Blindfolded Archer</h3><span class="go">Coming Soon...</span>
       </div>
     </div>
+  </div>
+</section>
+
+<section class="section" id="contribute">
+  <div class="wrap contribute-strip">
+    <div class="section-label" style="text-align:center;">Open to contributions</div>
+    <h2>Want to contribute a case study?</h2>
+    <p class="lede">Got an idea for making a tricky CS concept click? Students are welcome to design and build their own case study for this library.</p>
+    <a class="cta-btn" href="contribute.html">Learn more &rarr;</a>
   </div>
 </section>
 
@@ -421,6 +436,7 @@ footer::before{content:"";display:block;height:4px;background:linear-gradient(90
           <li><a href="#building">What We're Building</a></li>
           <li><a href="#philosophy">Philosophy</a></li>
           <li><a href="#case-studies">Case Studies</a></li>
+          <li><a href="#contribute">Contribute</a></li>
           <li><a href="get-in-touch.html">Get in Touch</a></li>
         </ul>
       </div>
