@@ -373,35 +373,6 @@ footer{text-align:center;padding:22px 20px;margin-top:20px;color:#fff;font-size:
   .room-card .r-name{font-size:10px;}
 }
 
-/* ---- top brand bar: institution logos ---- */
-.brand-bar{
-  position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;
-  padding:12px 22px;z-index:500;pointer-events:none;
-}
-.brand-badge{
-  pointer-events:auto;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  background:transparent;
-  border:none;
-  border-radius:0;
-  padding:0;
-  box-shadow:none;
-  backdrop-filter:none;
-}
-.brand-badge img{height:105px;width:auto;display:block;}
-.brand-badge .brand-text{font-weight:700;font-size:12.5px;color:var(--primary-deep);line-height:1.15;font-family:'Poppins',sans-serif;}
-.brand-badge.wordmark{padding:9px 16px;}
-.brand-badge.wordmark .brand-text{font-size:15px;letter-spacing:.04em;font-weight:700;color:var(--primary-deep);}
-.brand-badge.wordmark .brand-sub{font-size:9.5px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;display:block;}
-@media(max-width:640px){
-  .brand-bar{padding:8px 10px;}
-  .brand-badge img{height:45px;}
-  .brand-badge{padding:0;}
-  .brand-badge .brand-text{font-size:10.5px;}
-}
-
 /* ---- reset search button: gentle attention-grabbing pulse ---- */
 #restart-btn{
   position:relative;border-color:var(--error-border)!important;color:var(--error-text)!important;
@@ -417,18 +388,6 @@ footer{text-align:center;padding:22px 20px;margin-top:20px;color:#fff;font-size:
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
-
-<div class="brand-bar">
-
-  <div class="brand-badge">
-    <img src="../../assets/iitropar.png" alt="IIT Ropar logo">
-  </div>
-
-  <div class="brand-badge">
-    <img src="../../assets/vicharanashala.png" alt="Vicharanshala logo">
-  </div>
-
-</div>
 
 <div class="wrap">
 
@@ -654,6 +613,7 @@ footer{text-align:center;padding:22px 20px;margin-top:20px;color:#fff;font-size:
       <div class="section-nav">
         <button class="btn ghost back-btn" id="workbook-back">⬅ Back to Blueprint Room</button>
         <button class="btn" id="workbook-finish">🏁 Finish ➜</button>
+        <button class="btn secondary" id="workbook-home">🏠 Back to CS Concept Inventory</button>
       </div>
     </div>
   </section>
@@ -1238,6 +1198,9 @@ document.getElementById("workbook-finish").addEventListener("click", ()=>{
   restartSearch(false);
   setStep(1);
   showSection("sec-problem");
+});
+document.getElementById("workbook-home").addEventListener("click", ()=>{
+  window.location.href = "../../index.html";
 });
 
 /* ---------------- initial paint ---------------- */
