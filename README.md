@@ -113,7 +113,7 @@ Got an idea for making a tricky CS concept click? Students and contributors are 
 
 ## Get in Touch
 
-Have questions, feedback, or ideas? Visit the [Get in Touch](https://vicharanashala.github.io/cse-concept-laboratory/get-in-touch.html) page on the live site.
+Have questions, feedback, or ideas? Visit the [Get in Touch](https://github.com/vicharanashala/cse-concept-laboratory/issues/new/choose) page on the live site.
 
 ## License
 
