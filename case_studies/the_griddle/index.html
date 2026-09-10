@@ -1243,26 +1243,21 @@
   }
 
   function quizHTML(){
-    var qd = state.pages[5].data;
     var html = '<span class="kicker">Step 6 of 6 — Quick Check</span>';
     html += '<h2 class="page-title">Would It Work Anywhere Else?</h2>';
     html += '<p class="lead">Same idea, different settings. Work through these.</p>';
 
-    if(!qd.finished){
-      html += '<div class="question-grid exercise-grid">';
-      for(var i=0;i<EXERCISE_QUESTIONS.length;i++){
-        var item = EXERCISE_QUESTIONS[i];
-        html += '<div class="question-card">';
-        html += '<span class="level-badge">'+item.level+'</span>';
-        html += '<div class="qtext">'+item.q+'</div>';
-        html += '</div>';
-      }
+    html += '<div class="question-grid exercise-grid">';
+    for(var i=0;i<EXERCISE_QUESTIONS.length;i++){
+      var item = EXERCISE_QUESTIONS[i];
+      html += '<div class="question-card">';
+      html += '<span class="level-badge">'+item.level+'</span>';
+      html += '<div class="qtext">'+item.q+'</div>';
       html += '</div>';
-
-      html += '<button class="btn btn-primary" id="exerciseFinishBtn" data-action="quiz-finish" style="margin-top:16px;">See Case Study Summary</button>';
-    } else {
-      html += finalPanelHTML();
     }
+    html += '</div>';
+
+    html += finalPanelHTML();
 
     return html;
   }
@@ -1273,7 +1268,10 @@
     html += '<h4>Case Study Complete</h4>';
     html += '<p>Rush hour time: <strong>'+g.elapsed+'</strong> units (baseline was '+BASELINE_TIME+').</p>';
     html += '<p style="opacity:0.85;">You just built a working instinct for cache memory — a small, fast layer that sits between you and slower storage, holding on to whatever is likely to be needed again soon.</p>';
-    html += '<button class="btn btn-primary" data-action="restart-app" style="margin-top:14px;">↺ Start Over</button>';
+    html += '<div class="action-row" style="margin-top:14px;">';
+    html += '<button class="btn btn-primary" data-action="restart-app">↺ Start from Beginning</button>';
+    html += '<a class="btn btn-ghost" href="../../" style="text-decoration:none; display:inline-flex; align-items:center;">🏠 Home</a>';
+    html += '</div>';
     html += '</div>';
     return html;
   }
@@ -1331,7 +1329,13 @@
 
   document.getElementById('backBtn').addEventListener('click', function(){
     if(state.current === 0) return;
-    showModal();
+    if(state.current === 2){
+      showModal();
+      return;
+    }
+    state.current--;
+    state.maxUnlocked = state.current;
+    render();
   });
 
   document.getElementById('nextBtn').addEventListener('click', function(){
@@ -1457,10 +1461,6 @@
     }
     if(action === 'start-rush'){
       state.pages[2].data.rushStarted = true;
-      render();
-    }
-    if(action === 'quiz-finish'){
-      state.pages[5].data.finished = true;
       render();
     }
     if(action === 'restart-app'){
