@@ -225,7 +225,7 @@ footer{
 }
 footer::before{content:"";display:block;height:4px;background:linear-gradient(90deg,var(--amber),var(--primary));}
 .footer-inner{padding-top:60px;}
-.footer-grid{display:grid;grid-template-columns:1.1fr 1fr 0.9fr;gap:40px;}
+.footer-grid{display:grid;grid-template-columns:minmax(0,340px) 1fr;gap:100px;}
 .footer-grid h3{color:#fff;font-size:14.5px;margin-bottom:16px;}
 .footer-org p{color:var(--footer-muted);margin:4px 0;font-size:15px;}
 .footer-org p.org-name{color:#fff;font-weight:600;font-size:17px;margin-bottom:4px;}
@@ -434,10 +434,10 @@ footer::before{content:"";display:block;height:4px;background:linear-gradient(90
       </div>
     </div>
     <p class="footer-tagline">Making abstract Computer Science concepts easier to experience, discover, and understand.</p>
-    <p class="footer-bottom">© 2026 Vicharanashala Lab for Education Design, IIT Ropar — All Rights Reserved.</p>
+    <p class="footer-bottom">&copy; 2026 Vicharanashala Lab for Education Design, IIT Ropar &mdash; All Rights Reserved.</p>
   </div>
 </footer>
-
+  
 <script>
 (function(){
   var links = Array.prototype.slice.call(document.querySelectorAll('.site-nav a'));
