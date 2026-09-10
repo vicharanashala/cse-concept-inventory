@@ -1,6 +1,6 @@
 ---
 name: Suggest an Improvement
-about: Suggest an improvement or new idea for the CSE Concept Inventory.
+about: Suggest an improvement or new idea for the CSE Concept Laboratory.
 title: "[Suggestion]:"
 labels: enhancement
 assignees: Nakul03
@@ -15,7 +15,7 @@ assignees: Nakul03
 
 ## Why would this improvement be useful?
 
-<!-- Explain how this would improve the CSE Concept Inventory or user experience. -->
+<!-- Explain how this would improve the CSE Concept Laboratory or user experience. -->
 
 
 

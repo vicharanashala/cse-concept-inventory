@@ -1,6 +1,6 @@
 ---
 name: 'Ask a Question '
-about: Ask a question about the CSE Concept Inventory.
+about: Ask a question about the CSE Concept Laboratory.
 title: "[Question]:"
 labels: question
 assignees: Nakul03
