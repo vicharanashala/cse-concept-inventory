@@ -1052,7 +1052,7 @@ function updateNavUI(){
   const complete = isCurrentSectionComplete();
 
   if(isLast){
-    contBtn.textContent = "Finish ✓";
+    contBtn.textContent = "Restart form Beginning ✓";
     contBtn.disabled = !complete;
     hintEl.textContent = complete ? "" : lockHintFor();
   }else{
