@@ -71,7 +71,6 @@ cse-concept-laboratory/
 └── index.html                # Landing page
 ```
 
-> 📄 Start a new case study from [`case-study-template.html`](./case-study-template.html)
 
 ## Contributing
 
@@ -86,15 +85,33 @@ Got an idea for making a tricky CS concept click? Students and contributors are 
 - Please allow a minimum of two weeks for review and merging.
 
 ### How to Raise a PR
-
+ 
+[svg](https://github.com/vicharanashala/cse-concept-laboratory#how-to-raise-a-pr)
+ 
 1. **Fork the repository** and clone it locally.
+ 
 2. **Create a new branch** for your case study or fix (e.g. `case-study/your-topic-name`).
-3. **Use the starter template** — build your case study from [`case-study-template.html`](./case-study-template.html) and place it inside `case_studies/your_case_study_name/`.
-4. **Follow the learning journey structure** — Think About the Problem → The Story → Play the Game → Reflection → Key Learning → Exercise — and keep to our [teaching philosophy](#teaching-philosophy).
-5. **Test locally** — open your case study file in a browser and confirm it renders correctly and all links/assets work.
-6. **Fill out the PR template exactly** as provided when you open the pull request — incomplete or modified templates will not be reviewed.
-7. **Submit your PR** against the `master` branch with a clear title and description of what the case study teaches and why.
-8. **Be patient during review** — allow a minimum of two weeks for maintainers to review and merge. You may be asked for revisions before acceptance.
+ 
+3. **Use the starter template** — build your case study from [`case-study-template.html`](https://github.com/vicharanashala/cse-concept-laboratory/blob/master/case-study-template.html) and place it inside `case_studies/your_case_study_name/`. Each case study should remain self-contained within its own folder.
+ 
+4. **Follow the learning journey structure** — Think About the Problem → The Story → Play the Game → Reflection → Key Learning → Exercise — and keep to our [teaching philosophy](https://github.com/vicharanashala/cse-concept-laboratory#teaching-philosophy).
+ 
+5. **Test locally** — open your case study file in a browser and confirm that it renders correctly and that all links and assets work.
+ 
+6. **Add your case study to the main index if required** — make sure the case study is correctly linked from the repository's global `index.html`.
+ 
+7. **Fill out the PR template exactly** as provided when you open the pull request. Incomplete or modified PR templates will not be reviewed.
+ 
+8. **Submit your PR** against the `master` branch with a clear title and description explaining what the case study teaches and why.
+ 
+9. **PR acceptance criteria**:
+   - The case study must follow the provided case-study template and learning journey structure.
+   - The PR template must be completed exactly as provided.
+   - Only quality contributions that meet the project's standards will be merged.
+   - Please allow a **minimum of two weeks** for review and merging.
+   - You may be asked to make revisions before the PR is accepted.
+ 
+10. **Be patient during review** — maintainers will review the contribution and may request changes before acceptance.
 
 ## Get in Touch
 
