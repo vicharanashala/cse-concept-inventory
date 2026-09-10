@@ -39,18 +39,6 @@ button{font-family:'Poppins', sans-serif;cursor:pointer;}
 button:focus-visible{outline:3px solid var(--primary);outline-offset:2px;}
 .wrap{max-width:960px;margin:0 auto;padding:96px 20px 70px;}
 
-/* ---- top brand bar: institution logos ---- */
-.brand-bar{
-  position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;
-  padding:12px 22px;z-index:500;pointer-events:none;
-}
-.brand-badge{pointer-events:auto;display:flex;align-items:center;gap:8px;background:transparent;border:none;padding:0;}
-.brand-badge img{height:90px;width:auto;display:block;}
-@media(max-width:640px){
-  .brand-bar{padding:8px 10px;}
-  .brand-badge img{height:44px;}
-}
-
 /* ---- stepper ---- */
 .stepper{max-width:700px;margin:0 auto 30px;display:flex;align-items:center;justify-content:center;padding:0 12px;}
 .step-item{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative;}
@@ -311,11 +299,6 @@ button:focus-visible{outline:3px solid var(--primary);outline-offset:2px;}
 </style>
 </head>
 <body>
-
-<div class="brand-bar">
-  <div class="brand-badge"><img src="../../assets/iitropar.png" alt="IIT Ropar logo"></div>
-  <div class="brand-badge"><img src="../../assets/vicharanashala.png" alt="Vicharanshala logo"></div>
-</div>
 
 <div class="wrap">
 
@@ -582,6 +565,7 @@ button:focus-visible{outline:3px solid var(--primary);outline-offset:2px;}
       <div class="section-nav">
         <button class="btn ghost" id="btn-cases-back">⬅ Back to the Method</button>
         <button class="btn" id="btn-cases-finish">🏁 Finish ➜</button>
+        <button class="btn secondary" id="btn-cases-home">🏠 Back to CS Concept Inventory</button>
       </div>
     </div>
   </section>
@@ -989,6 +973,9 @@ document.getElementById('btn-cases-back').addEventListener('click', () => showSe
 document.getElementById('btn-cases-finish').addEventListener('click', () => {
   stopAuto();
   showSection('sec-puzzle');
+});
+document.getElementById('btn-cases-home').addEventListener('click', () => {
+  window.location.href = "../../index.html";
 });
 
 /* ---------------- initial paint ---------------- */
