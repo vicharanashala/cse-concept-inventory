@@ -86,8 +86,6 @@ Got an idea for making a tricky CS concept click? Students and contributors are 
 
 ### How to Raise a PR
  
-[svg](https://github.com/vicharanashala/cse-concept-laboratory#how-to-raise-a-pr)
- 
 1. **Fork the repository** and clone it locally.
  
 2. **Create a new branch** for your case study or fix (e.g. `case-study/your-topic-name`).
