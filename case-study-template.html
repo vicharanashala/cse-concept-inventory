@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Study Template — Author Edition</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --bg: #EDF3FA;
+    --bg-top: #FDF1E9;
+    --panel: #FFFFFF;
+    --line: #D9E5F2;
+    --track: #B7CBDF;
+    --wash: #F3F8FD;
+    --teal: #4A9BD1;
+    --teal-dim: #8FCBEF;
+    --blue-dark: #2B6FA3;
+    --amber: #EA8C36;
+    --amber-dim: #F3A65C;
+    --orange-dark: #C96F1F;
+    --ink: #1F2E37;
+    --muted: #54666D;
+    --faint: #93A5AB;
+    --danger: #D9714F;
+    --success-bg: #DCEAD8;
+    --success-text: #274B26;
+    --success-border: #4B7A4A;
+    --error-bg: #FBE1DC;
+    --error-text: #8A3420;
+    --error-border: #D9714F;
+    --banner: #22496B;
+    --shadow-card: 0 8px 24px rgba(23,50,77,0.10);
+    --shadow-lift: 0 10px 30px rgba(23,50,77,0.12);
+    --shadow-btn: 0 6px 18px rgba(43,111,163,0.28);
+    --font-display: 'Poppins', sans-serif;
+    --font-body: 'Inter', sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg) 420px, var(--bg) 100%);
+    color: var(--ink); font-family: var(--font-body); min-height:100vh;
+  }
+  .app{ position:relative; min-height:100vh; width:100%; }
+
+  h1,h2,h3,h4{ font-family: var(--font-display); margin:0; letter-spacing:-0.01em; color: var(--ink); }
+  p{ line-height:1.6; color: var(--muted); margin:0; }
+  .eyebrow{ font-family:var(--font-body); font-weight:700; font-size:11.5px; letter-spacing:0.13em; text-transform:uppercase; color: var(--amber); display:block; margin-bottom:12px; }
+
+  button{ font-family: var(--font-display); cursor:pointer; border:none; outline:none; }
+  button:focus-visible{ outline:2px solid var(--teal); outline-offset:3px; }
+
+  .btn-primary{
+    background: linear-gradient(135deg, var(--teal-dim), var(--blue-dark)); color:#fff;
+    font-weight:600; font-size:14px; padding:13px 26px; border-radius:999px;
+    box-shadow: var(--shadow-btn); transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary:hover{ transform:translateY(-1px); box-shadow:0 10px 24px rgba(43,111,163,.36); }
+  .btn-primary:disabled{ opacity:.4; cursor:not-allowed; transform:none; box-shadow:none; }
+  .btn-danger{
+    background: linear-gradient(135deg,#E39A7D,var(--danger)); color:#fff; font-weight:600; font-size:14px;
+    padding:13px 26px; border-radius:999px; box-shadow:0 6px 18px rgba(217,113,79,.3);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-danger:hover{ transform:translateY(-1px); }
+  .btn-ghost{
+    background:transparent; color: var(--teal); font-size:13px; font-weight:600;
+    padding:9px 18px; border:1.5px solid var(--teal); border-radius:999px;
+    transition: all .15s ease;
+  }
+  .btn-ghost:hover{ background: rgba(74,155,209,.08); }
+  .btn-ghost.on{ background: rgba(74,155,209,.1); }
+  .btn-row{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:40; background:rgba(255,255,255,.92); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between;
+    padding:12px 20px; gap:14px; flex-wrap:wrap;
+  }
+  .back-btn{
+    background:transparent; border:1.5px solid var(--line); color: var(--muted);
+    font-family:var(--font-body); font-weight:600; font-size:11px; letter-spacing:.04em; text-transform:uppercase;
+    padding:7px 14px; border-radius:999px; cursor:pointer; flex-shrink:0;
+  }
+  .back-btn:hover{ border-color: var(--error-border); color: var(--error-text); }
+  .back-btn[disabled]{ visibility:hidden; }
+
+  .progress{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:center; flex:1; }
+  .progress-step{ display:flex; align-items:center; gap:5px; font-family:var(--font-body); font-weight:600; font-size:9px; letter-spacing:.02em; text-transform:uppercase; color: var(--line); }
+  .progress-step .num{ width:18px; height:18px; border-radius:50%; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:9px; color: var(--muted); flex-shrink:0; }
+  .progress-step.done .num{ background: var(--teal); border-color: var(--teal); color:#fff; }
+  .progress-step.current .num{ background: linear-gradient(135deg,var(--teal-dim),var(--blue-dark)); border-color: var(--blue-dark); color:#fff; box-shadow:0 2px 8px rgba(43,111,163,.3); }
+  .progress-step.current .label{ color: var(--blue-dark); }
+  .progress-step .label{ color: var(--muted); }
+  .progress-line{ width:14px; height:1px; background: var(--line); flex-shrink:0; }
+
+  .screen{ display:none; min-height:calc(100vh - 56px); width:100%; align-items:center; justify-content:center; padding:40px 20px; }
+  .screen.active{ display:flex; }
+  .container{ width:100%; max-width:920px; margin:0 auto; min-width:0; }
+
+  /* ---------- Guide notes ---------- */
+  .guide-note{ background: var(--wash); border-left:3px solid var(--teal); border-radius:0 12px 12px 0; padding:14px 18px; margin:0 0 16px; text-align:left; }
+  .guide-note p{ margin:0 0 6px; color: var(--ink); font-size:13.5px; }
+  .guide-note p:last-child{ margin-bottom:0; }
+  .guide-note ul{ margin:6px 0 0; padding-left:18px; text-align:left; }
+  .guide-note li{ color: var(--ink); font-size:13.5px; line-height:1.6; margin-bottom:4px; }
+  .guide-kicker{ display:inline-block; font-family:var(--font-body); font-weight:700; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color: var(--teal); margin-bottom:6px; }
+  .edit-tag{
+    display:inline-block; background: var(--teal); color:#fff; font-family:var(--font-body); font-weight:700;
+    font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; padding:3px 10px; border-radius:999px; margin-bottom:10px;
+  }
+
+  /* ---------- PAGE 1: PROBLEM ---------- */
+  #screen-problem .container{ text-align:center; max-width:900px; }
+  .problem-card{ background: var(--panel); border:1px solid var(--line); border-radius:16px; padding:44px 40px; box-shadow: var(--shadow-lift); }
+  .problem-card .guide-note{ text-align:left; margin-bottom:0; }
+
+  /* ---------- PAGE 2: SETUP ---------- */
+  #screen-setup .container{ text-align:left; max-width:920px; }
+  .setup-card{ background: var(--panel); border:1px solid var(--line); border-radius:16px; padding:40px 40px 34px; box-shadow: var(--shadow-lift); }
+  .setup-title{ font-size:clamp(22px,3.4vw,32px); line-height:1.18; margin-bottom:16px; }
+  .setup-title .accent{ color: var(--amber); }
+  .rules-box{ background: var(--wash); border:1px solid var(--line); border-radius:14px; padding:20px 24px; margin-bottom:24px; }
+  .rules-box li{ font-size:14px; color: var(--muted); line-height:1.7; margin-bottom:4px; }
+  .rules-box strong{ color: var(--ink); }
+
+  /* ---------- PAGE 3: GAME ---------- */
+  #screen-game .container{ max-width:700px; }
+
+  /* ---------- QUESTION GRID (reflect + exercise) ---------- */
+  #screen-reflect .container, #screen-exercise .container{ text-align:left; max-width:1040px; }
+  .screen-title{ font-size:clamp(22px,3.2vw,30px); text-align:center; margin-bottom:22px; }
+  #screen-reflect .eyebrow, #screen-exercise .eyebrow{ text-align:center; }
+
+  .questions-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-bottom:22px; }
+  @media (max-width:640px){ .questions-grid{ grid-template-columns:1fr; } }
+
+  .q-card{
+    display:flex; flex-direction:column; gap:10px; background: var(--panel); border:1.5px dashed var(--track);
+    border-radius:16px; padding:20px 20px 18px; box-shadow: var(--shadow-card);
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .q-card:hover{ border-color: var(--teal); transform: translateY(-2px); }
+  .q-card-head{ display:flex; align-items:center; gap:10px; }
+  .q-num{
+    flex-shrink:0; width:30px; height:30px; border-radius:50%; background: rgba(74,155,209,.12);
+    border:1.5px solid var(--teal-dim); display:flex; align-items:center; justify-content:center;
+    font-size:12.5px; font-weight:700; color: var(--blue-dark);
+  }
+  .q-note{ font-size:13px; color: var(--muted); flex:1; }
+
+  /* ---------- CONCEPT PAGE ---------- */
+  #screen-concept .container{ text-align:left; max-width:880px; }
+  #screen-concept .eyebrow{ text-align:center; }
+
+  .concept-blank{ background: var(--panel); border:1.5px dashed var(--track); border-radius:16px; padding:24px 26px; margin-bottom:20px; box-shadow: var(--shadow-card); }
+  .concept-blank h4{ font-family:var(--font-display); font-weight:600; font-size:12.5px; letter-spacing:.05em; text-transform:uppercase; color: var(--teal); margin:16px 0 8px; }
+  .concept-blank h4:first-child{ margin-top:0; }
+  .concept-blank p{ font-size:13.5px; line-height:1.6; }
+
+  .compare-cards{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:8px; }
+  @media (max-width:560px){ .compare-cards{ grid-template-columns:1fr; } }
+  .compare-card{
+    background: var(--panel); border:1.5px dashed var(--track); border-radius:14px; padding:20px 18px;
+    text-align:center; display:flex; flex-direction:column; align-items:center; gap:4px;
+  }
+  .compare-title{ font-family:var(--font-body); font-weight:600; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color: var(--muted); }
+  .compare-sub{ font-size:12.5px; color: var(--faint); margin-top:2px; }
+
+  .center-actions{ text-align:center; margin-top:8px; }
+
+  /* ---------- MODAL ---------- */
+  .modal-backdrop{ position:fixed; inset:0; background: rgba(31,46,55,.5); display:none; align-items:center; justify-content:center; z-index:80; padding:20px; }
+  .modal-backdrop.show{ display:flex; }
+  .modal-card{ background: var(--panel); border:1px solid var(--line); border-radius:18px; padding:32px 30px; max-width:440px; width:100%; text-align:center; box-shadow:0 20px 50px rgba(23,50,77,.22); }
+  .modal-eyebrow{ font-family:var(--font-body); font-weight:700; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color: var(--amber); margin-bottom:12px; }
+  .modal-card p{ font-size:14.5px; line-height:1.6; color: var(--muted); margin:0 0 10px; }
+  .modal-card .punch{ color: var(--ink); font-weight:600; }
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background: var(--banner); color:#fff; font-family:var(--font-display); font-weight:600; font-size:13px;
+    padding:12px 20px; border-radius:999px; box-shadow:0 8px 24px rgba(23,50,77,.35);
+    opacity:0; pointer-events:none; transition: all .3s ease; z-index:90;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:480px){
+    .progress-step .label{ display:none; }
+    .progress-line{ width:8px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <button class="back-btn" id="back-btn">← Back</button>
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <!-- ============ PAGE 1: PROBLEM ============ -->
+  <section class="screen active" id="screen-problem">
+    <div class="container">
+      <div class="problem-card">
+        <span class="eyebrow">Step 1 — Problem</span>
+        <h1 style="font-size:clamp(24px,3.6vw,34px); margin-bottom:18px;">Set up the problem</h1>
+        <div class="guide-note">
+          <span class="guide-kicker">Replace this</span>
+          <p>Describe, in 2–4 sentences, a general situation many people encounter — one where the naive approach clearly struggles as things scale up. End with the open question your case study will answer. Don't name your concept yet; let the reader arrive at it themselves.</p>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:26px;">
+        <button class="btn-primary" id="problem-next">Continue</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 2: SETUP ============ -->
+  <section class="screen" id="screen-setup">
+    <div class="container">
+      <div class="setup-card">
+        <span class="eyebrow">Step 2 — Setup</span>
+        <h2 class="setup-title">Let's begin — <span class="accent">name</span> your demo</h2>
+        <div class="rules-box">
+          <ul>
+            <li><strong>Replace this rules list</strong> with how your interactive demo actually behaves.</li>
+            <li>What does the reader control, and how do they act?</li>
+            <li>What feedback do they get back after each action?</li>
+            <li>What happens when something goes wrong?</li>
+          </ul>
+        </div>
+        <button class="btn-primary" id="start-demo">Enter the Game</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 3: GAME ============ -->
+  <section class="screen" id="screen-game">
+    <div class="container" style="max-width:700px; text-align:center;">
+      <span class="eyebrow">Step 3 — Game</span>
+      <h2 style="font-size:clamp(22px,3.4vw,30px); margin-bottom:18px;">Build your game here</h2>
+      <p style="font-size:16px; line-height:1.7; color:var(--muted);">
+        This is where your interactive game goes. It should be interactive, relatable, and easy to understand —
+        let the reader trigger the outcome themselves rather than reading about it. Keep it simple; don't overload
+        this page with too much specific detail. You could let visitors watch it play out automatically (optional)
+        before trying it themselves.
+      </p>
+      <div class="btn-row" style="margin-top:28px;">
+        <button class="btn-primary" id="demo-next">Next →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 4: REFLECT ============ -->
+  <section class="screen" id="screen-reflect">
+    <div class="container">
+      <span class="eyebrow">Step 4 — Reflect</span>
+      <h2 class="screen-title">Write reflection questions</h2>
+      <div class="guide-note" style="max-width:700px; margin-left:auto; margin-right:auto;">
+        <p>Ask about what the reader just <em>observed</em> — not textbook facts. Avoid naming your concept here; that comes next. Keep each question open-ended enough that there's no single "correct" answer. Replace each placeholder below with your own question.</p>
+      </div>
+
+      <div class="questions-grid">
+        <div class="q-card">
+          <div class="q-card-head"><div class="q-num">01</div><div class="q-note">Q1 goes here</div></div>
+        </div>
+        <div class="q-card">
+          <div class="q-card-head"><div class="q-num">02</div><div class="q-note">Q2 goes here</div></div>
+        </div>
+        <div class="q-card">
+          <div class="q-card-head"><div class="q-num">03</div><div class="q-note">Q3 goes here</div></div>
+        </div>
+        <div class="q-card">
+          <div class="q-card-head"><div class="q-num">04</div><div class="q-note">Q4 goes here</div></div>
+        </div>
+        <div class="q-card">
+          <div class="q-card-head"><div class="q-num">05</div><div class="q-note">Q5 goes here</div></div>
+        </div>
+      </div>
+
+      <div class="center-actions">
+        <button class="btn-primary" id="to-concept">Next: Explain the Concept →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 5: CONCEPT ============ -->
+  <section class="screen" id="screen-concept">
+    <div class="container">
+      <span class="eyebrow">Step 5 — Concept</span>
+      <h2 class="screen-title">Now name it — explain the concept simply</h2>
+
+      <div class="concept-blank">
+        <span class="edit-tag">Edit me</span>
+        <h4>Definition</h4>
+        <p>Replace with a one-sentence definition of your concept.</p>
+        <h4>Mechanism</h4>
+        <p>Replace with the core conditions or steps that make this happen — a bullet list works well.</p>
+        <h4>Vocabulary</h4>
+        <p>Replace with 2–4 terms the reader can now use correctly.</p>
+      </div>
+
+      <div class="guide-note" style="margin-bottom:16px;">
+        <span class="guide-kicker">Optional</span>
+        <p>A short comparison can help the concept land — e.g. the naive way vs. your concept's way. Delete this pair of cards if it doesn't fit.</p>
+      </div>
+      <div class="compare-cards">
+        <div class="compare-card">
+          <span class="compare-title">The naive way</span>
+          <span class="compare-sub">Replace with a number or short phrase</span>
+        </div>
+        <div class="compare-card">
+          <span class="compare-title">Your concept's way</span>
+          <span class="compare-sub">Replace with a number or short phrase</span>
+        </div>
+      </div>
+
+      <div class="center-actions">
+        <button class="btn-primary" id="to-exercise">Next: Try the Exercises →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 6: EXERCISE ============ -->
+  <section class="screen" id="screen-exercise">
+    <div class="container">
+      <span class="eyebrow">Step 6 — Exercise</span>
+      <h2 class="screen-title">Design exercises that test understanding</h2>
+      <div class="guide-note" style="max-width:700px; margin-left:auto; margin-right:auto;">
+        <p>Descriptive questions ask the reader to explain their reasoning in their own words — there's no single answer to memorize. Replace each placeholder below with your own question.</p>
+      </div>
+
+      <div class="questions-grid">
+        <div class="q-card">
+          <div class="q-card-head"><div class="q-num">01</div><div class="q-note">Q1 goes here</div></div>
+        </div>
+        <div class="q-card">
+          <div class="q-card-head"><div class="q-num">02</div><div class="q-note">Q2 goes here</div></div>
+        </div>
+        <div class="q-card">
+          <div class="q-card-head"><div class="q-num">03</div><div class="q-note">Q3 goes here</div></div>
+        </div>
+        <div class="q-card">
+          <div class="q-card-head"><div class="q-num">04</div><div class="q-note">Q4 goes here</div></div>
+        </div>
+        <div class="q-card">
+          <div class="q-card-head"><div class="q-num">05</div><div class="q-note">Q5 goes here</div></div>
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn-ghost" id="go-home-btn">🏠 Go to Home Page</button>
+        <button class="btn-primary" id="restart-journey">Restart the Whole Journey</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MODAL: BACK WARNING ============ -->
+  <div class="modal-backdrop" id="modal-back-warn">
+    <div class="modal-card">
+      <div class="modal-eyebrow">Wait —</div>
+      <p>Going back will lose your progress on this page, and you'll need to reach it again through Next.</p>
+      <p class="punch">Are you sure you want to go back?</p>
+      <div class="btn-row" style="margin-top:20px;">
+        <button class="btn-ghost" id="back-cancel">Stay Here</button>
+        <button class="btn-danger" id="back-confirm">Go Back</button>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var PAGES = ['screen-problem','screen-setup','screen-game','screen-reflect','screen-concept','screen-exercise'];
+  var PAGE_LABELS = ['Problem','Setup','Game','Reflect','Concept','Exercise'];
+  var currentPage = 0;
+  var unlockedPage = 0;
+
+  var progressEl = document.getElementById('progress');
+  function renderProgress(){
+    progressEl.innerHTML = '';
+    PAGES.forEach(function(_, i){
+      var step = document.createElement('div');
+      step.className = 'progress-step' + (i === currentPage ? ' current' : (i < currentPage ? ' done' : ''));
+      step.innerHTML = '<span class="num">' + (i+1) + '</span><span class="label">' + PAGE_LABELS[i] + '</span>';
+      progressEl.appendChild(step);
+      if(i < PAGES.length - 1){
+        var line = document.createElement('div');
+        line.className = 'progress-line';
+        progressEl.appendChild(line);
+      }
+    });
+  }
+
+  function showPage(idx){
+    currentPage = idx;
+    if(idx > unlockedPage) unlockedPage = idx;
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById(PAGES[idx]).classList.add('active');
+    document.getElementById('back-btn').disabled = (idx === 0);
+    renderProgress();
+    window.scrollTo({ top:0, behavior:'auto' });
+  }
+  function goNext(idx){ showPage(idx); }
+
+  document.getElementById('problem-next').addEventListener('click', function(){ goNext(1); });
+  document.getElementById('start-demo').addEventListener('click', function(){ goNext(2); });
+  document.getElementById('demo-next').addEventListener('click', function(){ goNext(3); });
+  document.getElementById('to-concept').addEventListener('click', function(){ goNext(4); });
+  document.getElementById('to-exercise').addEventListener('click', function(){ goNext(5); });
+  document.getElementById('restart-journey').addEventListener('click', function(){
+    resetEverything();
+    unlockedPage = 0;
+    showPage(0);
+  });
+  document.getElementById('go-home-btn').addEventListener('click', function(){
+    window.location.href = '../../';
+  });
+
+  document.getElementById('back-btn').addEventListener('click', function(){
+    if(currentPage === 0) return;
+    if(PAGES[currentPage] === 'screen-game'){
+      document.getElementById('modal-back-warn').classList.add('show');
+      return;
+    }
+    unlockedPage = currentPage - 1;
+    showPage(currentPage - 1);
+  });
+  document.getElementById('back-cancel').addEventListener('click', function(){
+    document.getElementById('modal-back-warn').classList.remove('show');
+  });
+  document.getElementById('back-confirm').addEventListener('click', function(){
+    document.getElementById('modal-back-warn').classList.remove('show');
+    var target = currentPage - 1;
+    unlockedPage = target;
+    showPage(target);
+  });
+
+  // ================= FULL RESET =================
+  function resetEverything(){
+    // No stored state to clear — every page here is static guidance/placeholder content.
+  }
+
+  // ---------- INIT ----------
+  renderProgress();
+  document.getElementById('back-btn').disabled = true;
+
+})();
+</script>
+</body>
+</html>

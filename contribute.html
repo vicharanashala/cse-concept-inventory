@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribute — CS Concept Inventory</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg:#EDF3FA; --bg-top:#FDF1E9; --panel:#fff; --line:#D9E5F2;
+  --teal:#4A9BD1; --teal-dim:#8FCBEF; --blue-dark:#2B6FA3;
+  --amber:#EA8C36; --ink:#1F2E37; --muted:#54666D; --banner:#22496B;
+  --footer-bg:#22496B; --footer-bg-2:#183a56;
+  --footer-ink:#DCEAF7; --footer-muted:#9BB9D2;
+  --primary:#4A9BD1; --primary-dark:#2B6FA3;
+  --border:#D9E5F2;
+  --shadow-card:rgba(23,50,77,0.12); --shadow-btn:rgba(43,111,163,0.28);
+  --container:960px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:linear-gradient(180deg,var(--bg-top) 0%,var(--bg) 420px,var(--bg) 100%);
+  color:var(--ink);font-family:'Inter',sans-serif;min-height:100vh;
+}
+h1,h2,h3{font-family:'Poppins',sans-serif;margin:0;letter-spacing:-.01em}
+p{line-height:1.65;color:var(--muted);margin:0}
+a{color:inherit}
+
+/* ---- top brand bar ---- */
+.brand-bar{
+  position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;
+  height:88px;padding:0 24px;z-index:500;
+  background:#FFFFFF;
+  border-bottom:1px solid var(--border);box-shadow:0 4px 16px -8px var(--shadow-card);
+}
+.brand-badge{pointer-events:auto;display:flex;align-items:center;gap:8px;background:transparent;border:none;padding:0;height:100%;}
+.brand-badge img{max-height:80px;width:auto;display:block;}
+.brand-badge img.logo-vsl{max-height:145px;}
+.site-nav{pointer-events:auto;display:flex;align-items:center;gap:26px;height:100%;}
+.site-nav a{
+  position:relative;font-family:'Poppins',sans-serif;font-weight:600;font-size:13.5px;
+  color:var(--muted);text-decoration:none;padding-bottom:6px;
+}
+.site-nav a:hover{color:var(--primary-dark);}
+.site-nav a.active{color:var(--primary-dark);}
+.site-nav a.active::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:2px;
+  background:var(--amber);border-radius:2px;
+}
+.site-nav a.nav-cta{
+  margin-left:18px;padding:9px 18px;border-radius:8px;color:#fff;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  box-shadow:0 8px 16px -8px var(--shadow-btn);transition:transform .15s,box-shadow .15s;
+}
+.site-nav a.nav-cta:hover{color:#fff;transform:translateY(-2px);box-shadow:0 12px 22px -8px var(--shadow-btn);}
+.site-nav a.nav-cta.active{color:#fff;}
+.site-nav a.nav-cta.active::after{display:none;}
+@media(max-width:640px){
+  .brand-bar{height:60px;padding:0 12px;}
+  .brand-badge img{max-height:38px;}
+  .brand-badge img.logo-vsl{max-height:44px;}
+  .site-nav{display:none;}
+}
+@media(max-width:980px){.site-nav{gap:15px;}}
+
+/* ---- shared layout helper used by the home-page footer ---- */
+.wrap{max-width:var(--container);margin:0 auto;padding:0 24px;}
+
+main{max-width:900px;margin:0 auto;padding:150px 24px 100px}
+.eyebrow{
+  display:block;margin-bottom:12px;text-align:center;color:var(--amber);
+  font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+}
+.hero{text-align:center}
+.hero h1{font-size:clamp(30px,5vw,44px)}
+.hero p{max-width:600px;margin:16px auto 0;font-size:17px}
+
+.steps{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:52px;
+}
+.step{
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:28px 24px;box-shadow:0 8px 24px rgba(23,50,77,.10);
+}
+.num{
+  width:34px;height:34px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;background:rgba(74,155,209,.12);border:1.5px solid var(--teal);
+  color:var(--blue-dark);font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;
+  margin-bottom:18px;
+}
+.step:nth-child(2) .num,.step:nth-child(2) a{border-color:var(--amber)}
+.step h2{font-size:19px;margin-bottom:9px}
+.step p{font-size:14.5px}
+.btn{
+  display:inline-block;margin-top:20px;padding:11px 20px;border-radius:999px;
+  background:linear-gradient(135deg,var(--teal-dim),var(--blue-dark));
+  color:#fff;text-decoration:none;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;
+  box-shadow:0 6px 18px rgba(43,111,163,.28);
+}
+.btn:hover{transform:translateY(-1px)}
+.btn.issue{background:linear-gradient(135deg,#F3A65C,var(--amber));box-shadow:0 6px 18px rgba(234,140,54,.25)}
+
+.note{
+  margin-top:30px;padding:20px 24px;background:#F3F8FD;
+  border-left:3px solid var(--teal);border-radius:0 12px 12px 0;text-align:center;
+}
+.note p{font-size:14.5px;color:var(--ink)}
+.note strong{font-weight:700}
+
+/* ---- footer ---- */
+footer{
+  background:linear-gradient(160deg,var(--footer-bg),var(--footer-bg-2));
+  color:var(--footer-ink);padding:0 0 32px;position:relative;
+}
+footer::before{content:"";display:block;height:4px;background:linear-gradient(90deg,var(--amber),var(--primary));}
+.footer-inner{padding-top:60px;}
+.footer-grid{display:grid;grid-template-columns:1.1fr 1fr 0.9fr;gap:40px;}
+.footer-grid h3{color:#fff;font-size:14.5px;margin-bottom:16px;}
+.footer-org p{color:var(--footer-muted);margin:4px 0;font-size:15px;}
+.footer-org p.org-name{color:#fff;font-weight:600;font-size:17px;margin-bottom:4px;}
+.footer-links{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+.footer-links a{color:var(--footer-ink);text-decoration:none;font-size:15px;}
+.footer-links a:hover{color:#fff;text-decoration:underline;}
+.footer-tagline{
+  margin:44px 0 0;padding-top:28px;border-top:1px solid rgba(255,255,255,0.14);
+  color:var(--footer-ink);font-size:15.5px;max-width:60ch;text-align:center;margin-left:auto;margin-right:auto;
+}
+.footer-bottom{margin-top:24px;color:var(--footer-muted);font-size:13.5px;text-align:center;}
+@media(max-width:680px){.footer-grid{grid-template-columns:1fr;gap:32px;}}</style>
+</head>
+<body>
+
+<div class="brand-bar">
+  <div class="brand-badge">
+    <img src="assets/vicharanashala.png" alt="Vicharanashala logo" class="logo-vsl">
+  </div>
+
+  <nav class="site-nav">
+    <a href="index.html#vision">Vision</a>
+    <a href="index.html#building">What We're Building</a>
+    <a href="index.html#philosophy">Philosophy</a>
+    <a href="index.html#goal">Goal</a>
+    <a href="index.html#case-studies">Case Studies</a>
+    <a href="contribution.html" class="active">Contribute</a>
+    <a href="get-in-touch.html" class="nav-cta">Get in Touch</a>
+  </nav>
+
+  <div class="brand-badge">
+    <img src="assets/iitropar.png" alt="IIT Ropar logo">
+  </div>
+</div>
+
+<main>
+  <section class="hero">
+    <span class="eyebrow">Contribute</span>
+    <h1>Build a Case Study</h1>
+    <p>
+      Want to contribute an interactive Computer Science learning experience?
+      Follow these three simple steps.
+    </p>
+  </section>
+
+  <section class="steps">
+
+    <article class="step">
+      <div class="num">1</div>
+      <h2>Download the Template</h2>
+      <p>
+        Download the HTML template below and use it as the starting point
+        for your case study.
+      </p>
+      <a class="btn" href="case-study-template.html" download="case-study-template.html">
+        ↓ Download Template
+      </a>
+    </article>
+
+    <article class="step">
+      <div class="num">2</div>
+      <h2>Create Your Case Study</h2>
+      <p>
+        Use the template to build your interactive case study. Replace the
+        placeholder content with your own concept, story, interaction,
+        reflection and exercises.
+      </p>
+    </article>
+
+    <article class="step">
+      <div class="num">3</div>
+      <h2>Raise a Pull Request</h2>
+      <p>
+        Once your case study is ready, submit it to our GitHub repository
+        through a Pull Request.
+      </p>
+      <a class="btn" href="https://github.com/vicharanashala/cse-concept-inventory" target="_blank" rel="noopener">
+        Open GitHub →
+      </a>
+    </article>
+
+  </section>
+
+  <div class="note">
+    <p>
+      <strong>Have a question or facing an issue?</strong>
+      <a href="https://github.com/vicharanashala/cse-concept-inventory/issues/new/choose" target="_blank" rel="noopener">
+        Click here to raise an issue →
+      </a>
+    </p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <div class="footer-grid">
+      <div class="footer-org">
+        <h3>A project under</h3>
+        <p class="org-name">Vicharanashala Lab for Education Design</p>
+        <p>Indian Institute of Technology Ropar (IIT Ropar)</p>
+      </div>
+      <div></div>
+      <div>
+        <h3>Explore</h3>
+        <ul class="footer-links">
+          <li><a href="index.html#vision">Vision</a></li>
+          <li><a href="index.html#building">What We're Building</a></li>
+          <li><a href="index.html#philosophy">Philosophy</a></li>
+          <li><a href="index.html#case-studies">Case Studies</a></li>
+          <li><a href="contribution.html">Contribute</a></li>
+          <li><a href="get-in-touch.html">Get in Touch</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-tagline">Making Computer Science concepts easier to experience, discover, and understand.</p>
+    <p class="footer-bottom">© 2026 Vicharanashala Lab for Education Design, IIT Ropar — All Rights Reserved.</p>
+  </div>
+</footer>
+
+</body>
+</html>
