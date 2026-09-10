@@ -92,7 +92,7 @@ Got an idea for making a tricky CS concept click? Students and contributors are 
  
 3. **Use the starter template** — download the case study template from our [Contribution Page](https://vicharanashala.github.io/cse-concept-laboratory/contribute.html) and use it as the starting point for your case study.
 
-Place your completed case study inside `case_studies/your_case_study_name/`. Each case study should remain self-contained within its own folder.
+ Place your completed case study inside `case_studies/your_case_study_name/`. Each case study should remain self-contained within its own folder.
  
 4. **Follow the learning journey structure** — Think About the Problem → The Story → Play the Game → Reflection → Key Learning → Exercise — and keep to our [teaching philosophy](https://github.com/vicharanashala/cse-concept-laboratory#teaching-philosophy).
  
