@@ -1,6 +1,6 @@
 # CSE Concept Laboratory
 
-**Interactive Case Studies — Making Computer Science Concepts Intuitive**
+**Interactive Case Studies - Making Computer Science Concepts Intuitive**
 
 🔗 **Live site:** [vicharanashala.github.io/cse-concept-laboratory](https://vicharanashala.github.io/cse-concept-laboratory/)
 
@@ -10,9 +10,9 @@ A project under **Vicharanashala Lab for Education Design**, Indian Institute of
 
 ## About
 
-Abstract Computer Science ideas are hard to hold onto when the first encounter is a definition, a diagram, and a piece of terminology. This project takes a different approach: rather than telling students what a concept *is*, each case study places them inside a relatable situation where they watch a problem unfold, make their own decisions, and arrive at the underlying idea on their own. The formal name for the concept only shows up afterward, once the student already has something real to attach it to.
+Computer Science ideas are hard to hold onto when the first encounter is a definition, a diagram, and a piece of terminology. This project takes a different approach: rather than telling students what a concept *is*, each case study places them inside a relatable situation where they watch a problem unfold, make their own decisions, and arrive at the underlying idea on their own. The formal name for the concept only shows up afterward, once the student already has something real to attach it to.
 
-> **Show the problem first. Let the concept earn its name.**
+> **See the problem first. Let the concept earn its name.**
 
 ## What We're Building
 
@@ -37,10 +37,10 @@ This approach is designed to carry across many areas of Computer Science, includ
 
 ## Teaching Philosophy
 
-- **Start with the problem** — not the definition. Every case study opens with a situation a student can step into, so the problem is felt before it's named.
-- **Let the idea come first** — the concept name is held back until students have already experienced what it describes.
-- **Show it happening** — students watch a process play out step by step, rather than just reading about it.
-- **Help them discover, not memorize** — the goal is a connection students make for themselves.
+- **Start with the problem**: Not the definition. Every case study opens with a situation a student can step into, so the problem is felt before it's named.
+- **Let the idea come first**: The concept name is held back until students have already experienced what it describes.
+- **See it happening**: Students watch a process play out step by step, rather than just reading about it.
+- **Help you discover, not memorize**: The goal is a connection students make for themselves.
 
 ## Case Studies
 
